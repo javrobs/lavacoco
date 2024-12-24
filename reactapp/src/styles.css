@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,body,#root{
+    @apply bg-slate-300;
+    min-height: 100dvh;
+    font-family:Tahoma, Geneva, Verdana, sans-serif;
+    z-index: -10;
+    overflow-x: hidden;
+}
+header{
+    @apply shadow-lg;
+    background: hsl(220deg 61% 16%);
+}
+
+img.logo{
+    transition: .2s;
+    filter:saturate(100%)
+}
+
+img.logo:hover{
+    filter:saturate(180%) hue-rotate(-15deg)
+}
+
+video#hero-vid {
+    position: fixed;
+    right: 0;
+    top:0;
+    object-fit:cover;
+    min-width: 100%;
+    min-height: 100%;
+    z-index:0;
+  }
+
+header a{
+    @apply text-slate-300;
+    font-weight: 600;
+    font-size:1.2rem;
+    transition:.3s;
+}
+
+header a:hover, header a:active,a.active{
+    color: hsl(200deg 83.65% 59.22%);
+}
+
+.login-button{
+    @apply flex gap-2 items-center border-slate-300;
+}
+
+.login-button:hover{
+    border-color:hsl(200deg 83.65% 59.22%);
+}
+
+input:not([type="checkbox"]){
+    @apply p-1 rounded-full w-full shadow-sm px-3;
+    /* border-color:hsl(196.55deg 83.65% 59.22%); */
+}
+
+input.mini{
+    @apply w-16;
+}
+
+label{
+    @apply mx-6 flex gap-1 items-center;
+}
+
+input:active,input:hover,input:focus{
+    border-color:hsl(200deg, 90%, 38.43%);
+    outline: none;
+}
+
+button.btn-go{
+    @apply text-white px-3 py-2 text-lg rounded-lg shadow-md;
+    background-color: hsl(200deg, 90%, 50%);
+    transition: .3s;
+}
+
+button.btn-go:focus,button.btn-go:hover{
+    background-color: hsl(200deg, 90%, 30%);
+}
+
+h1{
+    @apply  text-3xl font-bold;
+    /* color: hsl(20deg, 70%, 50%); */
+}
+
+ul{
+    @apply ms-3;
+}
+
+.border-blue,.border-blue-div{
+    border-color:hsl(220deg,60%,35%);
+}
+
+a:not(header a){
+    color:hsl(20deg, 70%, 50%);
+}
+
+a:not(header a):hover,a:not(header a):focus{
+    color: hsl(20deg, 70%, 70%);
+}
+
+.border-blue-div{
+    @apply p-6 grow mx-auto bg-slate-50 border-4 rounded-3xl shadow-lg;
+}
+
+.cta{
+    @apply p-3 px-5 bg-orange-700 text-white rounded-lg shadow-md;
+    transition: .3s;
+}
+
+.cta:hover,.cta:focus{
+    @apply text-white bg-orange-500;
+}
+
+.btn{
+    @apply gap-1 flex items-center justify-center w-44;
+}
+
+.bubble-div{
+    @apply bg-slate-100 shadow-md p-4 px-5;
+}
+
+.no-scrollbar{
+    overflow-y:scroll;
+    scrollbar-width: none;
+    scroll-snap-type: y mandatory;
+    scroll-padding: none;
+    scroll-margin: none;
+}
+
+label.inputLabel{
+    @apply relative mt-3;
+}
+
+label.inputLabel input+span{
+    @apply text-slate-800 rounded-sm;
+    position:absolute;
+    left:.75rem;
+    top:5px;
+}
+
+label.inputLabel>input:focus+span, label.inputLabel>input[value]+span{
+    @apply  bg-white;
+    padding:0 .5rem;
+    left:1rem;
+    top:-12px;
+    font-size: smaller;
+    transition:.2s;
+}
+label.inputLabel input:focus+span{
+    @apply text-sky-600;
+}
+
+label.inputLabel input:focus{
+    @apply outline-sky-600 border-2;
+}
