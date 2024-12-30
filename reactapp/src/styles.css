@@ -33,15 +33,27 @@ video#hero-vid {
     z-index:0;
   }
 
-header a{
+header a, header>nav>button{
     @apply text-slate-300;
     font-weight: 600;
     font-size:1.2rem;
     transition:.3s;
 }
 
-header a:hover, header a:active,a.active{
+header a:hover, header a:active, a.active,header>nav>button:hover,.mini-menu>*:hover{
     color: hsl(200deg 83.65% 59.22%);
+}
+
+.mini-menu{
+    @apply absolute w-64 -right-64 top-0 p-3 flex flex-col gap-2 min-h-dvh bg-slate-950 text-blue-50
+}
+
+.mini-menu>*:not(:first-child):not(:last-child)::after{
+    @apply top-1 bg-orange-700;
+    content:"";
+    height:.25rem;
+    display: block;
+    position:relative;
 }
 
 .login-button{

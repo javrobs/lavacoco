@@ -1,5 +1,6 @@
-import React, {useState, useRef} from "react"
-import {Link} from "react-router"
+import React, {useState, useRef, useContext} from "react"
+import { userContext } from "../components/App.jsx"
+import {useNavigate} from "react-router"
 import Header from "../components/Header.jsx"
 import Icon from "../components/Icon.jsx"
 import ErrorMessage from "../components/ErrorMessage.jsx"
@@ -11,6 +12,8 @@ export default function Signup(){
     const pw2 = useRef(null);
     const pw = useRef(null);
     const [extendAddressForm,setExtendAddressForm] = useState(false);
+    const navigate = useNavigate();
+    const {refreshFunction} = useContext(userContext);
 
     function toggleAddressForm(e){
         setExtendAddressForm(value=>value==false);
@@ -45,6 +48,8 @@ export default function Signup(){
         }).then(response=>{
             console.log(response);
             if(response.ok){
+                refreshFunction();
+                navigate('/');
             } else {
                 setSignupFailedState(response.statusText)
             }

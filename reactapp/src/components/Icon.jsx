@@ -1,5 +1,5 @@
 import React from "react"
 
-export default function Icon({icon}){
-    return <span className="material-symbols-outlined">{icon}</span>
+export default function Icon({icon,classNameExtra}){
+    return <span className={[classNameExtra,"material-symbols-outlined"].join(" ")}>{icon}</span>
 }
