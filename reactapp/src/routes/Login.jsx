@@ -5,6 +5,7 @@ import Header from "../components/Header.jsx"
 import ErrorMessage from "../components/ErrorMessage.jsx"
 import Icon from "../components/Icon.jsx"
 import {userContext} from "../components/App.jsx"
+import HoverInput from "../components/HoverInput.jsx"
 
 export default function Login(){
     const [loginState,setLoginState] = useState({})
@@ -12,6 +13,18 @@ export default function Login(){
     const {refreshFunction} = useContext(userContext);
     const navigate = useNavigate();
     
+    function phoneInputChange(e){
+        const {value} = e.target;
+        const onlyNumbers = new RegExp(/^[0-9]*$/);
+        const tenNumbers = new RegExp(/^[0-9]{10}$/);
+        if (onlyNumbers.test(value)){
+            setLoginState(oldState=>({...oldState,username:value}));
+        }
+        if (tenNumbers.test(value)){
+            console.log("REMEMBER TO DO THIS");
+        }
+    }
+
     function handleChange(e){
         const {name,value} = e.target;
         setLoginState(oldState=>({...oldState,[name]:value}))
@@ -28,29 +41,26 @@ export default function Login(){
             console.log(data);
             if(data.success){
                 console.log("Login exitoso");
-                navigate("/");
                 refreshFunction();
+                navigate("/");
             } else {
                 setLoginFailed(data.error);
             }
         });
     }
 
-    return <>
-        <Header/>
-        <form className="flex max-w-lg mx-auto flex-col gap-3 my-3 rounded-xl bubble-div justify-center text-center" onSubmit={handleSubmit}>
+    return <main className="container mx-auto">
+        <form className="flex max-w-lg mx-auto flex-col sm:mt-3 gap-3 bubble-div justify-center text-center" onSubmit={handleSubmit} autoComplete="on">
             <h1 className="text-center text-orange-700">Inicia sesión</h1>
             <ErrorMessage errorContent={loginFailed}/>
-            <label className="inputLabel">
-                <input value={loginState.phone} onInput={handleChange} minLength={10} name="username" type="number" autoComplete="username" required/>
-                <span>Teléfono</span>
-            </label>
-            <label className="inputLabel">
-                <input value={loginState.pw} onInput={handleChange} minLength={8} name="pw" type="password" autoComplete="password" required/>
-                <span>Contraseña</span>
-            </label>
+            <HoverInput label="Teléfono">
+                <input type="tel" id='username' value={loginState.username||""} onInput={phoneInputChange} pattern='[0-9]{10}' name="username" autoComplete="username" required/>
+            </HoverInput>
+            <HoverInput label="Contraseña">
+                <input id='pw' value={loginState.pw||""} onInput={handleChange} minLength={8} name="pw" type="password" autoComplete="current-password" required/>
+            </HoverInput>
             <button className="btn-go btn self-center mt-3" >Ingresar<Icon icon='login'/></button>
-            <Link to='/crear-cuenta'>Todavía no tengo usuario</Link>
+            <Link className="self-center" to='/crear-cuenta'>Todavía no tengo usuario</Link>
         </form>
-    </>
+        </main>
 }

@@ -10,8 +10,10 @@
   "author": "Me",
   "license": "ISC",
   "dependencies": {
+    "plotly.js": "^2.35.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-plotly.js": "^2.6.0",
     "react-router": "^7.0.2"
   },
   "devDependencies": {

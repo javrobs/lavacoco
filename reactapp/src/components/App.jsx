@@ -1,10 +1,17 @@
 import React, {useState, useEffect, createContext} from "react"
-import { BrowserRouter, Routes, Route, Link } from "react-router"
-import Home from "../routes/Home.jsx"
+import { RouterProvider, createBrowserRouter} from "react-router"
+import Home, {homeLoader} from "../routes/Home.jsx"
 import Login from "../routes/Login.jsx"
 import Signup from "../routes/Signup.jsx"
 import Nosotros from "../routes/Nosotros.jsx"
 import ClienteFrecuente from "../routes/ClienteFrecuente.jsx"
+import CrearOrden from "../routes/CrearOrden.jsx"
+import Configuracion from "../routes/Configuracion.jsx"
+import MisOrdenes from "../routes/MisOrdenes.jsx"
+import Invitar from "../routes/Invitar.jsx"
+import Layout from "./Layout.jsx"
+import ErrorComponent from './ErrorComponent.jsx'
+import ListaDePrecios, { priceLoader } from "../routes/ListaDePrecios.jsx"
 
 export const userContext = createContext();
 
@@ -24,20 +31,29 @@ export default function App(){
         });
     }
 
+    const router = createBrowserRouter([ 
+        {
+            path:'/',
+            element: <Layout/>,
+            children:[
+                {path:'/',element: <Home/>},
+                {path:'/iniciar-sesion',element:<Login/>},
+                {path:'/crear-cuenta', element:<Signup/>},
+                // {path:"/nosotros",element:<Nosotros/>},
+                // {path:"/cliente-frecuente",element:<ClienteFrecuente/>},
+                // {path:"/crear-orden", element:<CrearOrden/>},
+                // {path:"/mis-ordenes", element:<MisOrdenes/>},
+                // {path:"/invitar", element:<Invitar/>},
+                {path:"/configuracion", element:<Configuracion/>},
+                {path:"/lista-de-precios", element:<ListaDePrecios/>, loader:priceLoader}
+            ],
+            errorElement: <ErrorComponent/>
+        }
+    ])
+
     return <userContext.Provider value={{...user,refreshFunction:getUserInfo}}>
-        <BrowserRouter>
-            {!initialized?<main>
-                Loading...
-            </main>:
-            <main className="z-0">
-                <Routes>
-                    <Route index element={<Home/>}/>
-                    <Route path="/iniciar-sesion" element={<Login/>}/>
-                    <Route path="/crear-cuenta" element={<Signup/>}/>
-                    <Route path="/nosotros" element={<Nosotros/>}/>
-                    <Route path="/cliente-frecuente" element={<ClienteFrecuente/>}/>
-                </Routes>
-            </main>}
-        </BrowserRouter>
-        </userContext.Provider>
+        
+        {initialized?<RouterProvider router={router}/>:"Loading..."}
+        
+    </userContext.Provider>
 }

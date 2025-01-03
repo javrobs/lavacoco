@@ -166,3 +166,6 @@ cython_debug/
 node_modules/
 *.zip
 *.code-workspace
+frontend/static/frontend/main.js
+frontend/static/frontend/main.js.LICENSE.txt
+*settings.py
