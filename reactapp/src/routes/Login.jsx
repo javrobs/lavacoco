@@ -1,7 +1,6 @@
 import React, {useState,useContext} from "react"
 import {Link,useNavigate} from "react-router"
 import cookieCutter from "../utils/cookieCutter.js"
-import Header from "../components/Header.jsx"
 import ErrorMessage from "../components/ErrorMessage.jsx"
 import Icon from "../components/Icon.jsx"
 import {userContext} from "../components/App.jsx"
@@ -11,6 +10,7 @@ export default function Login(){
     const [loginState,setLoginState] = useState({})
     const [loginFailed,setLoginFailed] = useState("");
     const {refreshFunction} = useContext(userContext);
+    const [redirect,setRedirect] = useState(false);
     const navigate = useNavigate();
     
     function phoneInputChange(e){
@@ -37,16 +37,29 @@ export default function Login(){
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
             body:JSON.stringify(loginState)
-        }).then(response=>response.json()).then(data=>{
+        })
+        .then(response=>response.json())
+        .then(data=>{
             console.log(data);
             if(data.success){
                 console.log("Login exitoso");
-                refreshFunction();
-                navigate("/");
+                refreshFunction().then(()=>{
+                    console.log("after function is refreshed navigate");
+                    setRedirect(true);
+                }).catch(err => {
+                    console.error("Error refreshing user context:", err);
+                });
             } else {
+                console.log("Login failed:", data.error);
                 setLoginFailed(data.error);
             }
+        }).catch(err => {
+            console.error("Error during fetch:", err);
         });
+    }
+
+    if (redirect) {
+        navigate('/');
     }
 
     return <main className="container mx-auto">

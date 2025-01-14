@@ -4,8 +4,8 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
-from django.forms.models import model_to_dict
 from django.contrib.admin.views.decorators import staff_member_required
+import datetime
 
 import json
 import re
@@ -96,54 +96,51 @@ def load_user(request):
     return JsonResponse({"success":True,"logged_in":False})
 
 
-def home_info(request):
-    user = request.user
-    result = {}
-    if user.is_anonymous:
-        return JsonResponse({"success":True,"user":"anonymous"})
-    if user.is_superuser:
-        return JsonResponse({"success":True,"user":"super_user"})
-    else:
-        result["user_link"] = "www.google.com.mx"
-        result["orden_activa"] = False
-        result["orden_pasada"] = []
-        result["cliente_freq"] = 2
-    return JsonResponse(result)
-
-def price_info(request):
-    admin = request.user.is_superuser
-    result = {}
-    lte = 4 if admin else 3
-    list_of_prices = ['text','price','price_dryclean','id'] if admin else ['text','price']
-    result["prices"] = [model_to_dict(cat)|{"prices":list(cat.price_set.values(*list_of_prices))} 
-                            for cat in Category.objects.filter(id__lte=lte).all()]
-    if admin:
+@require_POST
+@staff_member_required
+def create_order(request):
+    try:
+        json_data = json.loads(request.body)
+        print(json_data)
+        result = {"success":True}
+        user = User.objects.get(id = json_data["user"])
+        if json_data.get("deliver") and not Address.objects.filter(user=user).exists():
+            return JsonResponse({"success":False, "error": "Falta la dirección del cliente"},status = 500)
+        if datetime.datetime.strptime(json_data["date_from"],"%Y-%m-%d").date() < datetime.date.today() or \
+        (json_data.get("date_to") and datetime.datetime.strptime(json_data['date_from'],"%Y-%m-%d") > datetime.datetime.strptime(json_data['date_to'],"%Y-%m-%d")):
+            return JsonResponse({"success":False,"error":"Error en las fechas"},status = 500)
+        new_order = Order(user = user,
+                          date_from = json_data["date_from"],
+                          date_to = json_data.get("date_to"),
+                          pick_up_at_home = bool(json_data.get("deliver"))
+                        )
+        new_order.save()
+        # result = {"users":list(User.objects.filter(is_staff=False).order_by("first_name").values("first_name","username","last_name","id"))} 
         return JsonResponse(result)
-    bed = model_to_dict(Category.objects.get(id=4))|{"Sábana":[],"Cobertor":[],"Edredón":[]}
-    for p in Price.objects.filter(category=4).values("text","price"):
-        for key in ["Sábana","Cobertor","Edredón"]:
-            if key in p['text']:
-                if "-" in p["text"]:
-                    p["text"] = p["text"].split("-")[1]
-                bed[key].append(p)
-                break
-    result["prices"].append(bed)
-    # if(each.id==4){
-    #         const sabanas = [];
-    #         const cobertores = [];
-    #         const edredones = [];
-    #         for(let price of each.prices){
-    #             console.log(price)
-    #             if(price.text.includes("Sábanas")){
-    #                 sabanas.push(price)
-    #             } else if(price.text.includes("Cobertor")){
-    #                 cobertores.push({...price,text:price.text.split("-")[1]})
-    #             } else {
-    #                 edredones.push({...price,text:price.text.split("-")[1]})
-    #             }
-    #         }
-    return JsonResponse(result)
+    except Exception as e:
+        print(e)
+        return JsonResponse({"success":False, "error":str(e)},status=500)
 
+@require_POST
+@staff_member_required
+def promote_order(request):
+    try:
+        json_data = json.loads(request.body)
+        order = Order.objects.get(id=json_data["id"])
+        order.status += 1 if json_data["promote"] else -1
+        if order.status>4 or order.status<0:
+            return JsonResponse({"success":False, "error":"Fuera de rango"},status=500)
+        order.save()
+        return JsonResponse({"success":True})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"success":False, "error":"Failed"},status=500)
+    
+
+@require_POST
+@staff_member_required
+def create_client(request):
+    return JsonResponse({"success":False,"error":"This part isnt done yet hehehe"},status=500)
 
 @require_POST
 @staff_member_required

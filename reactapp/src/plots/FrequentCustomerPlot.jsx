@@ -5,7 +5,6 @@ const FrequentCustomerPlot = ({value}) => {
 
     const data = [{
         x : [value],
-        y : ["caca"],
         orientation: "h",
         width:1,
         marker: {color:"hsla(200,80,60,1)"},
@@ -16,7 +15,7 @@ const FrequentCustomerPlot = ({value}) => {
         xaxis: {fixedrange:true,range:[0,5]},
         yaxis: {fixedrange:true,domain:[-0,1]},
         barmode: 'stack',
-        height:50,
+        height:32,
         showlegend:false,
         margin:{l:0,r:0,t:0,b:0}
     };
@@ -26,7 +25,7 @@ const FrequentCustomerPlot = ({value}) => {
         responsive:true
     };
 
-    return <Plot className="w-full" data={data} layout={layout} config={config} />
+    return <Plot className="w-full shadow-sm" data={data} layout={layout} config={config} />
     
 }
 

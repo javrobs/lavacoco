@@ -1,0 +1,60 @@
+
+
+from django.forms.models import model_to_dict
+from django.http import JsonResponse
+from .models import *
+from django.contrib.admin.views.decorators import staff_member_required
+
+def home_info(request):
+    user = request.user
+    result = {}
+    if user.is_anonymous:
+        return JsonResponse({"success":True})
+    if user.is_superuser:
+        result = {"success":True}
+        result["orders"] = list(Order.objects.filter(status__lte=4).order_by("date").values("id","user__first_name","date__week_day","date__day","user__last_name","status"))
+        return JsonResponse(result)
+    else:
+        result["user_link"] = "www.google.com.mx"
+        result["orden_activa"] = list(user.order_set.filter(status__lte=4).order_by("-created_at").values())
+        result["orden_pasada"] = []
+        order_query = Order.objects.filter(user=user)
+        result["cliente_freq"] = order_query.count()%5
+        if result["cliente_freq"] == 0:
+            result["cliente_freq"] = 5 if order_query.exists() else 0
+    return JsonResponse(result)
+
+
+def price_info(request):
+    admin = request.user.is_superuser 
+    result = {}
+    lte = 4 if admin else 3
+    list_of_prices = ['text','price','price_dryclean','id'] if admin else ['text','price']
+    result["prices"] = [model_to_dict(cat)|{"prices":list(cat.price_set.values(*list_of_prices))} 
+                            for cat in Category.objects.filter(id__lte=lte).all()]
+    if admin:
+        return JsonResponse(result)
+    bed = model_to_dict(Category.objects.get(id=4))|{"Sábana":[],"Cobertor":[],"Edredón":[]}
+    for p in Price.objects.filter(category=4).values("text","price"):
+        for key in ["Sábana","Cobertor","Edredón"]:
+            if key in p['text']:
+                if "-" in p["text"]:
+                    p["text"] = p["text"].split("-")[1]
+                bed[key].append(p)
+                break
+    result["prices"].append(bed)
+    return JsonResponse(result)
+
+@staff_member_required
+def create_order_info(request):
+    result = {}
+    result["users"] = list(User.objects.filter(is_staff=False).order_by("first_name").values("first_name","last_name","id"))
+    for u in result["users"]:
+        if Address.objects.filter(user=u["id"]).all():
+            u["address"] = model_to_dict(Address.objects.get(user=u["id"]))
+    return JsonResponse(result)
+
+def faq_info(request):
+    result = {"success":True}
+    result["questions"] = [model_to_dict(each) for each in FAQ.objects.all()]
+    return JsonResponse(result)

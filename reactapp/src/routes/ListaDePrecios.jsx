@@ -18,7 +18,7 @@ const ListaDePrecios = () => {
         const pattern = new RegExp(/^[0-9]*$/)
         if(pattern.test(value)){
             setPriceChanges((oldValues)=>{
-                return {...oldValues,[name]:Number(value)}
+                return {...oldValues,[name]:value}
             });
         }
     }
@@ -47,8 +47,6 @@ const ListaDePrecios = () => {
 
     const listOfPrices = loader.prices.map((each,i)=>{
 
-        
-
         const innerList = [];
 
         if(each.id==4&&!adminMode){
@@ -73,18 +71,18 @@ const ListaDePrecios = () => {
                 innerList.push(<div key={`text-${j}`} className={adminMode?"flex col-span-2 items-end":"col-span-2"}>{eachAgain.text}</div>);
                 innerList.push(<div key={`price-${j}`} className={adminMode?"flex gap-1 items-baseline":"text-end"}>
                     $ {adminMode?
-                        <label className="relative">
-                            <input onInput={editPrice} value={Object.keys(priceChanges).includes(`price-${eachAgain.id}`)?priceChanges[`price-${eachAgain.id}`]:eachAgain.price} className='mini' name={`price-${eachAgain.id}`}/>
-                            {Object.keys(priceChanges).includes(`price-${eachAgain.id}`)&&<button className="absolute h-5 w-5 -top-0.5 -right-0.5 bg-red-300 flex hover:bg-red-400 rounded-full justify-center items-center" onClick={()=>deleteChange(`price-${eachAgain.id}`)}><span className="text-xs material-symbols-outlined">close</span></button>}
+                        <label className="relative flex items-center">
+                            <input onInput={editPrice} type='number' value={Object.keys(priceChanges).includes(`price-${eachAgain.id}`)?priceChanges[`price-${eachAgain.id}`]:eachAgain.price} className='no-arrow min-w-16' autoComplete="off" name={`price-${eachAgain.id}`}/>
+                            {Object.keys(priceChanges).includes(`price-${eachAgain.id}`)&&<button className="absolute h-5 w-5 rounded-full right-2 bg-sky-200 flex hover:bg-sky-300 justify-center items-center" onClick={()=>deleteChange(`price-${eachAgain.id}`)}><span className="text-sm material-symbols-outlined">undo</span></button>}
                         </label>
                         :
                         eachAgain.price}
                     </div>);
                 if(adminMode){
                     innerList.push(<div key={`price-dc-${j}`} className="flex gap-1 items-baseline">
-                        $ <label className="relative">
-                            <input onInput={editPrice} value={Object.keys(priceChanges).includes(`tinto-${eachAgain.id}`)?priceChanges[`tinto-${eachAgain.id}`]:eachAgain.price_dryclean} className='mini' name={`tinto-${eachAgain.id}`}/>
-                            {Object.keys(priceChanges).includes(`tinto-${eachAgain.id}`)&&<button className="absolute h-5 w-5 -top-0.5 -right-0.5 bg-red-300 flex hover:bg-red-400 rounded-full justify-center items-center" onClick={()=>deleteChange(`tinto-${eachAgain.id}`)}><span className="text-xs material-symbols-outlined">close</span></button>}
+                        $ <label className="relative flex items-center">
+                            <input onInput={editPrice} type='number' value={Object.keys(priceChanges).includes(`tinto-${eachAgain.id}`)?priceChanges[`tinto-${eachAgain.id}`]:eachAgain.price_dryclean} className='no-arrow min-w-16' autoComplete="off" name={`tinto-${eachAgain.id}`}/>
+                            {Object.keys(priceChanges).includes(`tinto-${eachAgain.id}`)&&<button className="absolute h-5 w-5 rounded-full right-2 bg-sky-200 flex hover:bg-sky-300 justify-center items-center" onClick={()=>deleteChange(`tinto-${eachAgain.id}`)}><span className="text-sm material-symbols-outlined">undo</span></button>}
                         </label>
                         </div>);
                 }
@@ -99,7 +97,7 @@ const ListaDePrecios = () => {
         </>
 
         return <div style={{flexBasis:"min-content"}} className="bubble-div min-w-72 sm:min-w-96 grow" key={`price-${i}`}>
-            <h1 className="text-center text-orange-600">{each.text}</h1>
+            <h1 className="text-center text-orange-700">{each.text}</h1>
             <div className={`grid gap-1 ${adminMode||each.id==4?"grid-cols-4":"grid-cols-3"}`}>
             {each.id==1&&!adminMode&&<div className='col-span-3 text-start text-sky-800 italic mx-2'>Por carga:</div>}
             {adminMode&&tableTitles}
@@ -113,21 +111,13 @@ const ListaDePrecios = () => {
     return <main className="container max-w-4xl mx-auto gap-3 py-3 flex flex-wrap">
             {listOfPrices}
             {adminMode && 
-                <button className="btn btn-go disabled:bg-slate-400 grow min-w-full" onClick={submitChanges} disabled={Object.keys(priceChanges).length==0}>
-                    {Object.keys(priceChanges).length==0?
-                        <>No hay cambios<Icon icon="check"/></>:
-                        <>Guardar cambios<Icon icon="upgrade"/></>}
-                </button>
-            }
+            <button className="btn btn-go disabled:bg-slate-400 grow min-w-full" onClick={submitChanges} disabled={Object.keys(priceChanges).length==0}>
+                {Object.keys(priceChanges).length==0?
+                    <>No hay cambios<Icon icon="check"/></>:
+                    <>Guardar cambios<Icon icon="upgrade"/></>}
+            </button>}
         </main>
 }
 
 export default ListaDePrecios;
-
-export async function priceLoader(){
-    const response = await fetch("/api/price_info");
-    const data = await response.json();
-
-    return data;
-}
 

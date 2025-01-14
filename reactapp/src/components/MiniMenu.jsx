@@ -1,34 +1,41 @@
 import React,{useState,useContext} from "react"
 import Icon from "./Icon.jsx"
-import { useNavigate, NavLink} from "react-router";
+import { useNavigate, NavLink, redirect} from "react-router";
 import { userContext } from "./App.jsx";
 
 const MiniMenu = () => {
     const user = useContext(userContext);
     const navigate = useNavigate();
     const [menuShowing,setMenuShowing] = useState(false);
+    const [redirect,setRedirect] = useState(false);
 
     const NotLoggedInNav = [
-        {to:'/nosotros',text:'¿Quiénes somos?',icon:'local_laundry_service'},
-        {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'}
+        // {to:'/nosotros',text:'¿Quiénes somos?',icon:'local_laundry_service'},
+        {to:"/",text:"Inicio",icon:"home"},
+        {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'},
+        {to:'/preguntas-frecuentes',text:'Preguntas frecuentes', icon:'help'},
     ]
 
     const LoggedInNav = [
-        {to:'/nosotros',text:'¿Quiénes somos?',icon:'local_laundry_service'},
+        // {to:'/nosotros',text:'¿Quiénes somos?',icon:'local_laundry_service'},
         // {to:'/cliente-frecuente',text:'Cliente frecuente',icon:'award_star'},
         // {to:'/mis-ordenes',text:'Mis órdenes',icon:'receipt_long'},
         // {to:'/invitar',text:'Invitar a un amigo',icon:'group_add'},
-        {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'}
+        {to:"/",text:"Inicio",icon:"home"},
+        {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'},
+        {to:'/preguntas-frecuentes',text:'Preguntas frecuentes', icon:'help'},
     ]
     
     const AdminNav = [
+        {to:"/",text:"Inicio",icon:"home"},
         {to:'/crear-orden',text:'Crear órden',icon:'receipt_long'},
         {to:'/crear-cliente',text:'Nuevo cliente',icon:'person_add'},
         {to:'/entradas',text:'Entradas',icon:'input'},
         {to:'/salidas',text:'Salidas',icon:'output'},
         {to:'/tintoreria',text:'Tintorería',icon:'dry_cleaning'},
         {to:'/reportes',text:'Reportes', icon:'dashboard'},
-        {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'}
+        {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'},
+        {to:'/preguntas-frecuentes',text:'Preguntas frecuentes', icon:'help'},
     ]
 
     const links = (user.logged_in?
@@ -55,8 +62,7 @@ const MiniMenu = () => {
             console.log(data);
             if(data.success){
                 console.log("Logout exitoso");
-                navigate("/");
-                user.refreshFunction();
+                user.refreshFunction().then(()=>setRedirect(true));
                 setMenuShowing(false);
             } else {
                 console.log("Logout falló");
@@ -64,8 +70,12 @@ const MiniMenu = () => {
         })
     }
 
+    if(redirect){
+        navigate("/")
+    }
+
     return <>
-    <button className='mini-menu-button ms-auto px-3 hover:bg-sky-400 hover:bg-opacity-20' onClick={()=>setMenuShowing(true)}>
+    <button className='mini-menu-button ms-auto min-h-16 w-16 self-stretch hover:bg-sky-400 hover:bg-opacity-20' onClick={()=>setMenuShowing(true)}>
         <Icon classNameExtra='text-3xl' icon="menu"/>
     </button>
     <div style={style} className="absolute w-64 -right-64 top-0 flex flex-col gap-2 min-h-dvh bg-slate-950 text-blue-50">

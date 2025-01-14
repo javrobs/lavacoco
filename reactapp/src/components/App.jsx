@@ -1,17 +1,15 @@
 import React, {useState, useEffect, createContext} from "react"
-import { RouterProvider, createBrowserRouter} from "react-router"
-import Home, {homeLoader} from "../routes/Home.jsx"
+import { RouterProvider, createBrowserRouter, useNavigate, useNavigation} from "react-router"
+import Home from "../routes/Home.jsx"
 import Login from "../routes/Login.jsx"
 import Signup from "../routes/Signup.jsx"
-import Nosotros from "../routes/Nosotros.jsx"
-import ClienteFrecuente from "../routes/ClienteFrecuente.jsx"
+import PreguntasFrecuentes from "../routes/PreguntasFrecuentes.jsx"
 import CrearOrden from "../routes/CrearOrden.jsx"
 import Configuracion from "../routes/Configuracion.jsx"
-import MisOrdenes from "../routes/MisOrdenes.jsx"
-import Invitar from "../routes/Invitar.jsx"
 import Layout from "./Layout.jsx"
 import ErrorComponent from './ErrorComponent.jsx'
-import ListaDePrecios, { priceLoader } from "../routes/ListaDePrecios.jsx"
+import ListaDePrecios from "../routes/ListaDePrecios.jsx"
+import defaultLoader from "../utils/defaultLoader.js"
 
 export const userContext = createContext();
 
@@ -19,16 +17,23 @@ export default function App(){
 
     const [user,setUser] = useState(null);
     const [initialized,setInitialized] = useState(false);
+    
+    useEffect(()=>{getUserInfo()},[]);
+    
 
-    useEffect(getUserInfo,[]);
+    
 
     function getUserInfo(){
+        return new Promise((resolve) => {
+            // Simulate context update or fetch user data
         fetch("/api/load_user")
         .then(response=>response.json())
         .then(data=>{
             setUser(data);
             setInitialized(true);
-        });
+            console.log(data,"user data changed");
+            resolve();
+        });})
     }
 
     const router = createBrowserRouter([ 
@@ -36,16 +41,14 @@ export default function App(){
             path:'/',
             element: <Layout/>,
             children:[
-                {path:'/',element: <Home/>},
+                {path:'/',element: <Home/>, loader:()=>defaultLoader('home')},
                 {path:'/iniciar-sesion',element:<Login/>},
                 {path:'/crear-cuenta', element:<Signup/>},
-                // {path:"/nosotros",element:<Nosotros/>},
-                // {path:"/cliente-frecuente",element:<ClienteFrecuente/>},
-                // {path:"/crear-orden", element:<CrearOrden/>},
-                // {path:"/mis-ordenes", element:<MisOrdenes/>},
-                // {path:"/invitar", element:<Invitar/>},
+                {path:"/crear-orden", element:<CrearOrden/>, loader:()=>defaultLoader('create_order')},
+                {path:"/crear-cliente", element:<Signup admin={true}/>},
                 {path:"/configuracion", element:<Configuracion/>},
-                {path:"/lista-de-precios", element:<ListaDePrecios/>, loader:priceLoader}
+                {path:'/preguntas-frecuentes',element:<PreguntasFrecuentes/>, loader:()=>defaultLoader('faq')},
+                {path:"/lista-de-precios", element:<ListaDePrecios/>, loader:()=>defaultLoader('price')}
             ],
             errorElement: <ErrorComponent/>
         }
