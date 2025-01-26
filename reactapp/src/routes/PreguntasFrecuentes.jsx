@@ -10,7 +10,6 @@ const PreguntasFrecuentes = () => {
 
         const style={
             transition:"1s ease-in-out max-height",
-            overflow:"hidden",
             maxHeight:(i==expandQuestion?"1000px":"0px")
         }
 

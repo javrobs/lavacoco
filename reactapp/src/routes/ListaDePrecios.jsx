@@ -3,6 +3,7 @@ import { useLoaderData , useNavigate} from "react-router"
 import GridDivider from "../components/GridDivider.jsx";
 import Icon from '../components/Icon.jsx'
 import cookieCutter from "../utils/cookieCutter.js";
+import MiniIconButton from "../components/MiniIconButton.jsx";
 
 
 
@@ -73,7 +74,7 @@ const ListaDePrecios = () => {
                     $ {adminMode?
                         <label className="relative flex items-center">
                             <input onInput={editPrice} type='number' value={Object.keys(priceChanges).includes(`price-${eachAgain.id}`)?priceChanges[`price-${eachAgain.id}`]:eachAgain.price} className='no-arrow min-w-16' autoComplete="off" name={`price-${eachAgain.id}`}/>
-                            {Object.keys(priceChanges).includes(`price-${eachAgain.id}`)&&<button className="absolute h-5 w-5 rounded-full right-2 bg-sky-200 flex hover:bg-sky-300 justify-center items-center" onClick={()=>deleteChange(`price-${eachAgain.id}`)}><span className="text-sm material-symbols-outlined">undo</span></button>}
+                            {Object.keys(priceChanges).includes(`price-${eachAgain.id}`)&&<MiniIconButton classNameExtra="absolute" onClick={()=>deleteChange(`price-${eachAgain.id}`)} icon="undo"/>}
                         </label>
                         :
                         eachAgain.price}
@@ -82,7 +83,7 @@ const ListaDePrecios = () => {
                     innerList.push(<div key={`price-dc-${j}`} className="flex gap-1 items-baseline">
                         $ <label className="relative flex items-center">
                             <input onInput={editPrice} type='number' value={Object.keys(priceChanges).includes(`tinto-${eachAgain.id}`)?priceChanges[`tinto-${eachAgain.id}`]:eachAgain.price_dryclean} className='no-arrow min-w-16' autoComplete="off" name={`tinto-${eachAgain.id}`}/>
-                            {Object.keys(priceChanges).includes(`tinto-${eachAgain.id}`)&&<button className="absolute h-5 w-5 rounded-full right-2 bg-sky-200 flex hover:bg-sky-300 justify-center items-center" onClick={()=>deleteChange(`tinto-${eachAgain.id}`)}><span className="text-sm material-symbols-outlined">undo</span></button>}
+                            {Object.keys(priceChanges).includes(`tinto-${eachAgain.id}`)&&<MiniIconButton classNameExtra="absolute" onClick={()=>deleteChange(`tinto-${eachAgain.id}`)} icon="undo"/>}
                         </label>
                         </div>);
                 }

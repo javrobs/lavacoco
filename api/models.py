@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import date
 
 # Create your models here.
 
@@ -49,12 +50,46 @@ class Order(models.Model):
     status = models.IntegerField(choices = status_choices, default=0)
     has_half = models.BooleanField(default = False)
     pick_up_at_home = models.BooleanField(default = False)
+    total = models.IntegerField(null = True)
+    total_tinto = models.IntegerField(null = True)
+    tinto_others = models.IntegerField(null = True)
+    
+    def __str__(self):
+        return f"Orden de {self.user.get_full_name()} - {self.date}"
+
+    def days_left_string(self):
+        week_days = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
+        days_left = (self.date-date.today()).days
+        immediate_days = ['Ayer','Hoy','Mañana']
+        if abs(days_left)<=1:
+            return immediate_days[days_left+1]
+        if days_left>0 and days_left<7:
+            return week_days[self.date.weekday()]
+        word_to_use = "En" if days_left>0 else "Hace"
+        return f"{word_to_use} {abs(days_left)} días" 
+    
+    def short_date(self):
+        days_left = (self.date-date.today()).days
+        week_days = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"]
+        immediate_days = ['Ayer', 'Hoy', 'Mañana']
+        if abs(days_left)<=1:
+            return immediate_days[days_left+1]
+        return f'{week_days[self.date.weekday()]}, {self.date.day}'
+    
+    def date_as_string(self):
+        months = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
+        return f'{self.date.day} de {months[self.date.month-1]} ({self.days_left_string()})'
     
 
 class List_Of_Order(models.Model):
     order = models.ForeignKey(Order, on_delete = models.CASCADE)
     concept = models.ForeignKey(Price, on_delete=models.PROTECT)
     quantity = models.SmallIntegerField()
+
+class List_Of_Others(models.Model):
+    order = models.ForeignKey(Order, on_delete = models.CASCADE)
+    concept = models.ForeignKey(Price, on_delete=models.PROTECT)
+    amount = models.IntegerField()
 
 
 class FAQ(models.Model):

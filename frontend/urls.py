@@ -17,7 +17,8 @@ urls_anonymous_only = [
 
 urls_admin_only = [
     "crear-orden/",
-    "crear-cliente/"
+    "crear-cliente/",
+    "crear-orden/<int:user_id>/"
 ]
 
 urls_all_users_only = [
@@ -35,5 +36,6 @@ urlpatterns = [*list(map(lambda x:path(x,views.main),urls)),
     *list(map(lambda x:path(x,views.all_users_only),urls_all_users_only)),
     *list(map(lambda x:path(x,views.admin_only),urls_admin_only)),
     *list(map(lambda x:path(x,views.anonymous_only),urls_anonymous_only)),
-    *list(map(lambda x:path(x,views.users_only),urls_users_only))]
+    *list(map(lambda x:path(x,views.users_only),urls_users_only)),
+    path("orden/<int:order_id>/", views.order)]
 

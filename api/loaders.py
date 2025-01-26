@@ -4,6 +4,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from .models import *
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 
 def home_info(request):
     user = request.user
@@ -12,7 +13,8 @@ def home_info(request):
         return JsonResponse({"success":True})
     if user.is_superuser:
         result = {"success":True}
-        result["orders"] = list(Order.objects.filter(status__lte=4).order_by("date").values("id","user__first_name","date__week_day","date__day","user__last_name","status"))
+        result["orders"] = [model_to_dict(order)|{"date":order.date_as_string(),"user":order.user.get_full_name()} for order in Order.objects.filter(status__lte=4).order_by("date")]
+        result["status_strings"] = ["Nueva","Abierta","Cerrada","Lista","Terminada"]
         return JsonResponse(result)
     else:
         result["user_link"] = "www.google.com.mx"
@@ -28,10 +30,10 @@ def home_info(request):
 def price_info(request):
     admin = request.user.is_superuser 
     result = {}
-    lte = 4 if admin else 3
+    categories = Category.objects.all() if admin else Category.objects.filter(id__lte=3).all()
     list_of_prices = ['text','price','price_dryclean','id'] if admin else ['text','price']
     result["prices"] = [model_to_dict(cat)|{"prices":list(cat.price_set.values(*list_of_prices))} 
-                            for cat in Category.objects.filter(id__lte=lte).all()]
+                            for cat in categories]
     if admin:
         return JsonResponse(result)
     bed = model_to_dict(Category.objects.get(id=4))|{"Sábana":[],"Cobertor":[],"Edredón":[]}
@@ -58,3 +60,23 @@ def faq_info(request):
     result = {"success":True}
     result["questions"] = [model_to_dict(each) for each in FAQ.objects.all()]
     return JsonResponse(result)
+
+@login_required
+def order_info(request,order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+        admin = request.user.is_superuser
+        if admin or order.user == request.user:
+            result = {"success":True}
+            result["order"] = model_to_dict(order)|{"date":order.date_as_string()}|{"user":order.user.get_full_name()}
+            result["order_list"] = {item.concept.id:item.quantity for item in order.list_of_order_set.all()}
+            list_of_prices = ['text','price','price_dryclean','id']
+            result["prices"] = {cat.id:{"name":cat.text,"prices":{price["id"]:price for price in (cat.price_set.values(*list_of_prices))}}
+                            for cat in Category.objects.all()}
+            result["others_start"] = []
+            return JsonResponse(result)
+        else:
+            return JsonResponse({"success":False,"error":"Not authorized"},status=500)
+    except Exception as e:
+        print(e)
+        return JsonResponse({"success":False,"error":str(e)},status=404)

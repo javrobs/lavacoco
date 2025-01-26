@@ -1,15 +1,17 @@
 import React, {useState} from "react"
-import {useLoaderData, useNavigate} from "react-router"
-import HoverInput from "../components/HoverInput.jsx";
-import HoverSelect from "../components/HoverSelect.jsx";
-import Icon from "../components/Icon.jsx";
-import cookieCutter from "../utils/cookieCutter.js";
-import ErrorMessage from '../components/ErrorMessage.jsx';
-import {AddressForm} from "./Signup.jsx"
+import {useLoaderData, useNavigate, useParams} from "react-router"
+import HoverInput from "../../components/HoverInput.jsx";
+import HoverSelect from "../../components/HoverSelect.jsx";
+import Icon from "../../components/Icon.jsx";
+import cookieCutter from "../../utils/cookieCutter.js";
+import ErrorMessage from '../../components/ErrorMessage.jsx';
+import {AddressForm} from "../Signup.jsx"
 
 const CrearOrden = () => {
+
+    const { userId } = useParams();
     const load = useLoaderData();
-    const [formState,setFormState] = useState({})
+    const [formState,setFormState] = useState({user:userId || ""})
     const [orderFailed,setOrderFailedState] = useState("");
     const [addressEditing,setAddressEditing] = useState(false);
     const navigate = useNavigate();
@@ -84,16 +86,16 @@ const CrearOrden = () => {
 
     return <main className="container mx-auto py-3">
         <form className="bubble-div max-w-lg mx-auto grid grid-cols-1 sm:grid-cols-2 gap-1 align-middle" onSubmit={handleSubmit}>
-            <div className="flex flex-wrap justify-between sm:col-span-2">
+            <div className="flex flex-wrap items-center justify-between sm:col-span-2">
                 <h1 className="text-orange-700">Nueva órden</h1>
-                <div>
+                <div className="flex flex-col gap-1">
                     <label className="flex items-center gap-1">
-                        <input type="checkbox" className="accent-sky-500" name="deliver" value={formState.deliver||""} id="deliver" onChange={handleChange}/>
-                        <Icon icon="directions_car"/>
+                        <input type="checkbox" className="accent-blue-700" name="deliver" value={formState.deliver||""} id="deliver" onChange={handleChange}/>
+                        <Icon classNameExtra="text-blue-600 shadow-sm bg-blue-200 rounded-full" icon="directions_car"/>
                     </label>
                     <label className="flex items-center gap-1">
-                        <input type="checkbox" className="accent-sky-500" name="priority" value={formState.priority||""} id="priority" onChange={handleChange}/>
-                        <Icon icon="brightness_alert"/>
+                        <input type="checkbox" className="accent-orange-700" name="priority" value={formState.priority||""} id="priority" onChange={handleChange}/>
+                        <Icon classNameExtra="text-orange-600 shadow-sm bg-orange-200 rounded-full" icon="brightness_alert"/>
                     </label>
                 </div>
                 
@@ -101,7 +103,7 @@ const CrearOrden = () => {
             {orderFailed&&<div className="text-center sm:col-span-2">
                 <ErrorMessage errorContent={orderFailed}/>
             </div>}
-            <div className="mx-6 grid sm:col-span-2 sm:grid-cols-2 gap-1">
+            <div className="mx-6 grid sm:col-span-2 gap-1">
                 <HoverSelect className="sm:col-span-2" label="Cliente">
                     <select onChange={handleUserChange} id="user" name="user" value={formState.user||""} required>
                         <option value="" disabled>Selecciona...</option>
@@ -109,11 +111,8 @@ const CrearOrden = () => {
                         <option className="bg-blue-200" value='new'>Cliente nuevo</option>
                     </select>
                 </HoverSelect>
-                <HoverInput label="Desde">
-                    <input onChange={handleChange} type="date" name="date_from" id="date_from" value={formState.date_from||""} required/>
-                </HoverInput>
-                <HoverInput label="Hasta (opcional)">
-                    <input onChange={handleChange} type="date" name="date_to" id="date_to" value={formState.date_to||""}/>
+                <HoverInput className="sm:col-span-2" label="Entrega">
+                    <input onChange={handleChange} type="date" name="date" id="date" value={formState.date||""} required/>
                 </HoverInput>
             </div>
             

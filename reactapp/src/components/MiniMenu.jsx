@@ -41,7 +41,7 @@ const MiniMenu = () => {
     const links = (user.logged_in?
         (user.superuser?AdminNav:LoggedInNav):
         NotLoggedInNav).map((each,i)=>{
-            return <NavLink onClick={()=>setMenuShowing(false)} key={"link"+i} to={each.to}>{each.text}<Icon icon={each.icon}/></NavLink>
+            return <NavLink onClick={()=>setMenuShowing(false)} key={"link"+i} to={each.to}><Icon icon={each.icon}/>{each.text}</NavLink>
         })
 
     const style = {
@@ -78,10 +78,9 @@ const MiniMenu = () => {
     <button className='mini-menu-button ms-auto min-h-16 w-16 self-stretch hover:bg-sky-400 hover:bg-opacity-20' onClick={()=>setMenuShowing(true)}>
         <Icon classNameExtra='text-3xl' icon="menu"/>
     </button>
-    <div style={style} className="absolute w-64 -right-64 top-0 flex flex-col gap-2 min-h-dvh bg-slate-950 text-blue-50">
-        
-        <div className="mini-menu-links flex flex-col justify-start">
-        <button className="text-start p-2" onClick={()=>setMenuShowing(false)}><Icon icon='close'/></button>
+    <div style={style} className="fixed w-64 -right-64 top-0 flex flex-col gap-2 h-dvh bg-slate-950 text-blue-50">
+        <div className="mini-menu-links overflow-auto no-scrollbar flex flex-col justify-start">
+            <button className="text-start p-2" onClick={()=>setMenuShowing(false)}><Icon icon='close'/></button>
             {links}
         </div>
         <div className="p-2 flex justify-between items-center mt-auto">

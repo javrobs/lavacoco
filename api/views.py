@@ -106,14 +106,12 @@ def create_order(request):
         user = User.objects.get(id = json_data["user"])
         if json_data.get("deliver") and not Address.objects.filter(user=user).exists():
             return JsonResponse({"success":False, "error": "Falta la dirección del cliente"},status = 500)
-        if datetime.datetime.strptime(json_data["date_from"],"%Y-%m-%d").date() < datetime.date.today() or \
-        (json_data.get("date_to") and datetime.datetime.strptime(json_data['date_from'],"%Y-%m-%d") > datetime.datetime.strptime(json_data['date_to'],"%Y-%m-%d")):
-            return JsonResponse({"success":False,"error":"Error en las fechas"},status = 500)
+        if datetime.datetime.strptime(json_data["date"],"%Y-%m-%d").date() < datetime.date.today():
+            return JsonResponse({"success":False,"error":"Error en la fecha"},status = 500)
         new_order = Order(user = user,
-                          date_from = json_data["date_from"],
-                          date_to = json_data.get("date_to"),
-                          pick_up_at_home = bool(json_data.get("deliver"))
-                        )
+                    date = json_data["date"],
+                    pick_up_at_home = bool(json_data.get("deliver")),
+                    priority = json_data.get("priority") or False)
         new_order.save()
         # result = {"users":list(User.objects.filter(is_staff=False).order_by("first_name").values("first_name","username","last_name","id"))} 
         return JsonResponse(result)
@@ -140,7 +138,38 @@ def promote_order(request):
 @require_POST
 @staff_member_required
 def create_client(request):
-    return JsonResponse({"success":False,"error":"This part isnt done yet hehehe"},status=500)
+    try:
+        json_data = json.loads(request.body)
+        print(json_data)
+        if User.objects.filter(username = json_data["username"]).exists():
+            return JsonResponse({"success":False,"error": "El usuario ya existe"})
+        user = User()
+        if re.compile(r'[0-9]{10}').fullmatch(json_data.get("username")):
+            user.username = json_data["username"]
+        else:
+            return JsonResponse({"success":False,"error": "Datos incompletos"}, status=400)
+        for key in ["first_name","last_name"]:
+            if json_data.get(key):
+                setattr(user,key,json_data.get(key))
+            else:
+                return JsonResponse({"success":False,"error": "Datos incompletos"}, status=400)
+        user.save()
+        new_address = Address(user=user)
+        for key in ["calle","colonia","numero_ext"]:
+            if json_data.get(key) and new_address:
+                setattr(new_address,key,json_data[key])
+            else:
+                new_address = None
+                return JsonResponse({"success":True, 'user_id':user.id, 'address':False})
+        for key in ["numero_int","cp"]:
+            if json_data.get(key):
+                setattr(new_address,key,json_data[key])
+        print(new_address)
+        new_address.save()
+        return JsonResponse({"success":True, 'user_id':user.id, "address":True})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 @require_POST
 @staff_member_required
@@ -164,3 +193,23 @@ def change_prices(request):
         print(e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)
     
+@require_POST
+@staff_member_required
+def set_order_list(request,order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+        json_data = json.loads(request.body)
+        order.list_of_order_set.all().delete()
+        order.has_half = json_data['has_half']
+        for key,value in json_data['order_list'].items():
+            print(key,value)
+            price = Price.objects.get(id=key)
+            order.list_of_order_set.create(concept=price,quantity=value)
+        if request.path.split("/")[2]=="set_and_promote_order_list":
+            order.status += 1
+        order.save()
+        print(json_data)
+        return JsonResponse({"success":True})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"success":False, "error":str(e)},status=500)

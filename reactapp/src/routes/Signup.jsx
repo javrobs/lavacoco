@@ -1,13 +1,13 @@
 import React, {useState, useRef, useContext} from "react"
 import { userContext } from "../components/App.jsx"
 import {useNavigate,Link} from "react-router"
-import Header from "../components/Header.jsx"
 import Icon from "../components/Icon.jsx"
 import ErrorMessage from "../components/ErrorMessage.jsx"
 import cookieCutter from "../utils/cookieCutter.js"
 import HoverInput from "../components/HoverInput.jsx"
 
 export default function Signup({admin}){
+
     const [signupState,setSignupState] = useState({})
     const [signupFailed,setSignupFailedState] = useState(false)
     const pw2 = useRef(null);
@@ -49,8 +49,8 @@ export default function Signup({admin}){
         setSignupState(oldState=>({...oldState,[name]:value}))
     }
 
-    const apiURL = admin?"api/create-client":"/api/signup";
-    const afterSubmitURL = admin?'/crear-orden':'/iniciar-sesion';
+    const apiURL = admin?"/api/create_client/":"/api/signup/";
+    let afterSubmitURL = admin?'/crear-orden/':'/iniciar-sesion';
 
     function handleSubmit(e){
         e.preventDefault();
@@ -64,7 +64,11 @@ export default function Signup({admin}){
             console.log(data);
             if (data.success){
                 console.log("succesful!");
-                refreshFunction();
+                if(admin){
+                    afterSubmitURL += `${data.user_id}/`
+                } else {
+                    refreshFunction();
+                }
                 navigate(afterSubmitURL);
             } else {
                 setSignupFailedState(data.statusText)

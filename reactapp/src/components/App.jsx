@@ -4,7 +4,8 @@ import Home from "../routes/Home.jsx"
 import Login from "../routes/Login.jsx"
 import Signup from "../routes/Signup.jsx"
 import PreguntasFrecuentes from "../routes/PreguntasFrecuentes.jsx"
-import CrearOrden from "../routes/CrearOrden.jsx"
+import CrearOrden from "../routes/admin/CrearOrden.jsx"
+import Orden from "../routes/admin/Orden.jsx"
 import Configuracion from "../routes/Configuracion.jsx"
 import Layout from "./Layout.jsx"
 import ErrorComponent from './ErrorComponent.jsx'
@@ -45,10 +46,12 @@ export default function App(){
                 {path:'/iniciar-sesion',element:<Login/>},
                 {path:'/crear-cuenta', element:<Signup/>},
                 {path:"/crear-orden", element:<CrearOrden/>, loader:()=>defaultLoader('create_order')},
+                {path:"/crear-orden/:userId", element:<CrearOrden/>, loader:()=>defaultLoader('create_order')},
                 {path:"/crear-cliente", element:<Signup admin={true}/>},
                 {path:"/configuracion", element:<Configuracion/>},
                 {path:'/preguntas-frecuentes',element:<PreguntasFrecuentes/>, loader:()=>defaultLoader('faq')},
-                {path:"/lista-de-precios", element:<ListaDePrecios/>, loader:()=>defaultLoader('price')}
+                {path:"/lista-de-precios", element:<ListaDePrecios/>, loader:()=>defaultLoader('price')},
+                {path:"/orden/:orderId",element:<Orden/>,loader:({params})=>defaultLoader("order",params.orderId)}
             ],
             errorElement: <ErrorComponent/>
         }
