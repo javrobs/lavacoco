@@ -71,7 +71,7 @@ export default function Signup({admin}){
                 }
                 navigate(afterSubmitURL);
             } else {
-                setSignupFailedState(data.statusText)
+                setSignupFailedState(data.error)
             }
         });
     }
@@ -80,11 +80,12 @@ export default function Signup({admin}){
 
     return <form className="flex max-w-lg mx-auto flex-col gap-y-3 p-3 px-5 sm:mt-3 rounded-xl bubble-div justify-center text-center" onSubmit={handleSubmit}>
         <h1 className="text-center text-orange-700">{admin?"Cliente nuevo":"Regístrate"}</h1>
-        {!admin&&<p className='text-blue-800 text-left'>Lleva seguimiento de tus órdenes y accede al programa de cliente frecuente.</p>}
+        
         {signupFailed&&<div className="w-full">
             <ErrorMessage errorContent={signupFailed}/>
         </div>}
         <div className="grid sm:grid-cols-2 gap-1 mx-6">
+            {!admin&&<p className='text-left sm:col-span-2 -mx-3'>Lleva seguimiento de tus órdenes y accede al programa de cliente frecuente.</p>}
             <HoverInput label="Teléfono" className='sm:col-span-2'>
                 <input type="tel" pattern='[0-9]{10}' required value={signupState.username||""} onInput={phoneInputChange} name="username"/>
             </HoverInput>
@@ -104,9 +105,9 @@ export default function Signup({admin}){
             </>
             }
         </div>
-        <label className="text-blue-800 flex gap-1 align-middle">
-            <input value={extendAddressForm} onClick={toggleAddressForm} className="accent-blue-300" type='checkbox'/>
-            <span className="text-start">{admin?"Registrar dirección para entregas a domicilio":"Quiero proporcionar mi dirección para entregas a domicilio, si están disponibles en mi zona. (Opcional)"}</span>
+        <label className="flex gap-1 items-start mx-3">
+            <input value={extendAddressForm} onClick={toggleAddressForm} className="accent-blue-600 mt-1.5" type='checkbox'/>
+            <span className="text-start">{admin?"Registrar dirección para entregas a domicilio.":"Opcional: Proporcionar mi dirección para entregas a domicilio, si están disponibles en mi zona."}</span>
         </label>
         {extendAddressForm&&<AddressForm formState={signupState} handleChange={handleChange}/>}
         <div className="justify-center flex gap-2">

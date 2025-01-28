@@ -13,7 +13,7 @@ def home_info(request):
         return JsonResponse({"success":True})
     if user.is_superuser:
         result = {"success":True}
-        result["orders"] = [model_to_dict(order)|{"date":order.date_as_string(),"user":order.user.get_full_name()} for order in Order.objects.filter(status__lte=4).order_by("date")]
+        result["orders"] = [model_to_dict(order)|{"date":order.date_as_string(),"user":order.user.get_full_name(),"phone":order.user.username} for order in Order.objects.filter(status__lte=4).order_by("date")]
         result["status_strings"] = ["Nueva","Abierta","Cerrada","Lista","Terminada"]
         return JsonResponse(result)
     else:
@@ -68,12 +68,13 @@ def order_info(request,order_id):
         admin = request.user.is_superuser
         if admin or order.user == request.user:
             result = {"success":True}
-            result["order"] = model_to_dict(order)|{"date":order.date_as_string()}|{"user":order.user.get_full_name()}
+            result["order"] = model_to_dict(order)|{"date":order.date_as_string(),"user":order.user.get_full_name(),"phone":order.user.username}
             result["order_list"] = {item.concept.id:item.quantity for item in order.list_of_order_set.all()}
             list_of_prices = ['text','price','price_dryclean','id']
             result["prices"] = {cat.id:{"name":cat.text,"prices":{price["id"]:price for price in (cat.price_set.values(*list_of_prices))}}
                             for cat in Category.objects.all()}
-            result["others_start"] = []
+            result["others_tinto"] = order.tinto_others or 0
+            result["others_start"] = list(order.list_of_others_set.values("concept","price"))
             return JsonResponse(result)
         else:
             return JsonResponse({"success":False,"error":"Not authorized"},status=500)

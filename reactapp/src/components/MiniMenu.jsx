@@ -28,7 +28,7 @@ const MiniMenu = () => {
     
     const AdminNav = [
         {to:"/",text:"Inicio",icon:"home"},
-        {to:'/crear-orden',text:'Crear órden',icon:'receipt_long'},
+        {to:'/crear-orden',text:'Crear orden',icon:'receipt_long'},
         {to:'/crear-cliente',text:'Nuevo cliente',icon:'person_add'},
         {to:'/entradas',text:'Entradas',icon:'input'},
         {to:'/salidas',text:'Salidas',icon:'output'},

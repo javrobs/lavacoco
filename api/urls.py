@@ -3,10 +3,10 @@ from . import views
 from . import loaders
 
 urlpatterns = [
-    path('login_user',views.login_user),
-    path('signup',views.create_user),
-    path('logout_user',views.logout_user),
-    path('load_user',views.load_user),
+    path('login_user/',views.login_user),
+    path('signup/',views.create_user),
+    path('logout_user/',views.logout_user),
+    path('load_user/',views.load_user),
     path('create_order/',views.create_order),
     path('create_client/',views.create_client),
     path('change_prices/',views.change_prices),

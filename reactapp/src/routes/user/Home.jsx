@@ -34,9 +34,9 @@ const LoggedUser = ({user}) => {
             <div className="p-4">
                 
                 {loaderData.orden_activa?<div className="border-b-2 border-orange-700">
-                    Órden activa
+                    Orden activa
                 </div>:<div className="rounded-md bg-slate-300 text-center flex flex-col gap-1 p-3">
-                    No tienes una órden activa por el momento.</div>}
+                    No tienes una orden activa por el momento.</div>}
                 {loaderData.ordenes_pasadas?.length>0 && <div className="border-b-2 border-orange-700">
                     Órdenes pasadas
                 </div>}

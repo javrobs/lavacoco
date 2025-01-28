@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.admin.views.decorators import staff_member_required
 import datetime
+from django.forms.models import model_to_dict
 
 import json
 import re
@@ -30,24 +31,22 @@ def login_user(request):
         return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
 
 @require_POST
-def create_user(request):
+def create_user(request, admin_created = False):
     try:
         json_data = json.loads(request.body)
         print(json_data)
         if User.objects.filter(username = json_data["username"]).exists():
             return JsonResponse({"success":False,"error": "El usuario ya existe"})
         user = User()
-        # test
-        # for key in needed_keys:
-        #     if json_data.getattr(key) and (key != "username" or re.compile(r'[0-9]{10}').fullmatch(json_data[key])):
         if re.compile(r'[0-9]{10}').fullmatch(json_data.get("username")):
             user.username = json_data["username"]
         else:
             return JsonResponse({"success":False,"error": "Datos incompletos"}, status=400)
-        if json_data.get("password") and json_data.get("password_2") == json_data['password']:
-            user.set_password(json_data['password'])
-        else:
-            return JsonResponse({"success":False,"error": "Error en la contraseña"}, status=403)
+        if not admin_created:
+            if json_data.get("password") and json_data.get("password_2") == json_data['password']:
+                user.set_password(json_data['password'])
+            else:
+                return JsonResponse({"success":False,"error": "Error en la contraseña"}, status=403)
         for key in ["first_name","last_name"]:
             if json_data.get(key):
                 setattr(user,key,json_data.get(key))
@@ -56,26 +55,20 @@ def create_user(request):
         print(user,"user saved")
         user.save()
         address_keys = ["calle","colonia","numero_ext"]
-        new_address = Address(user=user)
+        new_address = Address(user = user)
         for key in address_keys:
             if json_data.get(key) and new_address:
                 setattr(new_address,key,json_data[key])
             else:
                 new_address = None
-                return JsonResponse({"success":True, 'address':False})
+                return JsonResponse({"success":True, 'user_id':user.id, 'address':False})
         address_keys_extra = ["numero_int","cp"]
         for key in address_keys_extra:
             if json_data.get(key):
                 setattr(new_address,key,json_data[key])
         print(new_address)
         new_address.save()
-        return JsonResponse({"success":True, "address":True})
-    except json.JSONDecodeError:
-        print(e)
-        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
-    except KeyError as e:
-        print(e)
-        return JsonResponse({"success": False, "error": f"Missing field: {str(e)}"}, status=400)
+        return JsonResponse({"success":True, 'user_id':user.id, "address":True})
     except Exception as e:
         print(e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)
@@ -104,6 +97,19 @@ def create_order(request):
         print(json_data)
         result = {"success":True}
         user = User.objects.get(id = json_data["user"])
+        if json_data.get("calle") and json_data.get("colonia") and json_data.get("numero_ext"):
+            address = Address.objects.filter(user=user).first() or Address(user = user)
+            for key in ["calle","colonia","numero_ext"]:
+                if json_data.get(key):
+                    setattr(address,key,json_data[key])
+                else:
+                    address = None
+                    break
+            if address:
+                for key in ["numero_int","cp"]:
+                    if json_data.get(key):
+                        setattr(address,key,json_data[key])
+                address.save()
         if json_data.get("deliver") and not Address.objects.filter(user=user).exists():
             return JsonResponse({"success":False, "error": "Falta la dirección del cliente"},status = 500)
         if datetime.datetime.strptime(json_data["date"],"%Y-%m-%d").date() < datetime.date.today():
@@ -125,7 +131,7 @@ def promote_order(request):
     try:
         json_data = json.loads(request.body)
         order = Order.objects.get(id=json_data["id"])
-        order.status += 1 if json_data["promote"] else -1
+        order.status += 1
         if order.status>4 or order.status<0:
             return JsonResponse({"success":False, "error":"Fuera de rango"},status=500)
         order.save()
@@ -138,38 +144,7 @@ def promote_order(request):
 @require_POST
 @staff_member_required
 def create_client(request):
-    try:
-        json_data = json.loads(request.body)
-        print(json_data)
-        if User.objects.filter(username = json_data["username"]).exists():
-            return JsonResponse({"success":False,"error": "El usuario ya existe"})
-        user = User()
-        if re.compile(r'[0-9]{10}').fullmatch(json_data.get("username")):
-            user.username = json_data["username"]
-        else:
-            return JsonResponse({"success":False,"error": "Datos incompletos"}, status=400)
-        for key in ["first_name","last_name"]:
-            if json_data.get(key):
-                setattr(user,key,json_data.get(key))
-            else:
-                return JsonResponse({"success":False,"error": "Datos incompletos"}, status=400)
-        user.save()
-        new_address = Address(user=user)
-        for key in ["calle","colonia","numero_ext"]:
-            if json_data.get(key) and new_address:
-                setattr(new_address,key,json_data[key])
-            else:
-                new_address = None
-                return JsonResponse({"success":True, 'user_id':user.id, 'address':False})
-        for key in ["numero_int","cp"]:
-            if json_data.get(key):
-                setattr(new_address,key,json_data[key])
-        print(new_address)
-        new_address.save()
-        return JsonResponse({"success":True, 'user_id':user.id, "address":True})
-    except Exception as e:
-        print(e)
-        return JsonResponse({"success": False, "error": str(e)}, status=500)
+    return create_user(request,True)
 
 @require_POST
 @staff_member_required
@@ -199,16 +174,24 @@ def set_order_list(request,order_id):
     try:
         order = Order.objects.get(id=order_id)
         json_data = json.loads(request.body)
-        order.list_of_order_set.all().delete()
+        order_list = order.list_of_order_set
+        order_list.all().delete()
         order.has_half = json_data['has_half']
         for key,value in json_data['order_list'].items():
             print(key,value)
             price = Price.objects.get(id=key)
-            order.list_of_order_set.create(concept=price,quantity=value)
-        if request.path.split("/")[2]=="set_and_promote_order_list":
+            order_list.create(concept = price, quantity = value)
+        if request.path.split("/")[2] == "set_and_promote_order_list":
             order.status += 1
+        other_list = order.list_of_others_set
+        other_list.all().delete()
+        for other in json_data["others"]:
+            print(other)
+            if other.get("concept") and other.get("price"):
+                other_list.create(concept = other['concept'], price = other['price'])
+
+        order.tinto_others = json_data['othersTinto'] or 0
         order.save()
-        print(json_data)
         return JsonResponse({"success":True})
     except Exception as e:
         print(e)

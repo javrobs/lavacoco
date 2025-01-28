@@ -68,6 +68,14 @@ input:active,input:hover,input:focus,select:active,select:hover,select:focus{
     transition: .3s;
 }
 
+.btn-green{
+    @apply text-white px-3 py-2 bg-green-600 text-lg rounded-lg shadow-md;
+    transition: .3s;
+}
+.btn-green:hover,.btn-green:focus{
+    @apply text-white bg-green-300;
+}
+
 .btn-white{
     @apply px-3 py-2 text-lg rounded-lg shadow-sm bg-white;
     transition: .3s;

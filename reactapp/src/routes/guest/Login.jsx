@@ -1,10 +1,10 @@
 import React, {useState,useContext} from "react"
 import {Link,useNavigate} from "react-router"
-import cookieCutter from "../utils/cookieCutter.js"
-import ErrorMessage from "../components/ErrorMessage.jsx"
-import Icon from "../components/Icon.jsx"
-import {userContext} from "../components/App.jsx"
-import HoverInput from "../components/HoverInput.jsx"
+import cookieCutter from "../../utils/cookieCutter.js"
+import ErrorMessage from "../../components/ErrorMessage.jsx"
+import Icon from "../../components/Icon.jsx"
+import {userContext} from "../../components/App.jsx"
+import HoverInput from "../../components/HoverInput.jsx"
 
 export default function Login(){
     const [loginState,setLoginState] = useState({})
@@ -33,7 +33,7 @@ export default function Login(){
     function handleSubmit(e){
         e.preventDefault();
         console.log(e);
-        fetch("/api/login_user",{
+        fetch("/api/login_user/",{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
             body:JSON.stringify(loginState)

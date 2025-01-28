@@ -5,7 +5,6 @@ from datetime import date
 # Create your models here.
 
 class Address(models.Model):
-    # User address for delivery
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     calle = models.TextField(max_length = 40)
     colonia = models.TextField(max_length = 40)
@@ -50,8 +49,8 @@ class Order(models.Model):
     status = models.IntegerField(choices = status_choices, default=0)
     has_half = models.BooleanField(default = False)
     pick_up_at_home = models.BooleanField(default = False)
-    total = models.IntegerField(null = True)
-    total_tinto = models.IntegerField(null = True)
+    # total = models.IntegerField(null = True)
+    # total_tinto = models.IntegerField(null = True)
     tinto_others = models.IntegerField(null = True)
     
     def __str__(self):
@@ -88,8 +87,8 @@ class List_Of_Order(models.Model):
 
 class List_Of_Others(models.Model):
     order = models.ForeignKey(Order, on_delete = models.CASCADE)
-    concept = models.ForeignKey(Price, on_delete=models.PROTECT)
-    amount = models.IntegerField()
+    concept = models.TextField(max_length=100)
+    price = models.SmallIntegerField()
 
 
 class FAQ(models.Model):

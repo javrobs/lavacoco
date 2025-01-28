@@ -1,7 +1,7 @@
 import React, {useState, useEffect, createContext} from "react"
 import { RouterProvider, createBrowserRouter, useNavigate, useNavigation} from "react-router"
 import Home from "../routes/Home.jsx"
-import Login from "../routes/Login.jsx"
+import Login from "../routes/guest/Login.jsx"
 import Signup from "../routes/Signup.jsx"
 import PreguntasFrecuentes from "../routes/PreguntasFrecuentes.jsx"
 import CrearOrden from "../routes/admin/CrearOrden.jsx"
@@ -27,7 +27,7 @@ export default function App(){
     function getUserInfo(){
         return new Promise((resolve) => {
             // Simulate context update or fetch user data
-        fetch("/api/load_user")
+        fetch("/api/load_user/")
         .then(response=>response.json())
         .then(data=>{
             setUser(data);
