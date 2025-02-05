@@ -176,9 +176,8 @@ def set_order_list(request,order_id):
         json_data = json.loads(request.body)
         order_list = order.list_of_order_set
         order_list.all().delete()
-        order.has_half = json_data['has_half']
-        for key,value in json_data['order_list'].items():
-            print(key,value)
+        order.has_half = json_data['mediaCarga']
+        for key,value in json_data['orderList'].items():
             price = Price.objects.get(id=key)
             order_list.create(concept = price, quantity = value)
         if request.path.split("/")[2] == "set_and_promote_order_list":
@@ -186,13 +185,25 @@ def set_order_list(request,order_id):
         other_list = order.list_of_others_set
         other_list.all().delete()
         for other in json_data["others"]:
-            print(other)
             if other.get("concept") and other.get("price"):
                 other_list.create(concept = other['concept'], price = other['price'])
-
         order.tinto_others = json_data['othersTinto'] or 0
         order.save()
         return JsonResponse({"success":True})
     except Exception as e:
         print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500)
+    
+@require_POST
+@staff_member_required
+def save_payment_and_continue(request):
+    try:
+        json_data = json.loads(request.body)
+        order = Order.objects.get(id=json_data["id"])
+        order.payment = True if json_data["payment"]=="tarjeta" else False
+        order.status = 4
+        order.save()
+        return JsonResponse({"success":True})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"success":False, "error":str(e)},status=500)    

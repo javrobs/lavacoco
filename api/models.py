@@ -49,8 +49,7 @@ class Order(models.Model):
     status = models.IntegerField(choices = status_choices, default=0)
     has_half = models.BooleanField(default = False)
     pick_up_at_home = models.BooleanField(default = False)
-    # total = models.IntegerField(null = True)
-    # total_tinto = models.IntegerField(null = True)
+    card_payment = models.BooleanField(default = False)
     tinto_others = models.IntegerField(null = True)
     
     def __str__(self):

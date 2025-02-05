@@ -13,7 +13,7 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ["text"]
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ["user","date","created_at","last_modified_at","status","priority","pick_up_at_home"]
+    list_display = ["id","user","date","created_at","last_modified_at","status","priority","pick_up_at_home"]
 
 class ListOfOrderAdmin(admin.ModelAdmin):
     list_display = ["order","concept","quantity"]

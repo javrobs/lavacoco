@@ -11,6 +11,7 @@ urlpatterns = [
     path('create_client/',views.create_client),
     path('change_prices/',views.change_prices),
     path('promote_order/',views.promote_order),
+    path('save_payment_and_continue/',views.save_payment_and_continue),
     path('set_order_list/<int:order_id>',views.set_order_list),
     path('set_and_promote_order_list/<int:order_id>',views.set_order_list),
     
