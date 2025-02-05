@@ -92,7 +92,10 @@ const Orders = ({statusValue, loaderData, setNotify, promoteOrder}) => {
         let message;
         switch(statusValue){
             case 0:
-                actions = <IconButton onClick={()=>promoteOrder(each.id)} icon='arrow_right_alt'/>
+                actions = <>
+                    <IconButton onClick={()=>nav(`/orden/${each.id}`)} icon='description'/>
+                    <IconButton onClick={()=>promoteOrder(each.id)} icon='arrow_right_alt'/>
+                </>
                 break;
             case 1:
                 actions = <IconButton onClick={()=>nav(`/orden/${each.id}`)} icon='list'/>
@@ -106,7 +109,10 @@ const Orders = ({statusValue, loaderData, setNotify, promoteOrder}) => {
                         afterFunction: ()=>{promoteOrder(each.id);setNotify({show:false})}
                     })
                 }
-                actions = <IconButton onClick={notifyThenPromote} icon='arrow_right_alt'/>
+                actions = <>
+                    <IconButton onClick={()=>nav(`/orden/${each.id}`)} icon='description'/>
+                    <IconButton onClick={notifyThenPromote} icon='arrow_right_alt'/>
+                </>
                 break;
             case 3:
                 const notify = () => {
