@@ -82,6 +82,8 @@ class Order(models.Model):
 class List_Of_Order(models.Model):
     order = models.ForeignKey(Order, on_delete = models.CASCADE)
     concept = models.ForeignKey(Price, on_delete=models.PROTECT)
+    price_due = models.SmallIntegerField()
+    price_dryclean_due = models.SmallIntegerField()
     quantity = models.SmallIntegerField()
 
 class List_Of_Others(models.Model):

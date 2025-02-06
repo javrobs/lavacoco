@@ -172,16 +172,17 @@ def change_prices(request):
 @staff_member_required
 def set_order_list(request,order_id):
     try:
-        order = Order.objects.get(id=order_id)
+        order = Order.objects.get(id = order_id)
         json_data = json.loads(request.body)
         order_list = order.list_of_order_set
         order_list.all().delete()
         order.has_half = json_data['mediaCarga']
         for key,value in json_data['orderList'].items():
-            price = Price.objects.get(id=key)
-            order_list.create(concept = price, quantity = value)
-        if request.path.split("/")[2] == "set_and_promote_order_list":
-            order.status += 1
+            price = Price.objects.get(id = key)
+            order_list.create(concept = price, 
+                              quantity = value["qty"], 
+                              price_due = price.price, 
+                              price_dryclean_due = price.price_dryclean)
         other_list = order.list_of_others_set
         other_list.all().delete()
         for other in json_data["others"]:

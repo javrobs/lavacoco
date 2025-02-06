@@ -69,7 +69,7 @@ def order_info(request,order_id):
         if admin or order.user == request.user:
             result = {"success":True}
             result["order"] = model_to_dict(order)|{"date":order.date_as_string(),"user":order.user.get_full_name(),"phone":order.user.username}
-            result["order_list"] = {item.concept.id:item.quantity for item in order.list_of_order_set.all()}
+            result["order_list"] = {item.concept.id:{"qty":item.quantity,"price_due":item.price_due,"price_dryclean_due":item.price_dryclean_due} for item in order.list_of_order_set.all()}
             list_of_prices = ['text','price','price_dryclean','id']
             result["prices"] = {cat.id:{"name":cat.text,"prices":{price["id"]:price for price in (cat.price_set.values(*list_of_prices))}}
                             for cat in Category.objects.all()}
