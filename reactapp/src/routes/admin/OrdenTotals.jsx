@@ -5,7 +5,7 @@ const OrdenTotals = ({edit,prices,functions,order}) => {
 
     const othersArray = order.others.map((each,i)=>{
         console.log(each)
-        return <div className="grid gap-3 grid-cols-4 sm:grid-cols-6" key={`other-${i}`}>
+        return <div className="grid grid-cols-4 sm:grid-cols-6" key={`other-${i}`}>
             {edit?
             <>
                 <div className="flex gap-1 items-center col-span-3 sm:col-span-5">
@@ -22,14 +22,14 @@ const OrdenTotals = ({edit,prices,functions,order}) => {
     })
 
     const listOfItems = Object.values(prices).map((each,i)=>{
-        const iterable = Object.values(each.prices).filter(eachAgain=>Object.keys(order.orderList).includes(String(eachAgain.id)));
+        const iterable = Object.values(each.prices).filter(({id}) => Object.keys(order.orderList).includes(String(id)));
         const arrayOfThings = iterable.map((eachAgain,k)=>{
             return <div key={"item-"+k} className="grid grid-cols-4 sm:grid-cols-6">
             <div className="col-span-2 sm:col-span-4 p-1">
                 {eachAgain.text}
             </div>
-            <div className="p-1">{order.orderList[eachAgain.id]}</div>
-            <div className="p-1">$ {order.orderList[eachAgain.id]*eachAgain.price}</div>
+            <div className="p-1">{order.orderList[eachAgain.id].qty}</div>
+            <div className="p-1">$ {order.orderList[eachAgain.id].qty*order.orderList[eachAgain.id].price_due}</div>
             </div>
         })
 
@@ -68,8 +68,7 @@ const OrdenTotals = ({edit,prices,functions,order}) => {
             {othersArray}
         </div>
         }
-        <Total 
-            prices={prices} 
+        <Total
             order={order} 
             functions={functions}
             edit={edit}
@@ -79,27 +78,26 @@ const OrdenTotals = ({edit,prices,functions,order}) => {
 
 
 
-const Total = ({prices, order, functions, edit}) => {
+const Total = ({order, functions, edit}) => {
     const {orderList, mediaCarga, others, othersTinto} = order;
 
-    const priceList = Object.values(prices).reduce((prev,value)=>{
-        return {...prev,...value.prices}
-    },{})
+    // const priceList = Object.values(prices).reduce((prev,value)=>{
+    //     return {...prev,...value.prices}
+    // },{})
 
     console.log("calculating total")
 
-    let total = mediaCarga? 50: 0;
-    let totalTinto = 0;
+    // let total = ;
+    // let totalTinto = 0;
 
-    Object.entries(orderList).forEach(([key,value])=>{
-        total += value*priceList[key].price;
-        totalTinto += value*priceList[key].price_dryclean;
-    })
+    let [total,totalTinto] = Object.values(orderList).reduce((agg,value)=>{
+        return [
+            agg[0] + value.qty * value.price_due, 
+            agg[1] + value.qty * value.price_dryclean_due
+        ];
+    },[mediaCarga? 50: 0,0]);
 
-    others.forEach(each=>{
-        total += Number(each.price);
-    })
-
+    total += others.reduce((agg,each)=>agg + Number(each.price),0);
 
     return <div className="p-3 grid grid-cols-4 sm:grid-cols-6">
         <div className={`col-span-1 sm:col-span-4 ${others.length>1?"row-span-4":"row-span-3"} text-end self-center`}></div>

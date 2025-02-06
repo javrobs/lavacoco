@@ -9,6 +9,11 @@ import OrdenTotals from "./OrdenTotals.jsx";
 const OrderList = () => {
     const {order,order_list,prices,others_start,others_tinto} = useLoaderData();
     
+    const priceList = Object.values(prices).reduce((prev,value)=>{
+        return {...prev,...value.prices}
+    },{})
+    
+
     //Send State handling
     const [sendState,setSendState] = useState(
         {orderList: order_list,
@@ -25,7 +30,11 @@ const OrderList = () => {
                     const {[selectKey]:_, ...newItems} = oldValue.orderList;  
                     return {...oldValue,orderList:newItems};
                 } else {
-                    return {...oldValue,orderList:{...oldValue.orderList,[selectKey]:Number(value)}}
+                    return {...oldValue,orderList:{...oldValue.orderList,
+                        [selectKey]:{
+                            qty:Number(value),
+                            price_due:priceList[selectKey].price,
+                            price_dryclean_due:priceList[selectKey].price_dryclean}}}
                 }
             });
         }
@@ -129,9 +138,9 @@ const OrderList = () => {
         return <div key={`input-${i}`}>
             {prices[category].prices[key].text}
             <div className={classNames.grid}>
-            {edit==key||value>qty?
-            <InputQty inputRef={inputRef} orderListValue={value} keyName={key} classNames={classNames.input} onInput={functions().handleInputChange}/>:
-            <Buttons orderListValue={value} qty={qty} orderList={sendState.orderList} keyName={key} onClick={functions().handleChange}/>
+            {edit == key || (value?.qty && value.qty > qty)?
+            <InputQty inputRef={inputRef} orderListValue={value?.qty||0} keyName={key} classNames={classNames.input} onInput={functions().handleInputChange}/>:
+            <Buttons orderListValue={value?.qty||0} qty={qty} orderList={sendState.orderList} keyName={key} onClick={functions().handleChange}/>
             }
             <button className="btn-back !h-11 flex items-center justify-center" onClick={()=>handleEditButton(key)}><Icon icon={edit==key?"undo":"edit"}/></button>
             </div>
@@ -140,17 +149,15 @@ const OrderList = () => {
 
     const inputsBed = ["Sábanas","Cobertor","Edredón"].map((each,j)=>{
         const inputArray = Object.entries(prices[4].prices).filter(([_,value])=>value.text.includes(each)).map(([key,val],i)=>{
-            const value = sendState.orderList[key];
+            const value = sendState.orderList[key]||{};
             const splitter = ["Sábanas de ","Cobertor-","Edredón-"];
-
             let title = val.text.split(splitter[j])[1];
-
             return <div key={`input-${val.id}`}>
                 {title.charAt(0).toUpperCase() + title.slice(1)}
                 <div className={classNames.grid}>
-                {edit==key||value>qty?
-                <InputQty inputRef={inputRef} orderListValue={value} keyName={key} classNames={classNames.input} onInput={functions().handleInputChange}/>:
-                <Buttons orderListValue={value} qty={qty} orderList={sendState.orderList} keyName={key} onClick={functions().handleChange}/>
+                {edit == key || (value?.qty && value.qty > qty)?
+                <InputQty inputRef={inputRef} orderListValue={value.qty} keyName={key} classNames={classNames.input} onInput={functions().handleInputChange}/>:
+                <Buttons orderListValue={value.qty} qty={qty} orderList={sendState.orderList} keyName={key} onClick={functions().handleChange}/>
                 }
                 <button className="btn-back !h-11 flex items-center justify-center" onClick={()=>handleEditButton(key)}><Icon icon={edit==key?"undo":"edit"}/></button>
                 </div>
@@ -213,12 +220,9 @@ const OrderList = () => {
         })
     }
 
-    const priceList = Object.values(prices).reduce((prev,value)=>{
-        return {...prev,...value.prices}
-    },{})
     
-    const total = Object.entries(sendState.orderList).reduce((agg,[key,value])=>{
-        return agg + value*priceList[key].price;
+    const total = Object.values(sendState.orderList).reduce((agg,value)=>{
+        return agg + value.qty*value.price_due;
     },sendState.mediaCarga? 50: 0) + sendState.others.reduce((agg,each) => {
         return agg + Number(each.price);
     },0)

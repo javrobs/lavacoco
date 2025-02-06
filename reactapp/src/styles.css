@@ -48,7 +48,7 @@ header a:hover, header a:active, a.active,header>nav>button:hover,.mini-menu-but
     @apply bg-sky-300 bg-opacity-10;
 }
 
-input[type="text"],input[type="number"],input[type="tel"],input[type="password"],input[type="date"],select{
+input[type="text"],input[type="number"],input[type="tel"],input[type="password"],input[type="date"],input:not([type]),select{
     @apply p-1 h-8 rounded-full w-full shadow-sm px-3;
     /* border-color:hsl(196.55deg 83.65% 59.22%); */
 }
