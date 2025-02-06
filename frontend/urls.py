@@ -18,7 +18,8 @@ urls_anonymous_only = [
 urls_admin_only = [
     "crear-orden/",
     "crear-cliente/",
-    "crear-orden/<int:user_id>/"
+    "crear-orden/<int:user_id>/",
+    "tintoreria"
 ]
 
 urls_all_users_only = [

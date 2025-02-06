@@ -19,6 +19,7 @@ urlpatterns = [
     path('faq_info/',loaders.faq_info),
     path('price_info/',loaders.price_info),
     path('create_order_info/',loaders.create_order_info),
-    path('order_info/<int:order_id>',loaders.order_info)
+    path('order_info/<int:order_id>',loaders.order_info),
+    path('drycleaning_info/',loaders.drycleaning_info)
 ]
 

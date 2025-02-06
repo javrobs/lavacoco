@@ -1,6 +1,7 @@
 
 
 from django.forms.models import model_to_dict
+from django.db.models import Sum
 from django.http import JsonResponse
 from .models import *
 from django.contrib.admin.views.decorators import staff_member_required
@@ -81,3 +82,12 @@ def order_info(request,order_id):
     except Exception as e:
         print(e)
         return JsonResponse({"success":False,"error":str(e)},status=404)
+    
+@staff_member_required
+def drycleaning_info(request):
+    payed_orders = Order.objects.filter(status = 4)
+    tinto_others = payed_orders.aggregate(Sum("tinto_others"))["tinto_others__sum"]
+    tinto_orders = 0
+    for order in payed_orders.all():
+        tinto_orders += order.list_of_order_set.aggregate(Sum("concept__price_dryclean"))["concept__price_dryclean__sum"]
+    return JsonResponse({"success":True,"orders":[],"tinto":tinto_others + tinto_orders})

@@ -11,6 +11,7 @@ import Layout from "./Layout.jsx"
 import ErrorComponent from './ErrorComponent.jsx'
 import ListaDePrecios from "../routes/ListaDePrecios.jsx"
 import defaultLoader from "../utils/defaultLoader.js"
+import Tintoreria from "../routes/admin/TIntoreria.jsx"
 
 export const userContext = createContext();
 
@@ -51,7 +52,8 @@ export default function App(){
                 {path:"/configuracion", element:<Configuracion/>},
                 {path:'/preguntas-frecuentes',element:<PreguntasFrecuentes/>, loader:()=>defaultLoader('faq')},
                 {path:"/lista-de-precios", element:<ListaDePrecios/>, loader:()=>defaultLoader('price')},
-                {path:"/orden/:orderId",element:<Orden/>,loader:({params})=>defaultLoader("order",params.orderId)}
+                {path:"/orden/:orderId",element:<Orden/>,loader:({params})=>defaultLoader("order",params.orderId)},
+                {path:"/tintoreria",element:<Tintoreria/>,loader:()=>defaultLoader('drycleaning')}
             ],
             errorElement: <ErrorComponent/>
         }
