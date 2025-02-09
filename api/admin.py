@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib import admin
-from .models import Address,Price,Category,Order,List_Of_Order,List_Of_Others,FAQ,Dryclean_movements,Dryclean_balance
+from .models import *
 
 
 class AddressAdmin(admin.ModelAdmin):
@@ -26,9 +26,9 @@ class FAQAdmin(admin.ModelAdmin):
 
 class MovementsAdmin(admin.ModelAdmin):
     list_display = ["amount","created_at","order"]
-    
-class TotalDrycleanAdmin(admin.ModelAdmin):
-    list_display = ["id","total"]
+
+class SpendingAdmin(admin.ModelAdmin):
+    list_display = ["amount","category","created_at"]    
 
 admin.site.register(Address,AddressAdmin)
 admin.site.register(Price,PriceAdmin)
@@ -38,5 +38,5 @@ admin.site.register(List_Of_Order,ListOfOrderAdmin)
 admin.site.register(FAQ,FAQAdmin)
 admin.site.register(List_Of_Others,ListOfOthersAdmin)
 admin.site.register(Dryclean_movements,MovementsAdmin)
-admin.site.register(Dryclean_balance,TotalDrycleanAdmin)
+admin.site.register(Spending_movements,SpendingAdmin)
 # Register your models here.

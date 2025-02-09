@@ -17,6 +17,8 @@ urlpatterns = [
     path('set_order_list/<int:order_id>',views.set_order_list),
 
     path('dryclean_payment/',views.dryclean_payment),
+
+    path('spending_payment/',views.spending_payment),
     
     path('home_info/',loaders.home_info),
     path('faq_info/',loaders.faq_info),
@@ -26,6 +28,8 @@ urlpatterns = [
     path('drycleaning_info/',loaders.drycleaning_info),
     path('drycleaning_info/<int:page>',loaders.drycleaning_info),
     path('reports_info/',loaders.reports_info),
-    path('spending_info/',loaders.spending_info)
+    path('reports_info/<int:month>/<int:year>',loaders.reports_info),
+    path('spending_info/',loaders.spending_info),
+    path('spending_info/<int:page>',loaders.spending_info),
 ]
 

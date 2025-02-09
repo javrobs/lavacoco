@@ -40,5 +40,6 @@ urlpatterns = [*list(map(lambda x:path(x,views.main),urls)),
     *list(map(lambda x:path(x,views.admin_only),urls_admin_only)),
     *list(map(lambda x:path(x,views.anonymous_only),urls_anonymous_only)),
     *list(map(lambda x:path(x,views.users_only),urls_users_only)),
-    path("orden/<int:order_id>/", views.order)]
+    path("orden/<int:order_id>/", views.order),
+    path("reportes/<int:month>/<int:year>/",views.admin_only)]
 

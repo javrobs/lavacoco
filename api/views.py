@@ -229,3 +229,23 @@ def dryclean_payment(request):
     except Exception as e:
         print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500) 
+    
+    
+@require_POST
+@staff_member_required
+def spending_payment(request):
+    try:
+        json_data = json.loads(request.body)
+        print(json_data)
+        payment = int(json_data["amount"])
+        # owed_to_dryclean = -Dryclean_movements.get_total()
+        if payment <= 0:
+            return JsonResponse({"success":False, "error":"El pago debe ser mayor a 0"})
+        # if payment > owed_to_dryclean:
+        #     return JsonResponse({"success":False, "error":f"El pago ({payment}) debe ser menor a la deuda a tintorería ({owed_to_dryclean})"})
+        movement = Spending_movements(amount = payment, category=json_data["category"])
+        movement.save()
+        return JsonResponse({"success":True, "payment_id":movement.id})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"success":False, "error":str(e)},status=500) 

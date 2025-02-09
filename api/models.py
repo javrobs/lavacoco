@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum, F
 from datetime import date
+from django.utils import timezone
+import datetime
 
 # Create your models here.
 
@@ -60,7 +62,7 @@ class Order(models.Model):
 
     def days_left_string(self):
         week_days = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
-        days_left = (self.date-date.today()).days
+        days_left = (self.date-timezone.localdate()).days
         immediate_days = ['Ayer','Hoy','Mañana']
         if abs(days_left)<=1:
             return immediate_days[days_left+1]
@@ -70,7 +72,7 @@ class Order(models.Model):
         return f"{word_to_use} {abs(days_left)} días" 
     
     def short_date(self):
-        days_left = (self.date-date.today()).days
+        days_left = (self.date-timezone.localdate()).days
         week_days = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"]
         immediate_days = ['Ayer', 'Hoy', 'Mañana']
         if abs(days_left)<=1:
@@ -80,6 +82,19 @@ class Order(models.Model):
     def date_as_string(self):
         months = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
         return f'{self.date.day} de {months[self.date.month-1]} ({self.days_left_string()})'
+    
+    def earnings(self):
+        total = self.list_of_order_set.aggregate(total = Sum(F("price_due") * F("quantity")))["total"] or 0
+        other_sum = self.list_of_others_set.aggregate(Sum("price"))["price__sum"] or 0
+        return (total + other_sum)
+    
+    @staticmethod
+    def earning_month_year(month,year):
+        result = 0
+        print(month,year)
+        for each in Order.objects.filter(date_delivered__month=month).filter(date_delivered__year=year).all():
+            result += each.earnings()
+        return result
     
     def tinto_total(self):
         order_tinto_sum = self.list_of_order_set.aggregate(total = Sum(F("price_dryclean_due") * F("quantity")))["total"] or 0
@@ -101,21 +116,22 @@ class Dryclean_movements(models.Model):
     @staticmethod
     def get_total():
         return Dryclean_movements.objects.all().aggregate(Sum("amount"))["amount__sum"]
-
-class Dryclean_balance(models.Model):
-    total = models.SmallIntegerField()
-    updated_at = models.DateTimeField(auto_now=True)
-
+    
     @staticmethod
-    def get_total():
-        try:
-            return Dryclean_balance.objects.get(id=1).total
-        except:
-            return 0
+    def spending_month_year(month,year):
+        return Dryclean_movements.objects\
+            .filter(amount__gt = 0)\
+            .filter(created_at__month = month)\
+            .filter(created_at__year = year)\
+            .aggregate(Sum("amount"))["amount__sum"] or 0
+    
 
+class Spending_movements(models.Model):
+    amount = models.SmallIntegerField()
+    category = models.TextField(max_length=40)
+    created_at = models.DateTimeField(auto_now_add = True)
+    
 
-    def __str__(self):
-        return f"Total: {self.total}"
 
 class List_Of_Order(models.Model):
     order = models.ForeignKey(Order, on_delete = models.CASCADE)

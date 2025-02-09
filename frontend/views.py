@@ -21,11 +21,16 @@ def anonymous_only(request,*args):
     return redirect("/")
 
 @login_required
-def admin_only(request,**args):
+def admin_only(request,*args,**other):
     if request.user.is_superuser:
         return render(request,"frontend/index.html")
     return redirect("/")
 
+@login_required
+def admin_only_report(request,month,year):
+    if request.user.is_superuser:
+        return render(request,"frontend/index.html")
+    return redirect("/")
 
 @login_required
 def users_only(request,*args):

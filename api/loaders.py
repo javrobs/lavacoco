@@ -2,10 +2,12 @@
 
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
+from django.db.models import Sum, F
 from .models import *
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+import time
 
 def home_info(request):
     user = request.user
@@ -109,10 +111,39 @@ def drycleaning_info(request, page = 1):
         "total": Dryclean_movements.get_total()})
 
 @staff_member_required
-def reports_info(request):
-    return JsonResponse({"success":True})
+def reports_info(request, month=timezone.localdate().month, year=timezone.localdate().year):
+    try:
+        start = time.time()
+        result = {"success":True}
+        result['earnings'] = Order.earning_month_year(month,year)
+        result['spending'] = {**{"Tintorería": Dryclean_movements.spending_month_year(month,year)},
+                              **{movement["category"]: movement["amount__sum"] for movement in Spending_movements.objects.filter(created_at__month=month).filter(created_at__year=year).values("category").annotate(Sum("amount")) or []}
+                              }
+        result['orders'] = [{order.id:order.earnings()} for order in Order.objects.filter(date_delivered__month=month).filter(date_delivered__year=year).all()]
+        result['time'] = time.time() - start
+        print(month,year)
+        return JsonResponse(result)
+    except Exception as e:
+        print(e)
+        return JsonResponse({"success":False, "error":str(e)},status=500)
 
 
 @staff_member_required
-def spending_info(request):
-    return JsonResponse({"success":True})
+def spending_info(request,page=1):
+    cat = [each["category"] for each in Spending_movements.objects.values("category").distinct().all()]
+    movements = Spending_movements.objects.all().order_by("-id")
+    paginator = Paginator(movements, 15)
+    if page < 1:
+        page = 1
+    if page > paginator.num_pages:
+        page = paginator.num_pages
+    movements = [
+        {"id": None,
+        "concept": movement.category,
+        "due": movement.amount,
+        "date": movement.created_at.date()} for movement in paginator.get_page(page)]
+    return JsonResponse({"success": True, 
+        "movements": movements, 
+        "page": page,
+        "num_pages": paginator.num_pages,
+        "categories":cat})

@@ -35,16 +35,19 @@ const AdminUser = () => {
         
     return <main className="container grow mx-auto py-3 flex flex-col gap-2">
         <div className="bubble-div-with-title hidden sm:block shrink-0">
-            <div className="bubble-div-title">Acceso rápido<Icon icon='select_check_box'/></div>
+            <div className="bubble-div-title">
+                Acceso rápido
+                <Icon icon='select_check_box' />
+            </div>
             <div className="flex gap-2 justify-center p-2">
                 <Link className="btn btn-go" to='/crear-orden'>Crear orden<Icon icon='receipt_long'/></Link>
                 <Link className="btn btn-go" to='/crear-cliente'>Nuevo cliente<Icon icon='person_add'/></Link>
                 <Link className="btn btn-go" to='/tintoreria'>Tintorería<Icon icon='dry_cleaning'/></Link>
+                <Link className="btn btn-go" to='/gastos'>Gastos<Icon icon='paid'/></Link>
             </div>
         </div>
         
         <div className="bubble-div-with-title grow flex flex-col">
-            {/* <div className="bubble-div-title">Órdenes<Icon icon='receipt_long'/></div> */}
             <div className="grid gap-0.5 shrink-0 bg-slate-300 shadow-sm grid-cols-2 sm:grid-cols-4">
                 {["clock_loader_10","clock_loader_40","clock_loader_60","clock_loader_90"].map((each,i)=>{
                     const names = ['Nuevas','Abiertas',"Cerradas","Listas"];
