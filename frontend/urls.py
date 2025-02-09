@@ -19,7 +19,9 @@ urls_admin_only = [
     "crear-orden/",
     "crear-cliente/",
     "crear-orden/<int:user_id>/",
-    "tintoreria"
+    "tintoreria/",
+    "gastos/",
+    "reportes/"
 ]
 
 urls_all_users_only = [

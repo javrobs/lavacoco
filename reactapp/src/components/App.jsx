@@ -11,7 +11,9 @@ import Layout from "./Layout.jsx"
 import ErrorComponent from './ErrorComponent.jsx'
 import ListaDePrecios from "../routes/ListaDePrecios.jsx"
 import defaultLoader from "../utils/defaultLoader.js"
-import Tintoreria from "../routes/admin/TIntoreria.jsx"
+import Tintoreria from "../routes/admin/Tintoreria.jsx"
+import Gastos from "../routes/admin/Gastos.jsx"
+import Reportes from "../routes/admin/Reportes.jsx"
 
 export const userContext = createContext();
 
@@ -50,6 +52,8 @@ export default function App(){
                 {path:"/crear-orden/:userId", element:<CrearOrden/>, loader:()=>defaultLoader('create_order')},
                 {path:"/crear-cliente", element:<Signup admin={true}/>},
                 {path:"/configuracion", element:<Configuracion/>},
+                {path:"/gastos", element:<Gastos/>, loader:()=>defaultLoader("spending")},
+                {path:"/reportes", element:<Reportes/>, loader:()=>defaultLoader("reports")},
                 {path:'/preguntas-frecuentes',element:<PreguntasFrecuentes/>, loader:()=>defaultLoader('faq')},
                 {path:"/lista-de-precios", element:<ListaDePrecios/>, loader:()=>defaultLoader('price')},
                 {path:"/orden/:orderId",element:<Orden/>,loader:({params})=>defaultLoader("order",params.orderId)},

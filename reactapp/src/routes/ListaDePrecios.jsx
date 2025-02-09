@@ -16,7 +16,9 @@ const ListaDePrecios = () => {
 
     function editPrice(e) {
         const {value,name} = e.target;
+        console.log("price is being edited!")
         const pattern = new RegExp(/^[0-9]*$/)
+        console.log(pattern.test(value),value)
         if(pattern.test(value)){
             setPriceChanges((oldValues)=>{
                 return {...oldValues,[name]:value}

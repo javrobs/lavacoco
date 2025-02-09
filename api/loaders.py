@@ -1,11 +1,11 @@
 
 
 from django.forms.models import model_to_dict
-from django.db.models import Sum
 from django.http import JsonResponse
 from .models import *
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 def home_info(request):
     user = request.user
@@ -72,8 +72,14 @@ def order_info(request,order_id):
             result["order"] = model_to_dict(order)|{"date":order.date_as_string(),"user":order.user.get_full_name(),"phone":order.user.username}
             result["order_list"] = {item.concept.id:{"qty":item.quantity,"price_due":item.price_due,"price_dryclean_due":item.price_dryclean_due} for item in order.list_of_order_set.all()}
             list_of_prices = ['text','price','price_dryclean','id']
-            result["prices"] = {cat.id:{"name":cat.text,"prices":{price["id"]:price for price in (cat.price_set.values(*list_of_prices))}}
-                            for cat in Category.objects.all()}
+            result["prices"] = {cat.id:{
+                "name":cat.text,
+                "prices":
+                    {price["id"]:price 
+                    for price in (cat.price_set.values(*list_of_prices))}
+                }
+                for cat in Category.objects.all()
+            }
             result["others_tinto"] = order.tinto_others or 0
             result["others_start"] = list(order.list_of_others_set.values("concept","price"))
             return JsonResponse(result)
@@ -84,10 +90,29 @@ def order_info(request,order_id):
         return JsonResponse({"success":False,"error":str(e)},status=404)
     
 @staff_member_required
-def drycleaning_info(request):
-    payed_orders = Order.objects.filter(status = 4)
-    tinto_others = payed_orders.aggregate(Sum("tinto_others"))["tinto_others__sum"]
-    tinto_orders = 0
-    for order in payed_orders.all():
-        tinto_orders += order.list_of_order_set.aggregate(Sum("concept__price_dryclean"))["concept__price_dryclean__sum"]
-    return JsonResponse({"success":True,"orders":[],"tinto":tinto_others + tinto_orders})
+def drycleaning_info(request, page = 1):
+    movements = Dryclean_movements.objects.all().order_by("-id")
+    paginator = Paginator(movements, 15)
+    if page < 1:
+        page = 1
+    if page > paginator.num_pages:
+        page = paginator.num_pages
+    movements = [
+        {"id": movement.order.id if movement.order else None,
+        "concept": f"Orden #{movement.order.id} - {movement.order.user.get_full_name()}" if movement.order else 'Pago',
+        "due": movement.amount,
+        "date": movement.created_at.date()} for movement in paginator.get_page(page)]
+    return JsonResponse({"success": True, 
+        "movements": movements, 
+        "page": page,
+        "num_pages": paginator.num_pages,
+        "total": Dryclean_movements.get_total()})
+
+@staff_member_required
+def reports_info(request):
+    return JsonResponse({"success":True})
+
+
+@staff_member_required
+def spending_info(request):
+    return JsonResponse({"success":True})

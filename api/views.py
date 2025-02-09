@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.admin.views.decorators import staff_member_required
 import datetime
+from django.utils import timezone
 from django.forms.models import model_to_dict
 
 import json
@@ -203,8 +204,28 @@ def save_payment_and_continue(request):
         order = Order.objects.get(id=json_data["id"])
         order.payment = True if json_data["payment"]=="tarjeta" else False
         order.status = 4
+        order.date_delivered = timezone.now()
+        total_tinto = order.tinto_movement()
         order.save()
-        return JsonResponse({"success":True})
+        return JsonResponse({"success":True, "total_tinto":total_tinto})
     except Exception as e:
         print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500)    
+    
+@require_POST
+@staff_member_required
+def dryclean_payment(request):
+    try:
+        json_data = json.loads(request.body)
+        payment = int(json_data["payment"])
+        owed_to_dryclean = -Dryclean_movements.get_total()
+        if payment <= 0:
+            return JsonResponse({"success":False, "error":"El pago debe ser mayor a 0"})
+        if payment > owed_to_dryclean:
+            return JsonResponse({"success":False, "error":f"El pago ({payment}) debe ser menor a la deuda a tintorería ({owed_to_dryclean})"})
+        movement = Dryclean_movements(amount = payment)
+        movement.save()
+        return JsonResponse({"success":True, "payment_id":movement.id})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"success":False, "error":str(e)},status=500) 

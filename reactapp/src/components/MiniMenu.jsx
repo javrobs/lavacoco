@@ -30,10 +30,9 @@ const MiniMenu = () => {
         {to:"/",text:"Inicio",icon:"home"},
         {to:'/crear-orden',text:'Crear orden',icon:'receipt_long'},
         {to:'/crear-cliente',text:'Nuevo cliente',icon:'person_add'},
-        {to:'/entradas',text:'Entradas',icon:'input'},
-        {to:'/salidas',text:'Salidas',icon:'output'},
+        {to:'/gastos',text:"Gastos",icon:"mintmark"},
         {to:'/tintoreria',text:'Tintorería',icon:'dry_cleaning'},
-        {to:'/reportes',text:'Reportes', icon:'dashboard'},
+        {to:'/reportes',text:'Reportes', icon:'savings'},
         {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'},
         {to:'/preguntas-frecuentes',text:'Preguntas frecuentes', icon:'help'},
     ]
