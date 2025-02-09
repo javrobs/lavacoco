@@ -15,6 +15,7 @@ const Tintoreria = () => {
     const inputRef = useRef(null);
 
     const {total} = movementState;
+    console.log(total);
 
     function handleInput(e){
         const {value} = e.target;
@@ -45,11 +46,11 @@ const Tintoreria = () => {
 
 
     return <main className="container mx-auto max-w-screen-md flex flex-col py-4 sm:gap-2">
-        <div>
-            <h1 className="text-orange-700 px-2">Tintorería</h1>
-            {total != 0 && <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
+        <div className="bubble-div max-sm:!p-2">
+            <h1 className="text-orange-700">Tintorería</h1>
+            {Boolean(total) && <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
                 <ErrorMessage errorContent={error}/>
-                <div className="flex items-end">
+                <div className="flex divide-x-[1px] divide-slate-400 items-end">
                 <HoverInput label="Abonar pago" className="grow">
                     <input ref={inputRef} className="shadow-sm max-sm:!rounded-none !rounded-e-none no-arrow" min={0} max={-total} required={true} type="number" value={payment} onChange={handleInput}/>
                 </HoverInput> 
