@@ -23,7 +23,7 @@ def anonymous_only(request,*args):
 
 @login_required
 @staff_member_required
-def admin_only(request,*args):
+def admin_only(request,*args,**other):
     if request.user.is_superuser:
         return render(request,"frontend/index.html")
     return redirect("/")

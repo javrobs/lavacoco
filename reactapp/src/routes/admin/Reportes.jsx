@@ -1,5 +1,6 @@
 import React from "react";
 import { useLoaderData } from "react-router";
+import MonthBalancePlot from "../../plots/MonthBalancePlot.jsx"
 
 
 const Reportes = () => {
@@ -13,6 +14,7 @@ const Reportes = () => {
             <ul className="list-disc">
                 {Object.entries(data).map(([key,value])=><li key={key}>{key}: {JSON.stringify(value)}</li>)}
             </ul>
+            <MonthBalancePlot passData={data}/>
         </div>
     </main>
 }

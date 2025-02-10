@@ -2,6 +2,7 @@ import React,{useState, useRef, useEffect} from "react";
 import {useLoaderData,useNavigate} from "react-router"
 import Icon from "../../components/Icon.jsx";
 import cookieCutter from "../../utils/cookieCutter.js";
+import capitalize from "../../utils/capitalize.js";
 import SubMenuButton from "../../components/SubMenuButton.jsx";
 import Notify from "../../components/Notify.jsx";
 import OrdenTotals from "./OrdenTotals.jsx";
@@ -153,7 +154,7 @@ const OrderList = () => {
             const splitter = ["Sábanas de ","Cobertor-","Edredón-"];
             let title = val.text.split(splitter[j])[1];
             return <div key={`input-${val.id}`}>
-                {title.charAt(0).toUpperCase() + title.slice(1)}
+                {capitalize(title)}
                 <div className={classNames.grid}>
                 {edit == key || (value?.qty && value.qty > qty)?
                 <InputQty inputRef={inputRef} orderListValue={value.qty} keyName={key} classNames={classNames.input} onInput={functions().handleInputChange}/>:
