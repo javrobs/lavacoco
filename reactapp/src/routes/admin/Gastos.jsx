@@ -52,6 +52,7 @@ const Gastos = () => {
             setMovementState(getFreshState);
             setSendState({});
             setError("");
+            setNewSelect(false);
         } else {
             setError(data.error);
         }
@@ -75,11 +76,11 @@ const Gastos = () => {
                         </HoverInput>
                     </div>
                     {newSelect?
-                        <div className="relative flex items-center grow-[20] max-sm:basis-full">
-                            <HoverInput className="grow" label='Añadir gasto'>
-                            <input className="" ref={catInputRef} name="category" type="text" value={sendState?.category||""} onInput={handleInput} required={true}/>
+                        <div className="relative mt-3 flex items-center grow-[20] max-sm:basis-full">
+                            <HoverInput className="grow !mt-0" label='Añadir gasto'>
+                            <input className="!rounded-none" ref={catInputRef} name="category" type="text" value={sendState?.category||""} onInput={handleInput} required={true}/>
                             </HoverInput>
-                            <MiniIconButton classNameExtra="absolute mt-3" onClick={()=>{setNewSelect(false)}} icon="undo"/>
+                            <MiniIconButton classNameExtra="absolute" onClick={()=>{setNewSelect(false)}} icon="undo"/>
                         </div>:
                         <HoverSelect className="grow-[20] max-sm:basis-full" label='Añadir gasto'>
                             <select className="!rounded-none" value={sendState?.category||""} name="category" onChange={categoryHandleSelect} required={true}>
