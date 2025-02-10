@@ -7,6 +7,7 @@ from .models import *
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.utils import timezone
 import time
 
 def home_info(request):
@@ -103,7 +104,7 @@ def drycleaning_info(request, page = 1):
         {"id": movement.order.id if movement.order else None,
         "concept": f"Orden #{movement.order.id} - {movement.order.user.get_full_name()}" if movement.order else 'Pago',
         "due": movement.amount,
-        "date": movement.created_at.date()} for movement in paginator.get_page(page)]
+        "date": timezone.localdate(movement.created_at)} for movement in paginator.get_page(page)]
     return JsonResponse({"success": True, 
         "movements": movements, 
         "page": page,
@@ -141,7 +142,7 @@ def spending_info(request,page=1):
         {"id": None,
         "concept": movement.category,
         "due": movement.amount,
-        "date": movement.created_at.date()} for movement in paginator.get_page(page)]
+        "date": timezone.localdate(movement.created_at)} for movement in paginator.get_page(page)]
     return JsonResponse({"success": True, 
         "movements": movements, 
         "page": page,

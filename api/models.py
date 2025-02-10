@@ -55,14 +55,14 @@ class Order(models.Model):
     pick_up_at_home = models.BooleanField(default = False)
     card_payment = models.BooleanField(default = False)
     tinto_others = models.IntegerField(blank = True, null = True)
-    tinto_paid = models.BooleanField(default = False)
+    opened_datetime = models.DateTimeField(null = True)
     
     def __str__(self):
         return f"Orden de {self.user.get_full_name()} - {self.date}"
 
     def days_left_string(self):
         week_days = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
-        days_left = (self.date-timezone.localdate()).days
+        days_left = (self.date - timezone.localdate()).days
         immediate_days = ['Ayer','Hoy','Mañana']
         if abs(days_left)<=1:
             return immediate_days[days_left+1]

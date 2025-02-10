@@ -7,6 +7,7 @@ import ListOfPayments from "../../components/ListOfPayments.jsx";
 import ErrorMessage from "../../components/ErrorMessage.jsx";
 import cookieCutter from "../../utils/cookieCutter.js";
 import defaultLoader from "../../utils/defaultLoader.js";
+import MiniIconButton from "../../components/MiniIconButton.jsx";
 
 
 const Gastos = () => {
@@ -66,26 +67,29 @@ const Gastos = () => {
             <div className="bubble-div grid">
                 <h1 className="text-orange-700">Gastos</h1>
                 <ErrorMessage errorContent={error}/>
-                <form className="flex gap-2 max-sm:flex-wrap items-center" autoComplete="off" onSubmit={handleForm}>
+                <form className="flex divide-x-[1px] divide-slate-400 max-sm:flex-wrap items-center" autoComplete="off" onSubmit={handleForm}>
+                    <div className="items-center flex gap-1 w-32 grow shrink-0">
+                        <span className="mt-3">$</span>
+                        <HoverInput label='Cantidad'>
+                            <input className="no-arrow !max-sm:!rounded-none !rounded-e-none" ref={catInputRef} type="number" min={0} name="amount" value={sendState?.amount||""} onInput={handleInput} required={true}/>
+                        </HoverInput>
+                    </div>
                     {newSelect?
-                        <HoverInput className="grow-[20] max-sm:basis-full" label='Añadir gasto'>
-                            <input ref={catInputRef} name="category" type="text" value={sendState?.category||""} onInput={handleInput} required={true}/>
-                        </HoverInput>:
+                        <div className="relative flex items-center grow-[20] max-sm:basis-full">
+                            <HoverInput className="grow" label='Añadir gasto'>
+                            <input className="" ref={catInputRef} name="category" type="text" value={sendState?.category||""} onInput={handleInput} required={true}/>
+                            </HoverInput>
+                            <MiniIconButton classNameExtra="absolute mt-3" onClick={()=>{setNewSelect(false)}} icon="undo"/>
+                        </div>:
                         <HoverSelect className="grow-[20] max-sm:basis-full" label='Añadir gasto'>
-                            <select value={sendState?.category||""} name="category" onChange={categoryHandleSelect} required={true}>
+                            <select className="!rounded-none" value={sendState?.category||""} name="category" onChange={categoryHandleSelect} required={true}>
                                 <option value="" disabled={true}>Selecciona...</option>
                                 {movementState.categories.map((each,i)=><option key={`option-${i}`} value={each}>{each}</option>)}
                                 <option className="bg-blue-200" value="new_cat_change">Nueva categoría</option>
                             </select>
                         </HoverSelect>
                     }
-                    <div className="items-center flex gap-1 w-32 grow shrink-0">
-                        <span className="mt-3">$</span>
-                        <HoverInput label='Cantidad'>
-                            <input className="no-arrow" ref={catInputRef} type="number" min={0} name="amount" value={sendState?.amount||""} onInput={handleInput} required={true}/>
-                        </HoverInput>
-                    </div>
-                    <button className="btn-go mt-3 btn !text-base text-nowrap grow !w-32 !h-8">Enviar<Icon icon="payments"/></button>
+                    <button className="btn-go mt-3 btn !text-base !max-sm:!rounded-none !rounded-s-none text-nowrap grow !w-32 !h-8">Enviar<Icon icon="payments"/></button>
                 </form>
             </div>
             <div className="bubble-div-with-title">
