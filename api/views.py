@@ -113,7 +113,7 @@ def create_order(request):
                 address.save()
         if json_data.get("deliver") and not Address.objects.filter(user=user).exists():
             return JsonResponse({"success":False, "error": "Falta la dirección del cliente"},status = 500)
-        if datetime.datetime.strptime(json_data["date"],"%Y-%m-%d").date() < datetime.date.today():
+        if datetime.datetime.strptime(json_data["date"],"%Y-%m-%d").date() < timezone.localdate():
             return JsonResponse({"success":False,"error":"Error en la fecha"},status = 500)
         new_order = Order(user = user,
                     date = json_data["date"],
