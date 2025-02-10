@@ -31,5 +31,7 @@ urlpatterns = [
     path('reports_info/<int:month>/<int:year>',loaders.reports_info),
     path('spending_info/',loaders.spending_info),
     path('spending_info/<int:page>',loaders.spending_info),
+    path('laundry_machines_info',loaders.laundry_machines_info),
+    path('laundry_machines_info/<int:day>/<int:month>/<int:year>',loaders.laundry_machines_info)
 ]
 

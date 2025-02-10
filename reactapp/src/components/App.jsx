@@ -14,6 +14,7 @@ import defaultLoader from "../utils/defaultLoader.js"
 import Tintoreria from "../routes/admin/Tintoreria.jsx"
 import Gastos from "../routes/admin/Gastos.jsx"
 import Reportes from "../routes/admin/Reportes.jsx"
+import Lavadoras from "../routes/admin/Lavadoras.jsx"
 
 export const userContext = createContext();
 
@@ -58,7 +59,9 @@ export default function App(){
                 {path:'/preguntas-frecuentes',element:<PreguntasFrecuentes/>, loader:()=>defaultLoader('faq')},
                 {path:"/lista-de-precios", element:<ListaDePrecios/>, loader:()=>defaultLoader('price')},
                 {path:"/orden/:orderId",element:<Orden/>,loader:({params})=>defaultLoader("order",params.orderId)},
-                {path:"/tintoreria",element:<Tintoreria/>,loader:()=>defaultLoader('drycleaning')}
+                {path:"/tintoreria",element:<Tintoreria/>,loader:()=>defaultLoader('drycleaning')},
+                {path:"/lavadoras",element:<Lavadoras/>,loader:()=>defaultLoader('laundry_machines')},
+                {path:"/lavadoras/:day/:month/:year",element:<Lavadoras/>,loader:({params})=>defaultLoader('laundry_machines',params.day,params.month,params.year)},
             ],
             errorElement: <ErrorComponent/>
         }

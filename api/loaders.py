@@ -120,7 +120,7 @@ def reports_info(request, month=timezone.localdate().month, year=timezone.locald
         result['spending'] = {**{"Tintorería": Dryclean_movements.spending_month_year(month,year)},
                               **{movement["category"]: movement["amount__sum"] for movement in Spending_movements.objects.filter(created_at__month=month).filter(created_at__year=year).values("category").annotate(Sum("amount")) or []}
                               }
-        result['orders'] = [{order.id:order.earnings()} for order in Order.objects.filter(date_delivered__month=month).filter(date_delivered__year=year).all()]
+        result['orders'] = [{order.id:order.earnings()} for order in Order.objects.filter(last_modified_at__month=month).filter(last_modified_at__year=year).all()]
         result['time'] = time.time() - start
         print(month,year)
         return JsonResponse(result)
@@ -148,3 +148,17 @@ def spending_info(request,page=1):
         "page": page,
         "num_pages": paginator.num_pages,
         "categories":cat})
+
+@staff_member_required
+def laundry_machines_info(request,day=None,month=None,year=None):
+
+    dateQuery = datetime.date(day=day,month=month,year=year) if day and month and year else timezone.localdate()
+    def AM_PM(time):
+        hours = time.hour
+        minutes = str(100 + time.minute)[1:]
+        return f"{hours if hours <= 12 else hours - 12}:{minutes} {"PM" if hours >= 2 else "AM"}"
+    orders = [{"time":AM_PM(timezone.localtime(o.opened_datetime)),
+               "id":o.id,
+               "status":o.status_string(),
+               "concept":f"Orden #{o.id} - {o.user.get_full_name()}"}for o in Order.objects.filter(opened_datetime__date=dateQuery).order_by("opened_datetime").all()]
+    return JsonResponse({"success":True,"orders": orders,"dateSelected":dateQuery})

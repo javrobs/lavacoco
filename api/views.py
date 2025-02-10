@@ -133,6 +133,8 @@ def promote_order(request):
         json_data = json.loads(request.body)
         order = Order.objects.get(id=json_data["id"])
         order.status += 1
+        if order.status == 1:
+            order.opened_datetime = timezone.now()
         if order.status>4 or order.status<0:
             return JsonResponse({"success":False, "error":"Fuera de rango"},status=500)
         order.save()
@@ -204,7 +206,6 @@ def save_payment_and_continue(request):
         order = Order.objects.get(id=json_data["id"])
         order.payment = True if json_data["payment"]=="tarjeta" else False
         order.status = 4
-        order.date_delivered = timezone.now()
         total_tinto = order.tinto_movement()
         order.save()
         return JsonResponse({"success":True, "total_tinto":total_tinto})

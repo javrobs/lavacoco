@@ -13,7 +13,7 @@ const ListOfPayments = ({movementState,setMovementState,loader}) => {
         return <div className={`flex bg-opacity-50 ${each.due>0?"bg-sky-200":"bg-orange-200"}`} key={i}>
             <div className="px-1 shrink-0 w-24 text-center">{rearrangeDate}</div>
             <div className="px-1 shrink-0 w-24 text-center">{each.due>0? "$ " + each.due:"$ (" + (-each.due) + ")"}</div>
-            <div className="grow shrink overflow-hidden px-1 text-nowrap text-ellipsis">{each.id?<Link className="hover:!text-orange-500 text-orange-700" to={`/orden/${each.id}`}>{each.concept}</Link>:each.concept}</div>
+            <div className="px-1 grow overflow-hidden text-nowrap text-ellipsis">{each.id?<Link className="  hover:!text-orange-500 text-orange-700" to={`/orden/${each.id}`}>{each.concept}</Link>:each.concept}</div>
             
         </div>
     })
@@ -51,7 +51,6 @@ const ListOfPayments = ({movementState,setMovementState,loader}) => {
     async function changePageOnEnter(e){
         console.log(e,e.target.value);
         if(e.key=="Enter") changePage(e);
-        // let {value} = 
     }
 
     return <div className="divide-y-[1px] divide-slate-500">

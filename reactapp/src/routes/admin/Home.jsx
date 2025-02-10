@@ -41,7 +41,7 @@ const AdminUser = () => {
             </div>
             <div className="flex gap-2 justify-center p-2">
                 <Link className="btn btn-go" to='/crear-orden'>Crear orden<Icon icon='receipt_long'/></Link>
-                <Link className="btn btn-go" to='/crear-cliente'>Nuevo cliente<Icon icon='person_add'/></Link>
+                <Link className="btn btn-go" to='/lavadoras'>Lavadoras<Icon icon='local_laundry_service'/></Link>
                 <Link className="btn btn-go" to='/tintoreria'>Tintorería<Icon icon='dry_cleaning'/></Link>
                 <Link className="btn btn-go" to='/gastos'>Gastos<Icon icon='paid'/></Link>
             </div>
