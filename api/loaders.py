@@ -139,8 +139,9 @@ def spending_info(request,page=1):
     if page > paginator.num_pages:
         page = paginator.num_pages
     movements = [
-        {"id": None,
+        {
         "concept": movement.category,
+        "cardPayment": movement.card_payment,
         "due": movement.amount,
         "date": timezone.localdate(movement.created_at)} for movement in paginator.get_page(page)]
     return JsonResponse({"success": True, 
@@ -151,8 +152,10 @@ def spending_info(request,page=1):
 
 @staff_member_required
 def laundry_machines_info(request,day=None,month=None,year=None):
-
-    dateQuery = datetime.date(day=day,month=month,year=year) if day and month and year else timezone.localdate()
+    try:
+        dateQuery = datetime.date(day=day,month=month,year=year) if day and month and year else timezone.localdate()
+    except:
+        dateQuery = timezone.localdate()
     def AM_PM(time):
         hours = time.hour
         minutes = str(100 + time.minute)[1:]

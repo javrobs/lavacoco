@@ -28,7 +28,7 @@ class MovementsAdmin(admin.ModelAdmin):
     list_display = ["amount","created_at","order"]
 
 class SpendingAdmin(admin.ModelAdmin):
-    list_display = ["amount","category","created_at"]    
+    list_display = ["amount","category","created_at","card_payment"]    
 
 admin.site.register(Address,AddressAdmin)
 admin.site.register(Price,PriceAdmin)

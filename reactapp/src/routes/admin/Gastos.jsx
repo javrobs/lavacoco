@@ -58,6 +58,10 @@ const Gastos = () => {
         }
     }
 
+    function toggleCreditCard(){
+        setSendState(oldValue=>({...oldValue,creditCard:!oldValue?.creditCard}))
+    }
+
     useEffect(()=>{
         if(newSelect){
             catInputRef.current.focus();
@@ -69,12 +73,13 @@ const Gastos = () => {
                 <h1 className="text-orange-700">Gastos</h1>
                 <ErrorMessage errorContent={error}/>
                 <form className="flex divide-x-[1px] divide-slate-400 max-sm:flex-wrap items-center" autoComplete="off" onSubmit={handleForm}>
-                    <div className="items-center flex gap-1 w-32 grow shrink-0">
-                        <span className="mt-3">$</span>
-                        <HoverInput label='Cantidad'>
-                            <input className="no-arrow !max-sm:!rounded-none !rounded-e-none" ref={catInputRef} type="number" min={0} name="amount" value={sendState?.amount||""} onInput={handleInput} required={true}/>
+                    <button type="button" className={`btn-white btn mt-3 !p-0 !text-base max-sm:!rounded-none !rounded-e-none !w-10 !h-8 ${sendState?.creditCard?"!text-emerald-700 !bg-emerald-200":""}`} onClick={toggleCreditCard}><Icon icon={sendState?.creditCard?"credit_card":"payments"}/></button>
+                    {/* <div className="items-center flex gap-1 w-32 grow shrink-0">
+                        <span className="mt-3">$</span> */}
+                        <HoverInput label='Cantidad ($)' className="w-32 grow shrink-0">
+                            <input className="no-arrow !rounded-none" ref={catInputRef} type="number" min={0} name="amount" value={sendState?.amount||""} onInput={handleInput} required={true}/>
                         </HoverInput>
-                    </div>
+                    {/* </div> */}
                     {newSelect?
                         <div className="relative mt-3 flex items-center grow-[20] max-sm:basis-full">
                             <HoverInput className="grow !mt-0" label='Añadir gasto'>
@@ -94,7 +99,7 @@ const Gastos = () => {
                 </form>
             </div>
             <div className="bubble-div-with-title">
-                <div className="bubble-div-title"> Gastos recientes<Icon icon='paid'/></div>
+                <div className="bubble-div-title">Gastos recientes<Icon icon='paid'/></div>
                 <ListOfPayments movementState={movementState} setMovementState={setMovementState} loader="spending"/>
             </div>
         </main>

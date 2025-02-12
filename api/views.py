@@ -244,7 +244,9 @@ def spending_payment(request):
             return JsonResponse({"success":False, "error":"El pago debe ser mayor a 0"})
         # if payment > owed_to_dryclean:
         #     return JsonResponse({"success":False, "error":f"El pago ({payment}) debe ser menor a la deuda a tintorería ({owed_to_dryclean})"})
-        movement = Spending_movements(amount = payment, category=json_data["category"])
+
+        movement = Spending_movements(amount = payment, category=json_data["category"], )
+        movement.card_payment = bool(json_data.get('creditCard')) 
         movement.save()
         return JsonResponse({"success":True, "payment_id":movement.id})
     except Exception as e:
