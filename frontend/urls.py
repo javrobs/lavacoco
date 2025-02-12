@@ -21,7 +21,9 @@ urls_admin_only = [
     "crear-orden/<int:user_id>/",
     "tintoreria/",
     "gastos/",
-    "reportes/"
+    "reportes/",
+    "lavadoras/",
+    "lavadoras/<int:day>/<int:month>/<int:year>/",
 ]
 
 urls_all_users_only = [

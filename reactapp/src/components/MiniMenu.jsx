@@ -32,6 +32,7 @@ const MiniMenu = () => {
         {to:'/crear-cliente',text:'Nuevo cliente',icon:'person_add'},
         {to:'/tintoreria',text:'Tintorería',icon:'dry_cleaning'},
         {to:'/gastos',text:"Gastos",icon:"paid"},
+        {to:'/lavadoras',text:'Lavadoras', icon:'local_laundry_service'},
         {to:'/reportes',text:'Reportes', icon:'savings'},
         {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'},
         {to:'/preguntas-frecuentes',text:'Preguntas frecuentes', icon:'help'},

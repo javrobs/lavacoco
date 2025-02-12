@@ -42,7 +42,7 @@ const Payment = () => {
             <label className={`${payment=="tarjeta"?"bg-sky-200 text-sky-700":"hover:bg-sky-100"}  rounded-md px-2 flex items-center gap-1`}>
                 <input className="accent-sky-700" type="radio" name="payment" value="tarjeta" onChange={selectPayment} checked={payment=="tarjeta"} required={true}/>
                 <Icon icon="credit_card"/>
-                Tarjeta de crédito
+                Transferencia
             </label>
         </div>
         <button className="btn mx-auto btn-go mt-2">Finalizar<Icon icon="check"/></button>

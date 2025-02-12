@@ -21,12 +21,9 @@ def anonymous_only(request,*args):
         return render(request,"frontend/index.html")
     return redirect("/")
 
-@login_required
 @staff_member_required
 def admin_only(request,*args,**other):
-    if request.user.is_superuser:
-        return render(request,"frontend/index.html")
-    return redirect("/")
+    return render(request,"frontend/index.html")
 
 @login_required
 def admin_only_report(request,month,year):
@@ -42,8 +39,11 @@ def users_only(request,*args):
 
 @login_required
 def order(request,order_id):
-    if request.user.is_superuser or Order.objects.filter(user=request.user).filter(id=order_id).first():
-        return render(request,"frontend/index.html")
-    return redirect("/")
+    try:
+        order = Order.objects.get(id=order_id)
+        if request.user.is_superuser or order.user == request.user:
+            return render(request,"frontend/index.html")
+    except:
+        return redirect("/")
 
 

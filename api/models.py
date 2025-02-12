@@ -49,20 +49,19 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add = True)
     priority = models.BooleanField(default = False)
     last_modified_at = models.DateTimeField(auto_now=True)
-    date_delivered = models.DateField(blank = True, null = True)
     status = models.IntegerField(choices = status_choices, default=0)
     has_half = models.BooleanField(default = False)
     pick_up_at_home = models.BooleanField(default = False)
     card_payment = models.BooleanField(default = False)
     tinto_others = models.IntegerField(blank = True, null = True)
-    tinto_paid = models.BooleanField(default = False)
+    opened_datetime = models.DateTimeField(null = True)
     
     def __str__(self):
         return f"Orden de {self.user.get_full_name()} - {self.date}"
 
     def days_left_string(self):
         week_days = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
-        days_left = (self.date-timezone.localdate()).days
+        days_left = (self.date - timezone.localdate()).days
         immediate_days = ['Ayer','Hoy','Mañana']
         if abs(days_left)<=1:
             return immediate_days[days_left+1]
@@ -88,11 +87,15 @@ class Order(models.Model):
         other_sum = self.list_of_others_set.aggregate(Sum("price"))["price__sum"] or 0
         return (total + other_sum)
     
+    def status_string(self):
+        status_ref = ["Nueva","Abierta","Cerrada","Lista","Terminada"]
+        return status_ref[self.status]
+    
     @staticmethod
     def earning_month_year(month,year):
         result = 0
         print(month,year)
-        for each in Order.objects.filter(date_delivered__month=month).filter(date_delivered__year=year).all():
+        for each in Order.objects.filter(last_modified_at__month=month).filter(last_modified_at__year=year).all():
             result += each.earnings()
         return result
     
@@ -130,8 +133,8 @@ class Spending_movements(models.Model):
     amount = models.SmallIntegerField()
     category = models.TextField(max_length=40)
     created_at = models.DateTimeField(auto_now_add = True)
+    card_payment = models.BooleanField(default = False)
     
-
 
 class List_Of_Order(models.Model):
     order = models.ForeignKey(Order, on_delete = models.CASCADE)
@@ -139,6 +142,7 @@ class List_Of_Order(models.Model):
     price_due = models.SmallIntegerField()
     price_dryclean_due = models.SmallIntegerField()
     quantity = models.SmallIntegerField()
+
 
 class List_Of_Others(models.Model):
     order = models.ForeignKey(Order, on_delete = models.CASCADE)

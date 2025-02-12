@@ -2,19 +2,26 @@ import React,{useRef} from "react";
 import MiniIconButton from "./MiniIconButton.jsx";
 import { Link } from "react-router";
 import defaultLoader from "../utils/defaultLoader.js";
+import Icon from "./Icon.jsx";
 
 const ListOfPayments = ({movementState,setMovementState,loader}) => {
     const {movements} = movementState;
     const pageInput = useRef(null);
 
     const listOfPayments = movements.map((each,i)=>{
-        const rearrangeDate = each.date.split("-").reverse().join("/")
-
-        return <div className={`flex bg-opacity-50 ${each.due>0?"bg-sky-200":"bg-orange-200"}`} key={i}>
+        const rearrangeDate = each.date.split("-").reverse().join("/");
+        const hasCardInfo = Object.keys(each).includes("cardPayment");
+        const bg = hasCardInfo? (each.cardPayment?"text-emerald-700":""):(each.due>0?"":"bg-orange-200");
+        return <div className={`flex bg-opacity-50 items-center ${bg}`} key={i}>
             <div className="px-1 shrink-0 w-24 text-center">{rearrangeDate}</div>
             <div className="px-1 shrink-0 w-24 text-center">{each.due>0? "$ " + each.due:"$ (" + (-each.due) + ")"}</div>
-            <div className="grow shrink overflow-hidden px-1 text-nowrap text-ellipsis">{each.id?<Link className="hover:!text-orange-500 text-orange-700" to={`/orden/${each.id}`}>{each.concept}</Link>:each.concept}</div>
-            
+            <div className="px-1 grow overflow-hidden text-nowrap text-ellipsis">
+                {each.id?
+                <Link className="  hover:!text-orange-500 text-orange-700" to={`/orden/${each.id}`}>{each.concept}</Link>:
+                <>{each.concept}</>
+                }
+            </div>
+            {!each.id&&<MiniIconButton classNameExtra="me-1 shrink-0 text-black" icon="edit" onClick={()=>{}}/>}
         </div>
     })
 
@@ -51,7 +58,6 @@ const ListOfPayments = ({movementState,setMovementState,loader}) => {
     async function changePageOnEnter(e){
         console.log(e,e.target.value);
         if(e.key=="Enter") changePage(e);
-        // let {value} = 
     }
 
     return <div className="divide-y-[1px] divide-slate-500">
