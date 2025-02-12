@@ -79,7 +79,6 @@ const OrderList = () => {
         }
     }
 
-    console.log(functions())
 
     //Category handle
     const [category, setCategory] = useState(1);
