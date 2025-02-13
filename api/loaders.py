@@ -2,13 +2,17 @@
 
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Value, CharField,Count
+from django.db.models.functions import Concat
 from .models import *
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
 import time
+
+
+month_names = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 
 def home_info(request):
     user = request.user
@@ -116,17 +120,68 @@ def reports_info(request, month=timezone.localdate().month, year=timezone.locald
     try:
         start = time.time()
         result = {"success":True}
-        result['earnings'] = Order.earning_month_year(month,year)
-        result['spending'] = {**{"Tintorería": Dryclean_movements.spending_month_year(month,year)},
-                              **{movement["category"]: movement["amount__sum"] for movement in Spending_movements.objects.filter(created_at__month=month).filter(created_at__year=year).values("category").annotate(Sum("amount")) or []}
-                              }
-        result['orders'] = [{order.id:order.earnings()} for order in Order.objects.filter(last_modified_at__month=month).filter(last_modified_at__year=year).all()]
+        result["report"] = {"labels":[],"parents":[],"values":[]}
+        total_earnings = 0
+        total_spending = 0
+        def append_three(label,value,parent):
+            result["report"]["labels"].append(label)
+            result["report"]["values"].append(value)
+            result["report"]["parents"].append(parent)
+
+        for cat in Category.objects.all():
+            cat_value = 0
+            for price in cat.price_set.all():
+                agg = price.list_of_order_set\
+                    .filter(order__last_modified_at__month=month)\
+                    .filter(order__last_modified_at__year=year)\
+                    .aggregate(total=Sum(F("price_due")*F("quantity")))["total"]
+                if agg:
+                    cat_value += agg
+                    append_three(f" {price.text} ",agg,f" {cat.text} ")
+            if cat.text == "Lavandería":
+                total_medias_cargas = len(Order.objects.filter(last_modified_at__month=month).filter(last_modified_at__year=year).filter(has_half=True).all())*50
+                if total_medias_cargas:
+                    cat_value += total_medias_cargas
+                    append_three(" Media carga ",total_medias_cargas,f" {cat.text} ")
+            if cat_value:
+                total_earnings+= cat_value
+                append_three(f" {cat.text} ",cat_value," Entradas ")
+        
+        others_total = List_Of_Others.objects\
+            .filter(order__last_modified_at__month=month)\
+            .filter(order__last_modified_at__year=year)\
+            .aggregate(total=Sum(F("price")))["total"]
+        if others_total:
+            total_earnings += others_total
+            append_three(" Otros ",others_total," Entradas ")
+        if total_earnings:
+            append_three(" Entradas ",total_earnings,f"{month_names[month - 1]} {year}")
+        dryclean_spending = Dryclean_movements.spending_month_year(month,year)
+        if dryclean_spending:
+            total_spending += dryclean_spending
+            append_three(" Tintorería  ",dryclean_spending," Salidas ")
+        for movement in Spending_movements.objects.filter(created_at__month=month).filter(created_at__year=year).values("category").annotate(sum=Sum("amount")):
+            total_spending += movement["sum"]
+            append_three(f' {movement["category"]} ',movement["sum"]," Salidas ")
+        if total_spending:
+            append_three(" Salidas ",total_spending,f"{month_names[month - 1]} {year}")
+        # result['spending'] = {**{"Tintorería": Dryclean_movements.spending_month_year(month,year)},
+        #                       **{movement["category"]: movement["amount__sum"] for movement in Spending_movements.objects.filter(created_at__month=month).filter(created_at__year=year).values("category").annotate(Sum("amount")) or []}
+        #                       }
+        fechas = [[o["last_modified_at__month"],o["last_modified_at__year"]] for o in Order.objects.order_by("-last_modified_at").values("last_modified_at__month","last_modified_at__year").distinct().all()] + \
+            [[sm["created_at__month"],sm["created_at__year"]] for sm in Spending_movements.objects.order_by("-created_at").values("created_at__month","created_at__year").distinct().all()] + \
+            [[dm["created_at__month"],dm["created_at__year"]] for dm in Dryclean_movements.objects.order_by("-created_at").values("created_at__month","created_at__year").distinct().all()]
+        filtered_fechas = []
+        for [m,y] in fechas:
+            if f"{m}/{y}" not in map(lambda x: x[0],filtered_fechas):
+                filtered_fechas.append([f"{m}/{y}",f"{month_names[m - 1]} {y}"])
+        result["dates"] = filtered_fechas
+        result["report_date"] = f"{month}/{year}"
         result['time'] = time.time() - start
-        print(month,year)
         return JsonResponse(result)
     except Exception as e:
         print(e)
-        return JsonResponse({"success":False, "error":str(e)},status=500)
+        return JsonResponse({"success":False, "error":str(e)}, status=500)
 
 
 @staff_member_required

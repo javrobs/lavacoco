@@ -143,12 +143,19 @@ class List_Of_Order(models.Model):
     price_dryclean_due = models.SmallIntegerField()
     quantity = models.SmallIntegerField()
 
+    @staticmethod
+    def month_order_earnings(month,year):
+        return list(List_Of_Order.objects\
+            .filter(order__last_modified_at__month=month)\
+            .filter(order__last_modified_at__year=year)\
+            .annotate(cat=F("concept__category__text"),text=F("concept__text"))\
+            .values("cat","text")\
+            .annotate(total=Sum(F("price_due")*F("quantity"))))
 
 class List_Of_Others(models.Model):
     order = models.ForeignKey(Order, on_delete = models.CASCADE)
     concept = models.TextField(max_length=100)
     price = models.SmallIntegerField()
-
 
 class FAQ(models.Model):
     question = models.TextField()

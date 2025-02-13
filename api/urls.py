@@ -26,14 +26,14 @@ urlpatterns = [
     path('faq_info/',loaders.faq_info),
     path('price_info/',loaders.price_info),
     path('create_order_info/',loaders.create_order_info),
-    path('order_info/<int:order_id>',loaders.order_info),
+    path('order_info/<int:order_id>/',loaders.order_info),
     path('drycleaning_info/',loaders.drycleaning_info),
-    path('drycleaning_info/<int:page>',loaders.drycleaning_info),
+    path('drycleaning_info/<int:page>/',loaders.drycleaning_info),
     path('reports_info/',loaders.reports_info),
-    path('reports_info/<int:month>/<int:year>',loaders.reports_info),
+    path('reports_info/<int:month>/<int:year>/',loaders.reports_info),
     path('spending_info/',loaders.spending_info),
-    path('spending_info/<int:page>',loaders.spending_info),
-    path('laundry_machines_info',loaders.laundry_machines_info),
-    path('laundry_machines_info/<int:day>/<int:month>/<int:year>',loaders.laundry_machines_info)
+    path('spending_info/<int:page>/',loaders.spending_info),
+    path('laundry_machines_info/',loaders.laundry_machines_info),
+    path('laundry_machines_info/<int:day>/<int:month>/<int:year>/',loaders.laundry_machines_info)
 ]
 

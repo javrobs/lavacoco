@@ -11,7 +11,7 @@ const ListOfPayments = ({movementState,setMovementState,loader}) => {
     const listOfPayments = movements.map((each,i)=>{
         const rearrangeDate = each.date.split("-").reverse().join("/");
         const hasCardInfo = Object.keys(each).includes("cardPayment");
-        const bg = hasCardInfo? (each.cardPayment?"text-emerald-700":""):(each.due>0?"":"bg-orange-200");
+        const bg = hasCardInfo? (each.cardPayment?"text-emerald-700 bg-emerald-100":""):(each.due>0?"":"bg-orange-200");
         return <div className={`flex bg-opacity-50 items-center ${bg}`} key={i}>
             <div className="px-1 shrink-0 w-24 text-center">{rearrangeDate}</div>
             <div className="px-1 shrink-0 w-24 text-center">{each.due>0? "$ " + each.due:"$ (" + (-each.due) + ")"}</div>
