@@ -15,7 +15,7 @@ const Tintoreria = () => {
     const inputRef = useRef(null);
 
     const {total} = movementState;
-    console.log(total);
+
 
     function handleInput(e){
         const {value} = e.target;
@@ -34,8 +34,7 @@ const Tintoreria = () => {
         })
         const data = await response.json();
         if(data.success){
-            const {success,...getFreshState} = await defaultLoader("drycleaning");
-            if(success) setMovementState(getFreshState);
+            refreshState();
             inputRef.current.blur();
             setPayment("");
             setError("");
@@ -44,26 +43,45 @@ const Tintoreria = () => {
         }
     }
 
+    async function refreshState(){
+        const {success,...getFreshState} = await defaultLoader("drycleaning");
+        if(success) setMovementState(getFreshState);
+    }
 
-    return <main className="container mx-auto max-w-screen-md flex flex-col py-4 sm:gap-2">
+
+    return <main className="container mx-auto max-w-screen-md flex flex-col py-3 sm:gap-2">
         <div className="bubble-div max-sm:!p-2">
             <h1 className="text-orange-700">Tintorería</h1>
             {Boolean(total) && <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
                 <ErrorMessage errorContent={error}/>
                 <div className="flex divide-x-[1px] divide-slate-400 items-end">
                 <HoverInput label="Abonar pago" className="grow">
-                    <input ref={inputRef} className="shadow-sm max-sm:!rounded-none !rounded-e-none no-arrow" min={0} max={-total} required={true} type="number" value={payment} onChange={handleInput}/>
+                    <input ref={inputRef} className={`shadow-sm !rounded-e-none max-sm:!rounded-none no-arrow`} min={0} max={-total} required={true} type="number" value={payment} onChange={handleInput}/>
                 </HoverInput> 
                 <button className="btn btn-go max-sm:!rounded-none !rounded-s-none !text-base text-nowrap !h-8">
                     Enviar
-                    <Icon icon='payments'/>
+                    <Icon icon='arrow_forward'/>
                 </button>
                 </div>
             </form>}
         </div>
         <div className="bubble-div-with-title">
-            <div className="bubble-div-title"><span className="me-auto">Pendiente: <span className="text-orange-300 font-bold">$ {-total}</span>    </span>Movimientos recientes<Icon icon='dry_cleaning'/></div>
-            <ListOfPayments movementState={movementState} setMovementState={setMovementState} loader="drycleaning"/>
+            <div className="bubble-div-title">
+                <span className="me-auto">
+                    Pendiente: 
+                    <span className="text-orange-300 font-bold">
+                        $ {-total}
+                    </span>
+                </span>
+                Movimientos recientes
+                <Icon icon='dry_cleaning'/>
+            </div>
+            <ListOfPayments 
+                movementState={movementState} 
+                fetchURL="/api/edit_drycleaning/" 
+                setMovementState={setMovementState}
+                refreshState={refreshState}
+            />
         </div>
     </main>
 }

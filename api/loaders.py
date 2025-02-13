@@ -105,7 +105,8 @@ def drycleaning_info(request, page = 1):
     if page > paginator.num_pages:
         page = paginator.num_pages
     movements = [
-        {"id": movement.order.id if movement.order else None,
+        {"id": movement.id,
+         "id_order": movement.order.id if movement.order else None,
         "concept": f"Orden #{movement.order.id} - {movement.order.user.get_full_name()}" if movement.order else 'Pago',
         "due": movement.amount,
         "date": timezone.localdate(movement.created_at)} for movement in paginator.get_page(page)]
@@ -132,6 +133,7 @@ def reports_info(request, month=timezone.localdate().month, year=timezone.locald
             cat_value = 0
             for price in cat.price_set.all():
                 agg = price.list_of_order_set\
+                    .filter(order__status=4)\
                     .filter(order__last_modified_at__month=month)\
                     .filter(order__last_modified_at__year=year)\
                     .aggregate(total=Sum(F("price_due")*F("quantity")))["total"]
@@ -139,15 +141,16 @@ def reports_info(request, month=timezone.localdate().month, year=timezone.locald
                     cat_value += agg
                     append_three(f" {price.text} ",agg,f" {cat.text} ")
             if cat.text == "Lavandería":
-                total_medias_cargas = len(Order.objects.filter(last_modified_at__month=month).filter(last_modified_at__year=year).filter(has_half=True).all())*50
+                total_medias_cargas = len(Order.objects.filter(status=4).filter(last_modified_at__month=month).filter(last_modified_at__year=year).filter(has_half=True).all())*50
                 if total_medias_cargas:
                     cat_value += total_medias_cargas
                     append_three(" Media carga ",total_medias_cargas,f" {cat.text} ")
             if cat_value:
-                total_earnings+= cat_value
+                total_earnings += cat_value
                 append_three(f" {cat.text} ",cat_value," Entradas ")
         
         others_total = List_Of_Others.objects\
+            .filter(order__status=4)\
             .filter(order__last_modified_at__month=month)\
             .filter(order__last_modified_at__year=year)\
             .aggregate(total=Sum(F("price")))["total"]
@@ -189,12 +192,13 @@ def spending_info(request,page=1):
     cat = [each["category"] for each in Spending_movements.objects.values("category").distinct().all()]
     movements = Spending_movements.objects.all().order_by("-id")
     paginator = Paginator(movements, 15)
+    print([thing for thing in paginator.get_page(1)])
     if page < 1:
         page = 1
     if page > paginator.num_pages:
         page = paginator.num_pages
     movements = [
-        {
+        {"id":movement.id,
         "concept": movement.category,
         "cardPayment": movement.card_payment,
         "due": movement.amount,

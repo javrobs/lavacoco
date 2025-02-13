@@ -21,6 +21,8 @@ urlpatterns = [
 
     path('dryclean_payment/',payments.dryclean_payment),
     path('spending_payment/',payments.spending_payment),
+    path('edit_spending/',payments.edit_spending),
+    path('edit_drycleaning/',payments.edit_drycleaning),
     
     path('home_info/',loaders.home_info),
     path('faq_info/',loaders.faq_info),
