@@ -23,22 +23,19 @@ export default function App(){
     const [user,setUser] = useState(null);
     const [initialized,setInitialized] = useState(false);
     
+    
+
     useEffect(()=>{getUserInfo()},[]);
     
-
+   
     
 
-    function getUserInfo(){
-        return new Promise((resolve) => {
-            // Simulate context update or fetch user data
-        fetch("/api/load_user/")
-        .then(response=>response.json())
-        .then(data=>{
-            setUser(data);
-            setInitialized(true);
-            console.log(data,"user data changed");
-            resolve();
-        });})
+    async function getUserInfo(){
+        const response = await fetch("/api/load_user/");
+        const data = await response.json();
+        setUser(data);
+        setInitialized(true);
+        console.log(data,"user data changed");
     }
 
     const router = createBrowserRouter([ 
