@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models import Sum, F
 from datetime import date
 from django.utils import timezone
+from django.core.validators import MinValueValidator,MaxValueValidator
 import datetime
 
 # Create your models here.
@@ -178,5 +179,12 @@ class FAQ(models.Model):
     question = models.TextField()
     answer = models.TextField()
     logged_only = models.BooleanField(default=False)
+
+
+class Countries(models.Model):
+    name = models.TextField(unique=True)
+    country_code = models.DecimalField(max_digits=3, decimal_places=0)
+    unicode_1 = models.SmallIntegerField(validators=[MinValueValidator(62),MaxValueValidator(87)])
+    unicode_2 = models.SmallIntegerField(validators=[MinValueValidator(62),MaxValueValidator(87)])
 
 
