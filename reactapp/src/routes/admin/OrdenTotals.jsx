@@ -41,15 +41,20 @@ const OrdenTotals = ({edit,prices,functions,order}) => {
                 <div className="col-span-1 p-1">Importe</div>
             </div>
             {arrayOfThings}
-            {i == 0 && (edit || order.mediaCarga) && <div className="grid grid-cols-4 sm:grid-cols-6">
+            {i == 0 && (edit || order.mediaCarga>0) && <div className="grid grid-cols-4 sm:grid-cols-6">
                 {edit?<>
-                    <label className="col-span-2 p-1 sm:col-span-4 flex items-center gap-1"><input className="accent-sky-600" type='checkbox' checked={order.mediaCarga} name='half-load' onChange={functions.handleMediaCarga}/>Media carga?</label>
-                    {order.mediaCarga && <><div className="p-1">1</div><div className="p-1">$ 50</div></>}
+                    <label className="col-span-2 p-1 sm:col-span-4 flex items-center gap-1">
+                        <input className="accent-sky-600" type='checkbox' checked={order.mediaCarga} name='half-load' onChange={functions.handleMediaCarga}/>Media carga?
+                    </label>
+                    {order.mediaCarga>0 && 
+                        <><div className="p-1">1</div>
+                        <div className="p-1">$ {order.mediaCarga}</div></>
+                    }
                     </>:
                     <>
                         <div className="col-span-2 p-1 sm:col-span-4">Media carga</div>
                         <div className="p-1">1</div>
-                        <div className="p-1">$ 50</div>
+                        <div className="p-1">$ {order.mediaCarga}</div>
                     </>
                 }
             </div>}
@@ -95,7 +100,7 @@ const Total = ({order, functions, edit}) => {
             agg[0] + value.qty * value.price_due, 
             agg[1] + value.qty * value.price_dryclean_due
         ];
-    },[mediaCarga? 50: 0,0]);
+    },[mediaCarga,0]);
 
     total += others.reduce((agg,each)=>agg + Number(each.price),0);
 

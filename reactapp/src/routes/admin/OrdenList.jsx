@@ -8,7 +8,7 @@ import Notify from "../../components/Notify.jsx";
 import OrdenTotals from "./OrdenTotals.jsx";
 
 const OrderList = () => {
-    const {order,order_list,prices,others_start,others_tinto} = useLoaderData();
+    const {order,order_list,prices,others_start,others_tinto,half_price} = useLoaderData();
     
     const priceList = Object.values(prices).reduce((prev,value)=>{
         return {...prev,...value.prices}
@@ -76,7 +76,7 @@ const OrderList = () => {
                 })
             },
             deleteOther : (index)=>{setSendState(oldValue=>({...oldValue,others: oldValue.others.filter((_,i)=>i!=index)}))},
-            handleMediaCarga : ()=>{setSendState(oldValue=>({...oldValue,mediaCarga:!oldValue.mediaCarga}))}
+            handleMediaCarga : ()=>{setSendState(oldValue=>({...oldValue,mediaCarga:oldValue.mediaCarga?0:half_price}))}
         }
     }
 
@@ -223,7 +223,7 @@ const OrderList = () => {
     
     const total = Object.values(sendState.orderList).reduce((agg,value)=>{
         return agg + value.qty*value.price_due;
-    },sendState.mediaCarga? 50: 0) + sendState.others.reduce((agg,each) => {
+    },sendState.mediaCarga) + sendState.others.reduce((agg,each) => {
         return agg + Number(each.price);
     },0)
 
@@ -242,7 +242,8 @@ const OrderList = () => {
                         prices={prices} 
                         edit={true} 
                         order={sendState} 
-                        functions={functions()}/>
+                        functions={functions()}
+                        half_price={half_price}/>
                     <div className="flex flex-wrap justify-center gap-2">
                         <button onClick={sendReturn} type="button" name="save-and-return" className="flex items-center gap-1 btn-back">Guardar<Icon icon="save"/></button>
                         <button type="button" className="flex items-center gap-1 btn-go" onClick={sendFinish}>Guardar y terminar<Icon icon="shopping_cart_checkout"/></button>
