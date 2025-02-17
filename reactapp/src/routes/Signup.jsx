@@ -5,6 +5,7 @@ import Icon from "../components/Icon.jsx"
 import ErrorMessage from "../components/ErrorMessage.jsx"
 import cookieCutter from "../utils/cookieCutter.js"
 import HoverInput from "../components/HoverInput.jsx"
+import HoverSelect from "../components/HoverSelect.jsx"
 
 export default function Signup({admin}){
 
@@ -85,10 +86,20 @@ export default function Signup({admin}){
             <ErrorMessage errorContent={signupFailed}/>
         </div>}
         <div className="grid sm:grid-cols-2 gap-1 mx-6">
-            {!admin&&<p className='text-left sm:col-span-2 -mx-3'>Lleva seguimiento de tus órdenes y accede al programa de cliente frecuente.</p>}
-            <HoverInput label="Teléfono" className='sm:col-span-2'>
-                <input type="tel" pattern='[0-9]{10}' required value={signupState.username||""} onInput={phoneInputChange} name="username"/>
-            </HoverInput>
+            {!admin && 
+            <p className='text-left sm:col-span-2 -mx-3'>Lleva seguimiento de tus órdenes y accede al programa de cliente frecuente.</p>}
+            <div className="flex sm:col-span-2">
+                <HoverSelect className="w-20" label="País">
+                    <select value="MX" className="!rounded-e-none">
+                        <option value="MX">{"\u{1F1F2}\u{1F1FD}"}</option>
+                        <option value="US">{"\u{1F1FA}\u{1F1F8}"}</option>
+                        <option value="CA">{"\u{1F1E8}\u{1F1E6}"}</option>
+                    </select>
+                </HoverSelect>
+                <HoverInput className="grow" label="Teléfono">
+                    <input className="!rounded-s-none" type="tel" pattern='[0-9]{10}' required value={signupState.username||""} onInput={phoneInputChange} name="username"/>
+                </HoverInput>
+            </div>
             <HoverInput label="Nombre">
                 <input required value={signupState.first_name||""} onInput={handleChange} name="first_name"/>
             </HoverInput>
