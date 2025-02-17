@@ -43,6 +43,7 @@ def price_info(request):
     result["prices"] = [model_to_dict(cat)|{"prices":list(cat.price_set.values(*list_of_prices))} 
                             for cat in categories]
     if admin:
+        result["prices"][0]['prices'].append({"text":"Media carga","price":Half_Load_Price.get_price(),"price_dryclean":0,"id":"mc"})
         return JsonResponse(result)
     bed = model_to_dict(Category.objects.get(id=4))|{"Sábana":[],"Cobertor":[],"Edredón":[]}
     for p in Price.objects.filter(category=4).values("text","price"):
@@ -87,6 +88,7 @@ def order_info(request,order_id):
                 }
                 for cat in Category.objects.all()
             }
+            result["half_price"] = Half_Load_Price.get_price()
             result["others_tinto"] = order.tinto_others or 0
             result["others_start"] = list(order.list_of_others_set.values("concept","price"))
             return JsonResponse(result)
