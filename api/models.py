@@ -50,7 +50,7 @@ class Order(models.Model):
     priority = models.BooleanField(default = False)
     last_modified_at = models.DateTimeField(auto_now=True)
     status = models.IntegerField(choices = status_choices, default=0)
-    has_half = models.BooleanField(default = False)
+    has_half = models.SmallIntegerField(default = 0)
     pick_up_at_home = models.BooleanField(default = False)
     card_payment = models.BooleanField(default = False)
     tinto_others = models.IntegerField(blank = True, null = True)
@@ -156,6 +156,23 @@ class List_Of_Others(models.Model):
     order = models.ForeignKey(Order, on_delete = models.CASCADE)
     concept = models.TextField(max_length=100)
     price = models.SmallIntegerField()
+
+class Half_Load_Price(models.Model):
+    price = models.SmallIntegerField()
+
+    @staticmethod
+    def set_price(pass_price):
+        half_load,_ = Half_Load_Price.objects.get_or_create(id=1,defaults={"price":pass_price})
+        half_load.price = pass_price
+        half_load.save()
+        return True
+
+    @staticmethod
+    def get_price():
+        try:
+            return Half_Load_Price.objects.get(id=1).price
+        except:
+            return 0
 
 class FAQ(models.Model):
     question = models.TextField()
