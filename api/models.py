@@ -50,7 +50,7 @@ class Order(models.Model):
     priority = models.BooleanField(default = False)
     last_modified_at = models.DateTimeField(auto_now=True)
     status = models.IntegerField(choices = status_choices, default=0)
-    has_half = models.BooleanField(default = False)
+    has_half = models.SmallIntegerField(default = 0)
     pick_up_at_home = models.BooleanField(default = False)
     card_payment = models.BooleanField(default = False)
     tinto_others = models.IntegerField(blank = True, null = True)
