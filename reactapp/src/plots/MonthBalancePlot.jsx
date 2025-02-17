@@ -40,7 +40,7 @@ const MonthBalancePlot = ({report}) => {
     const layout = {
         height:"500",
         paper_bgcolor:"#0000",
-        sunburstcolorway:["#d66819","#2e80c2"],
+        sunburstcolorway:["#00a6f4","#ED5900"],
         margin: {l:0,r:0,t:0,b:0}
     };
 

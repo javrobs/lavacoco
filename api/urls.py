@@ -4,6 +4,7 @@ from . import loaders
 from . import logins
 from . import payments
 from . import prices
+from . import reports
 
 urlpatterns = [
     path('login_user/',logins.login_user),
@@ -23,6 +24,10 @@ urlpatterns = [
     path('spending_payment/',payments.spending_payment),
     path('edit_spending/',payments.edit_spending),
     path('edit_drycleaning/',payments.edit_drycleaning),
+
+    path('reports_info/',reports.month_year_info),
+    path('reports_info/<int:month>/<int:year>/',reports.month_year_info),
+    path('income_report_info',reports.income_report_info),
     
     path('home_info/',loaders.home_info),
     path('faq_info/',loaders.faq_info),
@@ -31,8 +36,6 @@ urlpatterns = [
     path('order_info/<int:order_id>/',loaders.order_info),
     path('drycleaning_info/',loaders.drycleaning_info),
     path('drycleaning_info/<int:page>/',loaders.drycleaning_info),
-    path('reports_info/',loaders.reports_info),
-    path('reports_info/<int:month>/<int:year>/',loaders.reports_info),
     path('spending_info/',loaders.spending_info),
     path('spending_info/<int:page>/',loaders.spending_info),
     path('laundry_machines_info/',loaders.laundry_machines_info),
