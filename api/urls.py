@@ -30,6 +30,7 @@ urlpatterns = [
     path('income_report_info',reports.income_report_info),
     
     path('home_info/',loaders.home_info),
+    path('signup_info/',loaders.signup_info),
     path('faq_info/',loaders.faq_info),
     path('price_info/',loaders.price_info),
     path('create_order_info/',loaders.create_order_info),

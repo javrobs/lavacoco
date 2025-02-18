@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 
 
-month_names = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+
 
 def home_info(request):
     user = request.user
@@ -18,7 +18,7 @@ def home_info(request):
         return JsonResponse({"success":True})
     if user.is_superuser:
         result = {"success":True}
-        result["orders"] = [model_to_dict(order)|{"date":order.date_as_string(),"user":order.user.get_full_name(),"phone":order.user.username} for order in Order.objects.filter(status__lte=4).order_by("date")]
+        result["orders"] = [model_to_dict(order)|{"date":order.date_as_string(),"user":order.user.get_full_name(),"phone":Country_code.extend_phone(order.user)} for order in Order.objects.filter(status__lte=4).order_by("date")]
         result["status_strings"] = ["Nueva","Abierta","Cerrada","Lista","Terminada"]
         return JsonResponse(result)
     else:
@@ -31,6 +31,16 @@ def home_info(request):
             result["cliente_freq"] = 5 if order_query.exists() else 0
     return JsonResponse(result)
 
+
+def signup_info(request):
+    try:
+        result = {"success":True}
+        result["codes"] = [{"id":country_code.id,
+                            "name":f"{country_code.name} (+{country_code.phone})",
+                            "code":country_code.codes()} for country_code in Country_code.objects.order_by("name").all()]
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({"success":False,"error":str(e)},status=500)
 
 def price_info(request):
     admin = request.user.is_superuser 
@@ -74,7 +84,7 @@ def order_info(request,order_id):
         admin = request.user.is_superuser
         if admin or order.user == request.user:
             result = {"success":True}
-            result["order"] = model_to_dict(order)|{"date":order.date_as_string(),"user":order.user.get_full_name(),"phone":order.user.username}
+            result["order"] = model_to_dict(order)|{"date":order.date_as_string(),"user":order.user.get_full_name(),"phone":Country_code.extend_phone(order.user)}
             result["order_list"] = {item.concept.id:{"qty":item.quantity,"price_due":item.price_due,"price_dryclean_due":item.price_dryclean_due} for item in order.list_of_order_set.all()}
             list_of_prices = ['text','price','price_dryclean','id']
             result["prices"] = {cat.id:{
