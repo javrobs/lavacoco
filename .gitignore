@@ -9,6 +9,7 @@ __pycache__/
 # Distribution / packaging
 .zip
 .Python
+.csv
 build/
 develop-eggs/
 dist/

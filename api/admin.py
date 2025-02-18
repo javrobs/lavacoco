@@ -30,6 +30,9 @@ class MovementsAdmin(admin.ModelAdmin):
 class SpendingAdmin(admin.ModelAdmin):
     list_display = ["amount","category","created_at","card_payment"]    
 
+class CountriesAdmin(admin.ModelAdmin):
+    list_display = ["name","phone","unicode_1","unicode_2"]
+
 admin.site.register(Address,AddressAdmin)
 admin.site.register(Price,PriceAdmin)
 admin.site.register(Category,CategoryAdmin)
@@ -39,4 +42,5 @@ admin.site.register(FAQ,FAQAdmin)
 admin.site.register(List_Of_Others,ListOfOthersAdmin)
 admin.site.register(Dryclean_movements,MovementsAdmin)
 admin.site.register(Spending_movements,SpendingAdmin)
+admin.site.register(Country_code,CountriesAdmin)
 # Register your models here.

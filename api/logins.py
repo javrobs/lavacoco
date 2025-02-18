@@ -50,8 +50,18 @@ def create_user(request, admin_created = False):
                 setattr(user,key,json_data.get(key))
             else:
                 return JsonResponse({"success":False,"error": "Datos incompletos"}, status=400)
-        print(user,"user saved")
         user.save()
+        country_code = json_data.get("countryCode")
+        print(country_code)
+        if country_code:
+            print(country_code)
+            try:
+                country = Country_code.objects.get(id=country_code)
+                print(country)
+                country.users.add(user)
+                print(country.users.all())
+            except Exception as e:
+                return JsonResponse({"success":False,"error": str(e)}, status=500)
         address_keys = ["calle","colonia","numero_ext"]
         new_address = Address(user = user)
         for key in address_keys:

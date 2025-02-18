@@ -1,6 +1,6 @@
-import React, {useState, useRef, useContext} from "react"
+import React, {useState, useRef, useContext, useEffect} from "react"
 import { userContext } from "../components/App.jsx"
-import {useNavigate,Link} from "react-router"
+import {useNavigate,Link, useLoaderData} from "react-router"
 import Icon from "../components/Icon.jsx"
 import ErrorMessage from "../components/ErrorMessage.jsx"
 import cookieCutter from "../utils/cookieCutter.js"
@@ -8,16 +8,35 @@ import HoverInput from "../components/HoverInput.jsx"
 import HoverSelect from "../components/HoverSelect.jsx"
 
 export default function Signup({admin}){
-
+    const {codes} = useLoaderData();
     const [signupState,setSignupState] = useState({})
     const [signupFailed,setSignupFailedState] = useState(false)
     const pw2 = useRef(null);
     const [extendAddressForm,setExtendAddressForm] = useState(false);
+    const [chooseCountryCode,setChooseCountryCode] = useState(false);
     const navigate = useNavigate();
     const {refreshFunction} = useContext(userContext);
+    const selectCountryRef = useRef(null);
 
-    function toggleAddressForm(e){
-        setExtendAddressForm(value=>value==false);
+    useEffect(()=>{
+        if(selectCountryRef.current){
+            selectCountryRef.current.focus();           
+        }},[chooseCountryCode])
+
+    function toggleAddressForm(){
+        setExtendAddressForm(value=>!value);
+    }
+
+    function toggleCountryCode(){
+        setChooseCountryCode(oldValue=>!oldValue)
+        setSignupState(oldValue => {
+            if(oldValue.countryCode){
+                const {countryCode,...others} = oldValue;
+                return others
+            } else {
+                return oldValue;
+            }
+        })
     }
 
     function verifyPW(e){
@@ -77,7 +96,9 @@ export default function Signup({admin}){
         });
     }
 
-    console.log(signupState)
+    const countryOptions = codes.map(each=>{
+        return <option key={each.id} value={each.id}>{each.name} {String.fromCodePoint(each.code[0])+String.fromCodePoint(each.code[1])}</option>
+    })
 
     return <form className="flex max-w-lg mx-auto flex-col gap-y-3 p-3 px-5 sm:mt-3 rounded-xl bubble-div justify-center text-center" onSubmit={handleSubmit}>
         <h1 className="text-center text-orange-700">{admin?"Cliente nuevo":"Regístrate"}</h1>
@@ -88,18 +109,9 @@ export default function Signup({admin}){
         <div className="grid sm:grid-cols-2 gap-1 mx-6">
             {!admin && 
             <p className='text-left sm:col-span-2 -mx-3'>Lleva seguimiento de tus órdenes y accede al programa de cliente frecuente.</p>}
-            <div className="flex sm:col-span-2">
-                <HoverSelect className="w-20" label="País">
-                    <select value="MX" className="!rounded-e-none">
-                        <option value="MX">{"\u{1F1F2}\u{1F1FD}"}</option>
-                        <option value="US">{"\u{1F1FA}\u{1F1F8}"}</option>
-                        <option value="CA">{"\u{1F1E8}\u{1F1E6}"}</option>
-                    </select>
-                </HoverSelect>
-                <HoverInput className="grow" label="Teléfono">
-                    <input className="!rounded-s-none" type="tel" pattern='[0-9]{10}' required value={signupState.username||""} onInput={phoneInputChange} name="username"/>
-                </HoverInput>
-            </div>
+            <HoverInput className="flex sm:col-span-2" label="Teléfono">
+                <input type="tel" pattern='[0-9]{10}' required value={signupState.username||""} onInput={phoneInputChange} name="username"/>
+            </HoverInput>
             <HoverInput label="Nombre">
                 <input required value={signupState.first_name||""} onInput={handleChange} name="first_name"/>
             </HoverInput>
@@ -116,6 +128,18 @@ export default function Signup({admin}){
             </>
             }
         </div>
+        <label className="flex gap-1 items-center mx-3 mt-2">
+            <input value={chooseCountryCode} onClick={toggleCountryCode} className="accent-blue-600" type='checkbox'/>
+            <div className="text-start text-nowrap">{admin?"El teléfono no es mexicano.":"Mi teléfono no es mexicano"}</div>
+            {chooseCountryCode && 
+            <HoverSelect className="grow ms-2 !mt-0 flex" label="País">
+                <select className="!mt-0" ref={selectCountryRef} value={signupState.countryCode||""} name="countryCode" onChange={handleChange}>
+                    <option value="" disabled={true}>Selecciona...</option>
+                    {countryOptions}
+                </select>
+            </HoverSelect>
+            }
+        </label>
         <label className="flex gap-1 items-start mx-3">
             <input value={extendAddressForm} onClick={toggleAddressForm} className="accent-blue-600 mt-1.5" type='checkbox'/>
             <span className="text-start">{admin?"Registrar dirección para entregas a domicilio.":"Opcional: Proporcionar mi dirección para entregas a domicilio, si están disponibles en mi zona."}</span>

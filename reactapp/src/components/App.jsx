@@ -45,7 +45,7 @@ export default function App(){
             children:[
                 {path:'/',element: <Home/>, loader:()=>defaultLoader('home')},
                 {path:'/iniciar-sesion',element:<Login/>},
-                {path:'/crear-cuenta', element:<Signup/>},
+                {path:'/crear-cuenta', element:<Signup/>,loader:()=>defaultLoader('signup')},
                 {path:"/crear-orden", element:<CrearOrden/>, loader:()=>defaultLoader('create_order')},
                 {path:"/crear-orden/:userId", element:<CrearOrden/>, loader:()=>defaultLoader('create_order')},
                 {path:"/crear-cliente", element:<Signup admin={true}/>},

@@ -181,10 +181,22 @@ class FAQ(models.Model):
     logged_only = models.BooleanField(default=False)
 
 
-class Countries(models.Model):
+class Country_code(models.Model):
     name = models.TextField(unique=True)
-    country_code = models.DecimalField(max_digits=3, decimal_places=0)
+    phone = models.DecimalField(max_digits=3, decimal_places=0)
     unicode_1 = models.SmallIntegerField(validators=[MinValueValidator(62),MaxValueValidator(87)])
     unicode_2 = models.SmallIntegerField(validators=[MinValueValidator(62),MaxValueValidator(87)])
+    users = models.ManyToManyField(User)
+
+    @staticmethod
+    def extend_phone(user):
+        country_code_user = user.country_code_set.first()
+        country_code_phone = str(country_code_user.phone) if country_code_user else "52"
+        return str(country_code_phone) + str(user.username)
+        
+
+    def codes(self):
+        return [127400 + self.unicode_1,127400 + self.unicode_2]
+    
 
 
