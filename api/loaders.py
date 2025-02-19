@@ -1,5 +1,3 @@
-
-
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from .models import *
@@ -8,8 +6,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
 from .jwt import invite_user_admin_decode, recover_password_decode
-
-
 
 
 def home_info(request):
@@ -198,7 +194,7 @@ def laundry_machines_info(request,day=None,month=None,year=None):
     def AM_PM(time):
         hours = time.hour
         minutes = str(100 + time.minute)[1:]
-        return f"{hours if hours <= 12 else hours - 12}:{minutes} {"PM" if hours >= 2 else "AM"}"
+        return f"{hours if hours <= 12 else hours - 12}:{minutes} {'PM' if hours >= 2 else 'AM'}"
     orders = [{"time":AM_PM(timezone.localtime(o.opened_datetime)),
                "id":o.id,
                "status":o.status_string(),
