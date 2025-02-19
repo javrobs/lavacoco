@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST
 import json
-from .jwt import invite_user_admin
+from .jwt import invite_user_admin,recover_password_admin
 
 import re
 from .models import *
@@ -110,7 +110,34 @@ def get_link_invite_admin(request):
         json_data = json.loads(request.body)
         user_id=json_data.get("selectUser")
         find_user = User.objects.get(id=user_id)
-        return JsonResponse({"success":True, "link":invite_user_admin(request,find_user)})
+        if find_user.password == "":
+            phone = Country_code.extend_phone(find_user)
+            link = invite_user_admin(request,find_user)
+            return JsonResponse({"success":True, 
+                                "link":link,
+                                "phone":phone,
+                                "message":f'Hola {find_user.first_name}, te invito al sitio web de lavandería coco. Regístrate aquí: {link}'})
+        
+        return JsonResponse({"success":False, "error":f"{find_user.first_name} ya tiene contraseña"},status=500)
+    except Exception as e:
+        return JsonResponse({"success":False, "error":str(e)},status=500)
+    
+
+@require_POST
+@staff_member_required
+def get_link_recover_password_admin(request):
+    try:
+        json_data = json.loads(request.body)
+        user_id=json_data.get("selectUser")
+        find_user = User.objects.get(id=user_id)
+        phone = Country_code.extend_phone(find_user)
+        if find_user.password:
+            link = recover_password_admin(request,find_user)
+            return JsonResponse({"success":True,
+                                "phone":phone,
+                                "link":recover_password_admin(request,find_user),
+                                "message":f'Hola {find_user.first_name}, recupera tu contraseña aquí: {link}'})
+        return JsonResponse({"success":False, "error":f"{find_user.first_name} no tiene contraseña"},status=500)
     except Exception as e:
         return JsonResponse({"success":False, "error":str(e)},status=500)
     
@@ -121,6 +148,27 @@ def add_password_admin_invite(request):
         print(json_data)
         user_id=json_data.get("userId")
         find_user = User.objects.get(id=user_id)
+        if find_user.password:
+            return JsonResponse({"success":False, "error": "Ya existe una contraseña"},status=400)
+        if len(json_data.get("password")) >= 8 and json_data.get("password") == json_data.get("password_2"):
+            find_user.set_password(json_data['password'])
+            find_user.save()
+            return JsonResponse({"success":True, "user_logged_in":find_user.id})
+        else:
+            return JsonResponse({"success":False,"error":"La contraseña falló."},status=400)
+    except Exception as e:
+        return JsonResponse({"success":False, "error":str(e)},status=500)
+
+    
+@require_POST
+def set_recover_password(request):
+    try:
+        json_data = json.loads(request.body)
+        print(json_data)
+        user_id=json_data.get("userId")
+        find_user = User.objects.get(id=user_id)
+        if find_user.password == "":
+            return JsonResponse({"success":False, "error": "No existe una contraseña"},status=400)
         if len(json_data.get("password")) >= 8 and json_data.get("password") == json_data.get("password_2"):
             find_user.set_password(json_data['password'])
             find_user.save()

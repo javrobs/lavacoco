@@ -7,7 +7,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
-from .jwt import invite_user_admin_decode
+from .jwt import invite_user_admin_decode, recover_password_decode
 
 
 
@@ -50,6 +50,29 @@ def signup_admin_invite_info(request,JWTInvite):
                 result["expired"] = True
                 return JsonResponse(result)
             user = User.objects.get(id=decode["user"])
+            if user.password:
+                return JsonResponse({"success":False,"error":"El usuario ya tiene contraseña"},error=500)
+            result["user_info"] = {"first_name":user.first_name,
+                    "last_name": user.last_name,
+                    "username":user.username,
+                    "id":user.id}
+            return JsonResponse(result)
+        except Exception as e:
+            print(e)
+            return JsonResponse({"success":False,"error":str(e)},error=500)
+    return JsonResponse({"success":False},error=500)
+
+def recover_pw_info(request,JWTInvite):
+    if request.user.is_anonymous:
+        try:
+            result = {"success":True}
+            decode = recover_password_decode(JWTInvite)
+            if decode["expired"]:
+                result["expired"] = True
+                return JsonResponse(result)
+            user = User.objects.get(id=decode["user"])
+            if user.password == "":
+                return JsonResponse({"success":False,"error":"El usuario no tiene contraseña"},error=500)
             result["user_info"] = {"first_name":user.first_name,
                     "last_name": user.last_name,
                     "username":user.username,
@@ -186,7 +209,7 @@ def laundry_machines_info(request,day=None,month=None,year=None):
 def clients_info(request):
     try:
         result = {"success":True}
-        result["clients"] = [{"id":user.id,"name":user.get_full_name(),"phone":Country_code.extend_phone(user)} for user in User.objects.filter(password="",is_staff=False)]
+        result["clients"] = [{"id":user.id,"name":user.get_full_name(),"has_password":bool(user.password)} for user in User.objects.filter(is_staff=False).order_by("first_name")]
         return JsonResponse(result) 
     except Exception as e:
         return JsonResponse({"success":False,"error":str(e)},status=400)

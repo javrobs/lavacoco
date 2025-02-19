@@ -63,6 +63,7 @@ export default function App(){
                 {path:"/lavadoras/:day/:month/:year",element:<Lavadoras/>,loader:({params})=>defaultLoader('laundry_machines',params.day,params.month,params.year)},
                 {path:"/clientes",element:<Clientes/>,loader:()=>defaultLoader('clients')},
                 {path:"/invitacion-admin/:JWTinvite",element:<RegisterPassword/>,loader:({params})=>defaultLoader('signup_admin_invite',params.JWTinvite)},
+                {path:"/recuperar-contrasena/:JWTinvite",element:<RegisterPassword recover={true}/>,loader:({params})=>defaultLoader('recover_pw',params.JWTinvite)},
             ],
             errorElement: <ErrorComponent/>
         }

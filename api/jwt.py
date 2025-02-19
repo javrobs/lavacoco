@@ -14,10 +14,23 @@ def invite_user_admin(request,user):
     encode_user = jwt.encode({"user":user.id,"type":"admin_invite","exp":timezone.now()+datetime.timedelta(hours=3)},key=SECRET_KEY,algorithm="HS256")
     return root_url(request) + "/invitacion-admin/" + encode_user
 
+def recover_password_admin(request,user):
+    encode_user = jwt.encode({"user":user.id,"type":"recover_password","exp":timezone.now()+datetime.timedelta(hours=3)},key=SECRET_KEY,algorithm="HS256")
+    return root_url(request) + "/recuperar-contrasena/" + encode_user
+
 def invite_user_admin_decode(code):
     try:
         decode = jwt.decode(code,SECRET_KEY,algorithms=["HS256"])
         if decode['type'] == "admin_invite":
+            return {"expired": decode["exp"] < time.time(), "user": decode['user']}
+    except jwt.exceptions.ExpiredSignatureError:
+        return {"expired":True}
+    return False
+
+def recover_password_decode(code):
+    try:
+        decode = jwt.decode(code,SECRET_KEY,algorithms=["HS256"])
+        if decode['type'] == "recover_password":
             return {"expired": decode["exp"] < time.time(), "user": decode['user']}
     except jwt.exceptions.ExpiredSignatureError:
         return {"expired":True}

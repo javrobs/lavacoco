@@ -14,6 +14,7 @@ urls_anonymous_only = [
     'iniciar-sesion/',
     'crear-cuenta/',
     'invitacion-admin/<str:JWTinvite>/',
+    'recuperar-contrasena/<str:JWTinvite>/',
 ]
 
 urls_admin_only = [

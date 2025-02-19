@@ -61,7 +61,7 @@ const AdminUser = () => {
                         <Icon icon={each}/>
                     </SubMenuButton>
                 })}
-        </div>
+            </div>
             <Orders statusValue={selectStatus} setNotify={setNotify} loaderData={loaderData} promoteOrder={promoteOrder}/>
             <Notify {...notify}/>
         </div>
