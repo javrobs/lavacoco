@@ -36,6 +36,7 @@ const MiniMenu = () => {
         {to:'/reportes',text:'Reportes', icon:'savings'},
         {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'},
         {to:'/preguntas-frecuentes',text:'Preguntas frecuentes', icon:'help'},
+        {to:'/clientes',text:'Clientes', icon:'groups'}
     ]
 
     const links = (user.logged_in?

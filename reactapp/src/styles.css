@@ -241,3 +241,8 @@ input.no-arrow[type=number] {
 .scrollbar-thin{
     scrollbar-width: thin;
 }
+
+
+.icon-full{
+    font-variation-settings: 'FILL' 1;
+}

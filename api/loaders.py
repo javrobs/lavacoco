@@ -7,6 +7,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
+from .jwt import invite_user_admin_decode
 
 
 
@@ -34,13 +35,30 @@ def home_info(request):
 
 def signup_info(request):
     try:
-        result = {"success":True}
-        result["codes"] = [{"id":country_code.id,
-                            "name":f"{country_code.name} (+{country_code.phone})",
-                            "code":country_code.codes()} for country_code in Country_code.objects.order_by("name").all()]
+        result = {"success":True,"codes":Country_code.all_country_codes()}
         return JsonResponse(result)
     except Exception as e:
         return JsonResponse({"success":False,"error":str(e)},status=500)
+    
+    
+def signup_admin_invite_info(request,JWTInvite):
+    if request.user.is_anonymous:
+        try:
+            result = {"success":True}
+            decode = invite_user_admin_decode(JWTInvite)
+            if decode["expired"]:
+                result["expired"] = True
+                return JsonResponse(result)
+            user = User.objects.get(id=decode["user"])
+            result["user_info"] = {"first_name":user.first_name,
+                    "last_name": user.last_name,
+                    "username":user.username,
+                    "id":user.id}
+            return JsonResponse(result)
+        except Exception as e:
+            print(e)
+            return JsonResponse({"success":False,"error":str(e)},error=500)
+    return JsonResponse({"success":False},error=500)
 
 def price_info(request):
     admin = request.user.is_superuser 
@@ -163,3 +181,12 @@ def laundry_machines_info(request,day=None,month=None,year=None):
                "status":o.status_string(),
                "concept":f"Orden #{o.id} - {o.user.get_full_name()}"}for o in Order.objects.filter(opened_datetime__date=dateQuery).order_by("opened_datetime").all()]
     return JsonResponse({"success":True,"orders": orders,"dateSelected":dateQuery})
+
+@staff_member_required
+def clients_info(request):
+    try:
+        result = {"success":True}
+        result["clients"] = [{"id":user.id,"name":user.get_full_name(),"phone":Country_code.extend_phone(user)} for user in User.objects.filter(password="",is_staff=False)]
+        return JsonResponse(result) 
+    except Exception as e:
+        return JsonResponse({"success":False,"error":str(e)},status=400)

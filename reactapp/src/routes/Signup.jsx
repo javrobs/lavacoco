@@ -11,7 +11,6 @@ export default function Signup({admin}){
     const {codes} = useLoaderData();
     const [signupState,setSignupState] = useState({})
     const [signupFailed,setSignupFailedState] = useState(false)
-    const pw2 = useRef(null);
     const [extendAddressForm,setExtendAddressForm] = useState(false);
     const [chooseCountryCode,setChooseCountryCode] = useState(false);
     const navigate = useNavigate();
@@ -39,17 +38,7 @@ export default function Signup({admin}){
         })
     }
 
-    function verifyPW(e){
-        const {value} = e.target;
-        handleChange(e);
-        pw2.current.setCustomValidity(signupState.password_2 != value?'Las contraseñas no coinciden':"");
-    }
-
-    function verifyPW2(e){
-        const {value} = e.target;
-        handleChange(e);
-        pw2.current.setCustomValidity(signupState.password != value?'Las contraseñas no coinciden':"");  
-    }
+    
     
 
     function phoneInputChange(e){
@@ -118,18 +107,10 @@ export default function Signup({admin}){
             <HoverInput label="Apellido">
                 <input required value={signupState.last_name||""} onInput={handleChange} name="last_name" />
             </HoverInput>
-            {!admin&&<>
-                <HoverInput label="Contraseña">
-                <input required value={signupState.password||""} onInput={verifyPW} name="password" type="password" minLength={8}/>
-            </HoverInput>
-            <HoverInput label="Repite la contraseña">
-                <input required ref={pw2} value={signupState.password_2||""} onInput={verifyPW2} name="password_2" type="password" />
-            </HoverInput>
-            </>
-            }
+            {!admin && <PasswordInputs signupState={signupState} handleChange={handleChange}/>}
         </div>
         <label className="flex gap-1 items-center mx-3 mt-2">
-            <input value={chooseCountryCode} onClick={toggleCountryCode} className="accent-blue-600" type='checkbox'/>
+            <input checked={chooseCountryCode} onChange={toggleCountryCode} className="accent-blue-600" type='checkbox'/>
             <div className="text-start text-nowrap">{admin?"El teléfono no es mexicano.":"Mi teléfono no es mexicano"}</div>
             {chooseCountryCode && 
             <HoverSelect className="grow ms-2 !mt-0 flex" label="País">
@@ -141,7 +122,7 @@ export default function Signup({admin}){
             }
         </label>
         <label className="flex gap-1 items-start mx-3">
-            <input value={extendAddressForm} onClick={toggleAddressForm} className="accent-blue-600 mt-1.5" type='checkbox'/>
+            <input checked={extendAddressForm} onChange={toggleAddressForm} className="accent-blue-600 mt-1.5" type='checkbox'/>
             <span className="text-start">{admin?"Registrar dirección para entregas a domicilio.":"Opcional: Proporcionar mi dirección para entregas a domicilio, si están disponibles en mi zona."}</span>
         </label>
         {extendAddressForm&&<AddressForm formState={signupState} handleChange={handleChange}/>}
@@ -185,4 +166,29 @@ export function AddressForm({handleChange,formState,notEditable}){
                 <span className="text-center sm:col-span-2">* = opcional</span>
             </div>
         </fieldset>
+}
+
+export const PasswordInputs = ({signupState,handleChange}) => {
+    const pw2 = useRef(null);
+
+    function verifyPW(e){
+        const {value} = e.target;
+        handleChange(e);
+        pw2.current.setCustomValidity(signupState.password_2 != value?'Las contraseñas no coinciden':"");
+    }
+
+    function verifyPW2(e){
+        const {value} = e.target;
+        handleChange(e);
+        pw2.current.setCustomValidity(signupState.password != value?'Las contraseñas no coinciden':"");  
+    }
+
+    return <>
+    <HoverInput label="Contraseña">
+        <input required value={signupState.password||""} onInput={verifyPW} name="password" type="password" minLength={8}/>
+    </HoverInput>
+    <HoverInput label="Repite la contraseña">
+        <input required ref={pw2} value={signupState.password_2||""} onInput={verifyPW2} name="password_2" type="password" />
+    </HoverInput>
+    </>
 }

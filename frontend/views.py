@@ -16,24 +16,28 @@ def all_users_only(request,*args):
     get_token(request)
     return render(request,"frontend/index.html")
 
-def anonymous_only(request,*args):
+def anonymous_only(request,*args,**other):
     if request.user.is_anonymous:
+        get_token(request)
         return render(request,"frontend/index.html")
     return redirect("/")
 
 @staff_member_required
 def admin_only(request,*args,**other):
+    get_token(request)
     return render(request,"frontend/index.html")
 
 @login_required
 def admin_only_report(request,month,year):
     if request.user.is_superuser:
+        get_token(request)
         return render(request,"frontend/index.html")
     return redirect("/")
 
 @login_required
 def users_only(request,*args):
     if not request.user.is_superuser:
+        get_token(request)
         return render(request,"frontend/index.html")
     return redirect("/")
 
