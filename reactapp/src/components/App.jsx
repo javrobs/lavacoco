@@ -15,6 +15,8 @@ import Tintoreria from "../routes/admin/Tintoreria.jsx"
 import Gastos from "../routes/admin/Gastos.jsx"
 import Reportes from "../routes/admin/Reportes.jsx"
 import Lavadoras from "../routes/admin/Lavadoras.jsx"
+import Clientes from "../routes/admin/Clientes.jsx"
+import RegisterPassword from "../routes/guest/RegisterPassword.jsx"
 
 export const userContext = createContext();
 
@@ -48,7 +50,7 @@ export default function App(){
                 {path:'/crear-cuenta', element:<Signup/>,loader:()=>defaultLoader('signup')},
                 {path:"/crear-orden", element:<CrearOrden/>, loader:()=>defaultLoader('create_order')},
                 {path:"/crear-orden/:userId", element:<CrearOrden/>, loader:()=>defaultLoader('create_order')},
-                {path:"/crear-cliente", element:<Signup admin={true}/>},
+                {path:"/crear-cliente", element:<Signup admin={true}/>,loader:()=>defaultLoader('signup')},
                 {path:"/configuracion", element:<Configuracion/>},
                 {path:"/gastos", element:<Gastos/>, loader:()=>defaultLoader("spending")},
                 {path:"/reportes/:month/:year", element:<Reportes/>, loader:({params})=>defaultLoader("reports",params.month,params.year)},
@@ -59,6 +61,8 @@ export default function App(){
                 {path:"/tintoreria",element:<Tintoreria/>,loader:()=>defaultLoader('drycleaning')},
                 {path:"/lavadoras",element:<Lavadoras/>,loader:()=>defaultLoader('laundry_machines')},
                 {path:"/lavadoras/:day/:month/:year",element:<Lavadoras/>,loader:({params})=>defaultLoader('laundry_machines',params.day,params.month,params.year)},
+                {path:"/clientes",element:<Clientes/>,loader:()=>defaultLoader('clients')},
+                {path:"/invitacion-admin/:JWTinvite",element:<RegisterPassword/>,loader:({params})=>defaultLoader('signup_admin_invite',params.JWTinvite)},
             ],
             errorElement: <ErrorComponent/>
         }

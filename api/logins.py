@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST
 import json
+from .jwt import invite_user_admin
 
 import re
 from .models import *
@@ -101,3 +102,30 @@ def load_user(request):
 @staff_member_required
 def create_client(request):
     return create_user(request,True)
+
+@require_POST
+@staff_member_required
+def get_link_invite_admin(request):
+    try:
+        json_data = json.loads(request.body)
+        user_id=json_data.get("selectUser")
+        find_user = User.objects.get(id=user_id)
+        return JsonResponse({"success":True, "link":invite_user_admin(request,find_user)})
+    except Exception as e:
+        return JsonResponse({"success":False, "error":str(e)},status=500)
+    
+@require_POST
+def add_password_admin_invite(request):
+    try:
+        json_data = json.loads(request.body)
+        print(json_data)
+        user_id=json_data.get("userId")
+        find_user = User.objects.get(id=user_id)
+        if len(json_data.get("password")) >= 8 and json_data.get("password") == json_data.get("password_2"):
+            find_user.set_password(json_data['password'])
+            find_user.save()
+            return JsonResponse({"success":True, "user_logged_in":find_user.id})
+        else:
+            return JsonResponse({"success":False,"error":"La contraseña falló."})
+    except Exception as e:
+        return JsonResponse({"success":False, "error":str(e)},status=500)

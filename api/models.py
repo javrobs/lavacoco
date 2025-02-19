@@ -194,6 +194,11 @@ class Country_code(models.Model):
         country_code_phone = str(country_code_user.phone) if country_code_user else "52"
         return str(country_code_phone) + str(user.username)
         
+    @staticmethod
+    def all_country_codes():
+        return [{"id":country_code.id,
+            "name":f"{country_code.name} (+{country_code.phone})",
+            "code":country_code.codes()} for country_code in Country_code.objects.order_by("name").all()]
 
     def codes(self):
         return [127400 + self.unicode_1,127400 + self.unicode_2]

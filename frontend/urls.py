@@ -12,7 +12,8 @@ urls = [
 
 urls_anonymous_only = [
     'iniciar-sesion/',
-    'crear-cuenta/'
+    'crear-cuenta/',
+    'invitacion-admin/<str:JWTinvite>/',
 ]
 
 urls_admin_only = [
@@ -24,6 +25,8 @@ urls_admin_only = [
     "reportes/",
     "lavadoras/",
     "lavadoras/<int:day>/<int:month>/<int:year>/",
+    "clientes/",
+    "reportes/<int:month>/<int:year>/",
 ]
 
 urls_all_users_only = [
@@ -43,5 +46,5 @@ urlpatterns = [*list(map(lambda x:path(x,views.main),urls)),
     *list(map(lambda x:path(x,views.anonymous_only),urls_anonymous_only)),
     *list(map(lambda x:path(x,views.users_only),urls_users_only)),
     path("orden/<int:order_id>/", views.order),
-    path("reportes/<int:month>/<int:year>/",views.admin_only)]
+]
 
