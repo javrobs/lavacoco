@@ -6,9 +6,10 @@ import ErrorMessage from "../components/ErrorMessage.jsx"
 import cookieCutter from "../utils/cookieCutter.js"
 import HoverInput from "../components/HoverInput.jsx"
 import HoverSelect from "../components/HoverSelect.jsx"
+import MiniBlueLabel from "../components/MiniBlueLabel.jsx"
 
 export default function Signup({admin}){
-    const {codes} = useLoaderData();
+    const {codes,reference_user} = useLoaderData();
     const [signupState,setSignupState] = useState({})
     const [signupFailed,setSignupFailedState] = useState(false)
     const [extendAddressForm,setExtendAddressForm] = useState(false);
@@ -59,15 +60,16 @@ export default function Signup({admin}){
     }
 
     const apiURL = admin?"/api/create_client/":"/api/signup/";
-    let afterSubmitURL = admin?'/crear-orden/':'/iniciar-sesion';
+    let afterSubmitURL = admin?'/crear-orden/':'/iniciar-sesion/';
 
     function handleSubmit(e){
         e.preventDefault();
         console.log(e);
+        const sendState = reference_user? {...signupState,reference_user_id:reference_user.id}: signupState
         fetch(apiURL,{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
-            body:JSON.stringify(signupState)
+            body:JSON.stringify(sendState)
         }).then(response=>response.json())
         .then(data=>{
             console.log(data);
@@ -91,13 +93,20 @@ export default function Signup({admin}){
 
     return <form className="flex max-w-lg mx-auto flex-col gap-y-3 p-3 px-5 sm:mt-3 rounded-xl bubble-div justify-center text-center" onSubmit={handleSubmit}>
         <h1 className="text-center text-orange-700">{admin?"Cliente nuevo":"Regístrate"}</h1>
-        
+        {reference_user && <div className="flex flex-wrap gap-3 mx-3 items-center">
+            Referencia:
+            <MiniBlueLabel icon="person" text={reference_user.name}/>
+        </div>}
         {signupFailed&&<div className="w-full">
             <ErrorMessage errorContent={signupFailed}/>
         </div>}
         <div className="grid sm:grid-cols-2 gap-1 mx-6">
             {!admin && 
-            <p className='text-left sm:col-span-2 -mx-3'>Lleva seguimiento de tus órdenes y accede al programa de cliente frecuente.</p>}
+            <p className='text-left sm:col-span-2 -mx-3'>
+                {reference_user?
+                `Recibe tu segunda carga gratis y ${reference_user.name.split(" ")[0]} recibirá una cuando finalices tu primera órden. ¡Ganar, ganar!`:
+                "Lleva seguimiento de tus órdenes y accede al programa de cliente frecuente."}
+            </p>}
             <HoverInput className="flex sm:col-span-2" label="Teléfono">
                 <input type="tel" pattern='[0-9]{10}' required value={signupState.username||""} onInput={phoneInputChange} name="username"/>
             </HoverInput>
@@ -114,7 +123,7 @@ export default function Signup({admin}){
             <div className="text-start text-nowrap">{admin?"El teléfono no es mexicano.":"Mi teléfono no es mexicano"}</div>
             {chooseCountryCode && 
             <HoverSelect className="grow ms-2 !mt-0 flex" label="País">
-                <select className="!mt-0" ref={selectCountryRef} value={signupState.countryCode||""} name="countryCode" onChange={handleChange}>
+                <select className="!mt-0" ref={selectCountryRef} value={signupState.countryCode||""} name="countryCode" onChange={handleChange} required={true}>
                     <option value="" disabled={true}>Selecciona...</option>
                     {countryOptions}
                 </select>

@@ -1,4 +1,4 @@
-import React from "react"
+import React , {useState} from "react"
 import {useLoaderData} from "react-router"
 import FrequentCustomerPlot from "../../plots/FrequentCustomerPlot.jsx"
 import Icon from "../../components/Icon.jsx"
@@ -6,10 +6,12 @@ import Icon from "../../components/Icon.jsx"
 
 const LoggedUser = ({user}) => {
     const loaderData = useLoaderData()
+    const [copied,setCopied] = useState(false);
 
     function copyLinkToClipboard(){
         navigator.clipboard.writeText(loaderData.user_link).then(()=>{
             console.log("texto copiado")
+            setCopied(true);
         },()=>{
             console.log("algo falló :(")
         })
@@ -46,9 +48,14 @@ const LoggedUser = ({user}) => {
             <div className="bubble-div-title">Invita a un amigo<Icon icon='group_add'/></div>
             <div className="p-4 flex items-stretch flex-col gap-2">
                 ¡Comparte tu enlace de lavandería coco y obtén una carga gratis con la primera visita de tu amigo!
-                <div className="rounded-md bg-slate-300 text-center flex flex-col gap-1 p-3">
+                <div className="rounded-md bg-slate-300 text-center break-words flex flex-col gap-1 p-3">
                     {loaderData.user_link}
-                    <button onClick={copyLinkToClipboard} className="btn btn-go mx-auto">Copiar enlace<Icon icon='content_copy'/></button>
+                    <button onClick={copyLinkToClipboard} className={`btn btn-go mx-auto ${copied?"!bg-lime-500 hover:!bg-lime-600":""}`}>
+                        {copied?
+                        <>Copiado<Icon icon='check'/></>:
+                        <>Copiar liga<Icon icon='content_copy'/></>
+                        }
+                    </button>
                 </div>
                 
             </div>

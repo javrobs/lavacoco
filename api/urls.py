@@ -22,7 +22,7 @@ urlpatterns = [
     path('create_order/',orders.create_order),
     path('promote_order/',orders.promote_order),
     path('save_payment_and_continue/',orders.save_payment_and_continue),
-    path('set_order_list/<int:order_id>',orders.set_order_list),
+    path('set_order_list/<int:order_id>/',orders.set_order_list),
 
     path('dryclean_payment/',payments.dryclean_payment),
     path('spending_payment/',payments.spending_payment),
@@ -31,10 +31,11 @@ urlpatterns = [
 
     path('reports_info/',reports.month_year_info),
     path('reports_info/<int:month>/<int:year>/',reports.month_year_info),
-    path('income_report_info',reports.income_report_info),
+    path('income_report_info/',reports.income_report_info),
     
     path('home_info/',loaders.home_info),
     path('signup_info/',loaders.signup_info),
+    path('signup_info/<str:JWTCode>/',loaders.signup_info),
     path('faq_info/',loaders.faq_info),
     path('price_info/',loaders.price_info),
     path('create_order_info/',loaders.create_order_info),

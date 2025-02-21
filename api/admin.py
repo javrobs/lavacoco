@@ -33,6 +33,9 @@ class SpendingAdmin(admin.ModelAdmin):
 class CountriesAdmin(admin.ModelAdmin):
     list_display = ["name","phone","unicode_1","unicode_2"]
 
+class RecommendationsAdmin(admin.ModelAdmin):
+    list_display = ['invited','reference','discount_invited','discount_reference']
+
 admin.site.register(Address,AddressAdmin)
 admin.site.register(Price,PriceAdmin)
 admin.site.register(Category,CategoryAdmin)
@@ -43,4 +46,5 @@ admin.site.register(List_Of_Others,ListOfOthersAdmin)
 admin.site.register(Dryclean_movements,MovementsAdmin)
 admin.site.register(Spending_movements,SpendingAdmin)
 admin.site.register(Country_code,CountriesAdmin)
+admin.site.register(User_recommendation,RecommendationsAdmin)
 # Register your models here.

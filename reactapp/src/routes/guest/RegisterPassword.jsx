@@ -6,6 +6,7 @@ import Icon from "../../components/Icon.jsx";
 import ExpiredJWT from "../../components/ExpiredJWT.jsx";
 import cookieCutter from "../../utils/cookieCutter.js";
 import ErrorMessage from "../../components/ErrorMessage.jsx";
+import MiniBlueLabel from "../../components/MiniBlueLabel.jsx";
 
 
 const RegisterPassword = ({recover}) => {
@@ -42,21 +43,13 @@ const RegisterPassword = ({recover}) => {
         }
     }
 
-    const title = recover? `Recupera tu contraseña`:`Hola, ${user_info.first_name}`
 
     return <MainContainer size="sm">
         <form className="bubble-div flex flex-col gap-2" onSubmit={handleSubmit}>
-            
-            <div className="flex gap-1 mb-2 flex-wrap">
-                <h1 className="text-orange-700">{title}</h1>
-                <div className="text-sm items-center ms-auto flex py-1 px-3 rounded-full bg-sky-200 text-sky-900 shadow-md">
-                    <Icon classNameExtra="text-sm icon-full text-sky-800" icon="phone"/> {user_info.username} 
-                </div>
-                <div className="text-sm items-center flex py-1 px-3 rounded-full bg-sky-200 text-sky-900 shadow-md">
-                    <Icon classNameExtra="text-sm icon-full" icon="person"/> {user_info.first_name} {user_info.last_name}
-                </div>
-            </div>
-            {!recover && <p>Inicia sesión con esta contraseña y tu número de teléfono para acceder a tus órdenes y a nuestro programa de cliente frecuente.</p>}
+            <h1 className="text-orange-700 mb-2 self-center">Hola, {user_info.first_name}</h1>
+            <p>{recover?
+            "Escribe una nueva contraseña y recupera el acceso a tu cuenta.":
+            "Inicia sesión con esta contraseña y tu número de teléfono para acceder a tus órdenes y a nuestro programa de cliente frecuente."}</p>
             <ErrorMessage errorContent={errorMessage}/>
             <div className="grid sm:grid-cols-2 gap-2">
                 <PasswordInputs signupState={signupState} handleChange={handleChange}/>
