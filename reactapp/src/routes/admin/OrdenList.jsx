@@ -8,7 +8,12 @@ import Notify from "../../components/Notify.jsx";
 import OrdenTotals from "./OrdenTotals.jsx";
 
 const OrderList = () => {
-    const {order,order_list,prices,others_start,others_tinto,half_price} = useLoaderData();
+
+    
+    // const {order,order_list,prices,others_start,others_tinto,half_price} = useLoaderData();
+    const load = useLoaderData();
+    const {order,order_list,prices,others_start,others_tinto,half_price} = load;
+    console.log(load);
     
     const priceList = Object.values(prices).reduce((prev,value)=>{
         return {...prev,...value.prices}
@@ -75,7 +80,10 @@ const OrderList = () => {
                     return oldValue;
                 })
             },
-            deleteOther : (index)=>{setSendState(oldValue=>({...oldValue,others: oldValue.others.filter((_,i)=>i!=index)}))},
+            deleteOther : (index)=>{setSendState(oldValue=>{
+                const filtered = oldValue.others.filter((_,i)=>i!=index);
+                return (filtered.length==1)?{...oldValue,othersTinto:0,others: filtered}:{...oldValue,others: filtered};
+            })},
             handleMediaCarga : ()=>{setSendState(oldValue=>({...oldValue,mediaCarga:oldValue.mediaCarga?0:half_price}))}
         }
     }
@@ -101,16 +109,14 @@ const OrderList = () => {
     useEffect(()=>{
         if(inputRef.current){
             inputRef.current.focus()
-        }},[edit]
-    );
-
-    useEffect(()=>{
-        if(sendState.others.length==1){
-            setSendState(oldValue=>({...oldValue,othersTinto:0}));
         }
-    },[sendState.others.length])
+    },[edit]);
 
-    
+    // useEffect(()=>{
+    //     if(sendState.others.length==1){
+    //         setSendState(oldValue=>({...oldValue,othersTinto:0}));
+    //     }
+    // },[sendState.others.length])
 
 
     const classNames = {};
@@ -179,7 +185,6 @@ const OrderList = () => {
     //Send info
 
     function sendFinish(){
-        // setAreYouSure(false);
         if(formRef.current.reportValidity()){
             fetcher(`/api/set_order_list/${order.id}/`,()=>{setAreYouSure(true)});
         }
