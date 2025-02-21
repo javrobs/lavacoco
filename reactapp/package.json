@@ -4,7 +4,7 @@
   "description": "App for laundry service",
   "main": "./src/index.js",
   "scripts": {
-    "test": "test",
+    "test": "jest",
     "dev": "webpack --mode development --watch"
   },
   "author": "Me",
@@ -17,10 +17,14 @@
     "react-router": "^7.0.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
     "@babel/preset-react": "^7.26.3",
     "autoprefixer": "^10.4.20",
+    "babel-jest": "^29.7.0",
     "babel-loader": "^9.2.1",
     "css-loader": "^7.1.2",
+    "jest": "^29.7.0",
     "postcss": "^8.4.49",
     "postcss-loader": "^8.1.1",
     "style-loader": "^4.0.0",
