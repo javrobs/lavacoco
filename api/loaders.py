@@ -138,6 +138,9 @@ def order_info(request,order_id):
             result["half_price"] = Half_Load_Price.get_price()
             result["others_tinto"] = order.tinto_others or 0
             result["others_start"] = list(order.list_of_others_set.values("concept","price"))
+
+            result["discounts"] = [{"id":order.user.invited.id, "type":"invited"}] if User_recommendation.objects.filter(invited=order.user).exists() else []
+            result["discounts"] += [{"id":reference.id, "type":"reference"} for reference in order.user.reference.filter(discount_invited__status=4).all()]
             return JsonResponse(result)
         else:
             return JsonResponse({"success":False,"error":"Not authorized"},status=500)
