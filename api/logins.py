@@ -1,5 +1,6 @@
 
 
+from django.db import transaction
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -33,51 +34,72 @@ def login_user(request):
 def create_user(request, admin_created = False):
     try:
         json_data = json.loads(request.body)
-        print(json_data)
-        if User.objects.filter(username = json_data["username"]).exists():
-            return JsonResponse({"success":False,"error": "El usuario ya existe"})
-        user = User()
-        if re.compile(r'[0-9]{10}').fullmatch(json_data.get("username")):
-            user.username = json_data["username"]
-        else:
-            return JsonResponse({"success":False,"error": "Datos incompletos"}, status=400)
-        if not admin_created:
-            if json_data.get("password") and json_data.get("password_2") == json_data['password']:
-                user.set_password(json_data['password'])
-            else:
-                return JsonResponse({"success":False,"error": "Error en la contraseña"}, status=403)
-        for key in ["first_name","last_name"]:
-            if json_data.get(key):
-                setattr(user,key,json_data.get(key))
-            else:
-                return JsonResponse({"success":False,"error": "Datos incompletos"}, status=400)
-        user.save()
-        country_code = json_data.get("countryCode")
-        print(country_code)
-        if country_code:
-            print(country_code)
-            try:
-                country = Country_code.objects.get(id=country_code)
-                print(country)
-                country.users.add(user)
-                print(country.users.all())
-            except Exception as e:
-                return JsonResponse({"success":False,"error": str(e)}, status=500)
-        address_keys = ["calle","colonia","numero_ext"]
-        new_address = Address(user = user)
-        for key in address_keys:
-            if json_data.get(key) and new_address:
-                setattr(new_address,key,json_data[key])
-            else:
-                new_address = None
-                return JsonResponse({"success":True, 'user_id':user.id, 'address':False})
-        address_keys_extra = ["numero_int","cp"]
-        for key in address_keys_extra:
-            if json_data.get(key):
-                setattr(new_address,key,json_data[key])
-        print(new_address)
-        new_address.save()
-        return JsonResponse({"success":True, 'user_id':user.id, "address":True})
+
+        with transaction.atomic():
+
+            if User.objects.filter(username = json_data["username"]).exists():
+                raise Exception(f"El usuario ya existe")
+            
+            if not re.compile(r'[0-9]{10}').fullmatch(json_data.get("username")):
+                raise Exception(f"Error en el teléfono")
+        
+            user = User(username=json_data["username"]) 
+            
+            if not admin_created:
+                if len(json_data.get("password")) >= 8 and json_data.get("password_2") == json_data['password']:
+                    user.set_password(json_data['password'])
+                else:
+                    raise Exception(f"Error en la contraseña")
+                
+            for key in ["first_name","last_name"]:
+                if json_data.get(key):
+                    setattr(user,key,json_data.get(key))
+                else:
+                    raise Exception(f"Datos incompletos")
+                
+            user.save()
+
+            country_code = json_data.get("countryCode")
+            if country_code:
+                try:
+                    country = Country_code.objects.get(id=country_code)
+                    country.users.add(user)
+                except Exception as e:
+                    raise Exception(f"Error asignando país: {str(e)}")
+                
+            address_keys = ["calle","colonia","numero_ext"]
+            new_address = Address(user = user)
+            for key in address_keys:
+                if json_data.get(key) and new_address:
+                    setattr(new_address,key,json_data[key])
+                else:
+                    new_address = None
+                    break
+
+            if new_address:
+                address_keys_extra = ["numero_int","cp"]
+                for key in address_keys_extra:
+                    if json_data.get(key):
+                        setattr(new_address,key,json_data[key])
+                new_address.save()
+
+            reference = json_data.get("reference_user_id")
+            if reference:
+                try:
+                    new_reference = User_recommendation(
+                        invited=user,
+                        reference=User.objects.get(id=reference)
+                    )
+                    new_reference.save()
+                except User.DoesNotExist:
+                    raise Exception("No existe el usuario de referencia")
+
+            return JsonResponse({"success": True,
+                'user_id': user.id,
+                "address": bool(new_address),
+                "country_code": bool(country_code),
+                "reference": bool(reference)})
+                
     except Exception as e:
         print(e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)

@@ -22,7 +22,6 @@ class Address(models.Model):
 
 class Category(models.Model):
     text = models.TextField(max_length=40)
-
     def __str__(self):
         return f"Categoria {self.text}"
 
@@ -203,5 +202,8 @@ class Country_code(models.Model):
     def codes(self):
         return [127400 + self.unicode_1,127400 + self.unicode_2]
     
-
-
+class User_recommendation(models.Model):
+    invited = models.OneToOneField(User, related_name="invited",  on_delete=models.CASCADE)
+    reference = models.ForeignKey(User, related_name="reference",  on_delete = models.CASCADE)
+    discount_invited = models.ForeignKey(Order, related_name="discountinvited",  null = True, on_delete = models.SET_NULL)
+    discount_reference = models.ForeignKey(Order, related_name="discountreference", null = True, on_delete = models.SET_NULL)

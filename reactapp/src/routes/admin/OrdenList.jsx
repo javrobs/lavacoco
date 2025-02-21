@@ -181,13 +181,13 @@ const OrderList = () => {
     function sendFinish(){
         // setAreYouSure(false);
         if(formRef.current.reportValidity()){
-            fetcher(`/api/set_order_list/${order.id}`,()=>{setAreYouSure(true)});
+            fetcher(`/api/set_order_list/${order.id}/`,()=>{setAreYouSure(true)});
         }
     }
     
     function sendReturn(){
         if(formRef.current.reportValidity()){
-            fetcher(`/api/set_order_list/${order.id}`,()=>{navigate("/")});
+            fetcher(`/api/set_order_list/${order.id}/`,()=>{navigate("/")});
         }
     }
 
@@ -195,10 +195,10 @@ const OrderList = () => {
         fetch("/api/promote_order/",{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
-            body:JSON.stringify({id:order.id})})
-        .then(response=>response.json())
-        .then(data=>{
-        if(data.success){
+            body:JSON.stringify({id:order.id})
+        }).then(response => response.json())
+        .then(data => {
+        if(data.success) {
             navigate("/");
         } else {
             console.log("error in promoting",id);

@@ -5,7 +5,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
-from .jwt import invite_user_admin_decode, recover_password_decode
+from .jwt import invite_user_admin_decode, recover_password_decode, invite_user_friend, invite_user_friend_decode
 
 
 def home_info(request):
@@ -19,7 +19,7 @@ def home_info(request):
         result["status_strings"] = ["Nueva","Abierta","Cerrada","Lista","Terminada"]
         return JsonResponse(result)
     else:
-        result["user_link"] = "www.google.com.mx"
+        result["user_link"] = invite_user_friend(request,user)
         result["orden_activa"] = list(user.order_set.filter(status__lte=4).order_by("-created_at").values())
         result["orden_pasada"] = []
         order_query = Order.objects.filter(user=user)
@@ -29,9 +29,12 @@ def home_info(request):
     return JsonResponse(result)
 
 
-def signup_info(request):
+def signup_info(request,JWTCode=None):
     try:
         result = {"success":True,"codes":Country_code.all_country_codes()}
+        if JWTCode:
+            ref_user = User.objects.get(id=invite_user_friend_decode(JWTCode)["user"])
+            result["reference_user"] = {"id":ref_user.id,"name": ref_user.get_full_name()}
         return JsonResponse(result)
     except Exception as e:
         return JsonResponse({"success":False,"error":str(e)},status=500)
