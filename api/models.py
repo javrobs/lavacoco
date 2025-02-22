@@ -209,3 +209,8 @@ class User_recommendation(models.Model):
     discount_reference = models.ForeignKey(Order, related_name="discountreference", blank= True, null = True, on_delete = models.SET_NULL)
     value_invited = models.SmallIntegerField(blank= True, null = True)
     value_reference = models.SmallIntegerField(blank= True, null = True)
+
+class Star_discount(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, blank= True, null = True, on_delete=models.CASCADE)
+    value = models.SmallIntegerField(blank= True, null = True)  

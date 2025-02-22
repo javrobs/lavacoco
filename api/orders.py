@@ -7,7 +7,7 @@ import datetime
 from django.utils import timezone
 
 import json
-from .models import Address,Order,Price,User_recommendation
+from .models import Address,Order,Price,User_recommendation,Star_discount
 
 
 @require_POST
@@ -91,6 +91,11 @@ def set_order_list(request,order_id):
                 rec.discount_invited = order
                 rec.value_invited = set_value
                 rec.save()
+            elif discount["type"] == "star":
+                star=Star_discount.objects.get(id=discount["id"])
+                star.order = order
+                star.value = set_value
+                star.save()
         for key,value in json_data['orderList'].items():
             price = Price.objects.get(id = key)
             order_list.create(concept = price, 
@@ -119,6 +124,9 @@ def save_payment_and_continue(request):
         order.status = 4
         total_tinto = order.tinto_movement()
         order.save()
+        order_count = order.user.order_set.filter(status=4).count()
+        if not order_count % 5:
+            order.user.star_discount_set.create()
         return JsonResponse({"success":True, "total_tinto":total_tinto})
     except Exception as e:
         print(e)

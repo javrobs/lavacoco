@@ -139,10 +139,14 @@ def order_info(request,order_id):
             result["half_price"] = Half_Load_Price.get_price()
             result["others_tinto"] = order.tinto_others or 0
             result["others_start"] = list(order.list_of_others_set.values("concept","price"))
-            result["discounts_available"] = [{"id":reference.id, "type":"recs_invite", "text":f"Invitación de {reference.reference.get_full_name()}"} for reference in User_recommendation.objects.filter(invited=order.user).filter(Q(discount_invited=order)|Q(discount_invited__isnull=True)).all()]
-            result["discounts_available"] += [{"id":reference.id, "type":"recs_reference", "text":f"Referencia de {reference.invited.get_full_name()}"} for reference in User_recommendation.objects.filter(reference=order.user,discount_invited__status=4).filter(Q(discount_reference=order)|Q(discount_reference__isnull=True)).all()]
-            result["discounts_applied"] = [{"id":reference.id, "type":"recs_invite", "text":f"Invitación de {reference.reference.get_full_name()}", "value":reference.value_invited} for reference in User_recommendation.objects.filter(discount_invited=order).all()]
-            result["discounts_applied"] += [{"id":reference.id, "type":"recs_reference", "text":f"Referencia de {reference.invited.get_full_name()}", "value":reference.value_reference} for reference in User_recommendation.objects.filter(discount_reference=order).all()]
+            result["discounts_available"] = \
+                [{"id":reference.id, "type":"recs_invite", "text":f"Invitación de {reference.reference.get_full_name()}"} for reference in User_recommendation.objects.filter(invited=order.user).filter(Q(discount_invited=order)|Q(discount_invited__isnull=True)).all()] + \
+                [{"id":reference.id, "type":"recs_reference", "text":f"Referencia de {reference.invited.get_full_name()}"} for reference in User_recommendation.objects.filter(reference=order.user,discount_invited__status=4).filter(Q(discount_reference=order)|Q(discount_reference__isnull=True)).all()] + \
+                [{"id":star.id,"type":"star","text":"Cliente frecuente"} for star in Star_discount.objects.filter(user=order.user).filter(Q(order__isnull=True)|Q(order=order)).all()]
+            result["discounts_applied"] = \
+                [{"id":reference.id, "type":"recs_invite", "text":f"Invitación de {reference.reference.get_full_name()}", "value":reference.value_invited} for reference in User_recommendation.objects.filter(discount_invited=order).all()] + \
+                [{"id":reference.id, "type":"recs_reference", "text":f"Referencia de {reference.invited.get_full_name()}", "value":reference.value_reference} for reference in User_recommendation.objects.filter(discount_reference=order).all()] + \
+                [{"id":star.id,"type":"star","text":"Cliente frecuente", "value":star.value} for star in Star_discount.objects.filter(order=order).all()]
             return JsonResponse(result)
         else:
             return JsonResponse({"success":False,"error":"Not authorized"},status=500)

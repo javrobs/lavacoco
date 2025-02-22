@@ -36,6 +36,9 @@ class CountriesAdmin(admin.ModelAdmin):
 class RecommendationsAdmin(admin.ModelAdmin):
     list_display = ['invited__first_name','reference__first_name','discount_invited','discount_reference','value_invited','value_reference']
 
+class StarAdmin(admin.ModelAdmin):
+    list_display = ["user",'order','value']
+
 admin.site.register(Address,AddressAdmin)
 admin.site.register(Price,PriceAdmin)
 admin.site.register(Category,CategoryAdmin)
@@ -47,4 +50,5 @@ admin.site.register(Dryclean_movements,MovementsAdmin)
 admin.site.register(Spending_movements,SpendingAdmin)
 admin.site.register(Country_code,CountriesAdmin)
 admin.site.register(User_recommendation,RecommendationsAdmin)
+admin.site.register(Star_discount,StarAdmin)
 # Register your models here.
