@@ -104,15 +104,6 @@ const OrdenTotals = ({edit,prices,functions,order}) => {
 const Total = ({order, functions, edit, discount}) => {
     const {orderList, mediaCarga, others, othersTinto} = order;
 
-    // const priceList = Object.values(prices).reduce((prev,value)=>{
-    //     return {...prev,...value.prices}
-    // },{})
-
-    console.log("calculating total")
-
-    // let total = ;
-    // let totalTinto = 0;
-
     let [total,totalTinto] = Object.values(orderList).reduce((agg,value)=>{
         return [
             agg[0] + value.qty * value.price_due, 
