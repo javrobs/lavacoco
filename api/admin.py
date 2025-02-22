@@ -34,7 +34,7 @@ class CountriesAdmin(admin.ModelAdmin):
     list_display = ["name","phone","unicode_1","unicode_2"]
 
 class RecommendationsAdmin(admin.ModelAdmin):
-    list_display = ['invited','reference','discount_invited','discount_reference']
+    list_display = ['invited__first_name','reference__first_name','discount_invited','discount_reference','value_invited','value_reference']
 
 admin.site.register(Address,AddressAdmin)
 admin.site.register(Price,PriceAdmin)

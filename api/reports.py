@@ -16,6 +16,7 @@ def month_year_info(request, month=timezone.localdate().month, year=timezone.loc
         result = {"success":True, 
             "report":{"labels":[],"parents":[],"values":[]}}
         total_earnings = 0
+        total_discounts = 0
         total_spending = 0
 
         def append_three(label,value,parent):
@@ -44,6 +45,22 @@ def month_year_info(request, month=timezone.localdate().month, year=timezone.loc
                 if total_medias_cargas:
                     cat_value += total_medias_cargas
                     append_three(" Media carga ",total_medias_cargas,f" {cat.text} ")
+                discounts_invited = User_recommendation.objects.filter(
+                    discount_invited__status=4,
+                    discount_invited__last_modified_at__month=month,
+                    discount_invited__last_modified_at__year=year
+                ).aggregate(Sum("value_invited"))["value_invited__sum"]
+                if discounts_invited:
+                    total_discounts += discounts_invited
+                    append_three(" Invitados ",discounts_invited," Descuentos ")
+                discounts_reference = User_recommendation.objects.filter(
+                    discount_reference__status=4,
+                    discount_reference__last_modified_at__month=month,
+                    discount_reference__last_modified_at__year=year
+                ).aggregate(Sum("value_reference"))["value_reference__sum"]
+                if discounts_reference:
+                    total_discounts += discounts_reference
+                    append_three(" Referencias ", discounts_reference," Descuentos ")
             if cat_value:
                 total_earnings += cat_value
                 append_three(f" {cat.text} ",cat_value," Entradas ")
@@ -60,7 +77,10 @@ def month_year_info(request, month=timezone.localdate().month, year=timezone.loc
             append_three(" Otros ",others_total," Entradas ")
 
         if total_earnings:
-            append_three(" Entradas ",total_earnings,f"{month_names[month - 1]} {year}")
+            append_three(" Entradas ", total_earnings, f"{month_names[month - 1]} {year}")
+
+        if total_discounts:
+            append_three(" Descuentos ", total_discounts, f"{month_names[month - 1]} {year}")
         
         # Aggregate spending
         dryclean_spending = Dryclean_movements.spending_month_year(month,year)

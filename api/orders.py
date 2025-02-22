@@ -7,7 +7,7 @@ import datetime
 from django.utils import timezone
 
 import json
-from .models import Address,Order,Price
+from .models import Address,Order,Price,User_recommendation
 
 
 @require_POST
@@ -73,6 +73,24 @@ def set_order_list(request,order_id):
         order_list = order.list_of_order_set
         order_list.all().delete()
         order.has_half = json_data['mediaCarga']
+        for discount in order.discountinvited.all():
+            discount.discount_invited = None
+            discount.save()
+        for discount in order.discountreference.all():
+            discount.discount_reference = None
+            discount.save()
+        set_value = Price.objects.get(id=1).price
+        for discount in json_data['discountsApplied']:
+            if discount["type"] == "recs_reference":
+                rec=User_recommendation.objects.get(id=discount["id"])
+                rec.discount_reference = order
+                rec.value_reference = set_value
+                rec.save()
+            elif discount["type"] == "recs_invite":
+                rec=User_recommendation.objects.get(id=discount["id"])
+                rec.discount_invited = order
+                rec.value_invited = set_value
+                rec.save()
         for key,value in json_data['orderList'].items():
             price = Price.objects.get(id = key)
             order_list.create(concept = price, 

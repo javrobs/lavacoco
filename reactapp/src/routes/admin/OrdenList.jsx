@@ -8,7 +8,9 @@ import Notify from "../../components/Notify.jsx";
 import OrdenTotals from "./OrdenTotals.jsx";
 
 const OrderList = () => {
-    const {order,order_list,prices,others_start,others_tinto,half_price} = useLoaderData();
+
+    
+    const {order,order_list,prices,others_start,others_tinto,half_price,discounts_available, discounts_applied} = useLoaderData();
     
     const priceList = Object.values(prices).reduce((prev,value)=>{
         return {...prev,...value.prices}
@@ -21,14 +23,18 @@ const OrderList = () => {
         mediaCarga: order.has_half,
         others: [...others_start, {concept: "", price: ""}],
         othersTinto: others_tinto,
+        discountsApplied: discounts_applied
         }
     );
 
     const functions = () => {
         function changeOrderList (selectKey,value){
             setSendState(oldValue => {
+                if (selectKey == 1){
+                    oldValue.discountsApplied = discounts_available.filter((each,i) => i < value - 1).map(each=>({...each,value:priceList["1"].price}));
+                }
                 if(Number(value) == 0) {
-                    const {[selectKey]:_, ...newItems} = oldValue.orderList;  
+                    const {[selectKey]:_, ...newItems} = oldValue.orderList;
                     return {...oldValue,orderList:newItems};
                 } else {
                     return {...oldValue,orderList:{...oldValue.orderList,
@@ -75,7 +81,10 @@ const OrderList = () => {
                     return oldValue;
                 })
             },
-            deleteOther : (index)=>{setSendState(oldValue=>({...oldValue,others: oldValue.others.filter((_,i)=>i!=index)}))},
+            deleteOther : (index)=>{setSendState(oldValue=>{
+                const filtered = oldValue.others.filter((_,i)=>i!=index);
+                return (filtered.length==1)?{...oldValue,othersTinto:0,others: filtered}:{...oldValue,others: filtered};
+            })},
             handleMediaCarga : ()=>{setSendState(oldValue=>({...oldValue,mediaCarga:oldValue.mediaCarga?0:half_price}))}
         }
     }
@@ -101,16 +110,8 @@ const OrderList = () => {
     useEffect(()=>{
         if(inputRef.current){
             inputRef.current.focus()
-        }},[edit]
-    );
-
-    useEffect(()=>{
-        if(sendState.others.length==1){
-            setSendState(oldValue=>({...oldValue,othersTinto:0}));
         }
-    },[sendState.others.length])
-
-    
+    },[edit]);
 
 
     const classNames = {};
@@ -179,7 +180,6 @@ const OrderList = () => {
     //Send info
 
     function sendFinish(){
-        // setAreYouSure(false);
         if(formRef.current.reportValidity()){
             fetcher(`/api/set_order_list/${order.id}/`,()=>{setAreYouSure(true)});
         }
@@ -225,7 +225,7 @@ const OrderList = () => {
         return agg + value.qty*value.price_due;
     },sendState.mediaCarga) + sendState.others.reduce((agg,each) => {
         return agg + Number(each.price);
-    },0)
+    },0) - sendState.discountsApplied.reduce((agg, each) => agg + each.value, 0);
 
     const messageToSend = `Hola ${order.user.split(" ")[0]}, el total de tu orden es de $${total}. Te avisaremos cuando tu ropa esté lista. Puedes revisar más detalles en: ${location.href} `;
 
@@ -239,7 +239,7 @@ const OrderList = () => {
                 {listMode?
                 <form ref={formRef} autoComplete="off" className="max-w-screen-md mt-3 mx-auto flex flex-col gap-2">
                     <OrdenTotals 
-                        prices={prices} 
+                        prices={prices}
                         edit={true} 
                         order={sendState} 
                         functions={functions()}

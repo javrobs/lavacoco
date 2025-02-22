@@ -6,13 +6,13 @@ import OrdenTotals from "./OrdenTotals.jsx";
 import Payment from "./Payment.jsx";
 
 const Orden = () => {
-    const loader = useLoaderData();
-    const {order} = useLoaderData();
+    const {order,prices,order_list,others_start,discounts_applied} = useLoaderData();
     const {superuser} = useContext(userContext);
 
-    const passOrder = {orderList: loader.order_list,
+    const passOrder = {orderList: order_list,
         mediaCarga: order.has_half,
-        others: loader.others_start
+        others: others_start,
+        discountsApplied:discounts_applied
         };
 
 
@@ -34,7 +34,7 @@ const Orden = () => {
                 passOrder.others.length > 0) &&
                 <OrdenTotals
                     order={passOrder}
-                    prices={loader.prices}
+                    prices={prices}
                     edit={false}
                 />}
                 

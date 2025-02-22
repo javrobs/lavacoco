@@ -2,7 +2,7 @@ import React from "react";
 import MiniIconButton from "../../components/MiniIconButton.jsx";
 
 const OrdenTotals = ({edit,prices,functions,order}) => {
-
+ 
     const othersArray = order.others.map((each,i)=>{
         console.log(each)
         return <div className="grid grid-cols-4 sm:grid-cols-6" key={`other-${i}`}>
@@ -18,6 +18,14 @@ const OrdenTotals = ({edit,prices,functions,order}) => {
                 <div className="p-1 col-span-3 sm:col-span-5">{each.concept}</div>
                 <div className="p-1">$ {each.price}</div>
             </>}
+        </div>
+    })
+
+    const discountArray = order.discountsApplied.map((each,i)=>{
+        console.log(each)
+        return <div className="grid grid-cols-4 sm:grid-cols-6" key={each.id}>
+            <div className="p-1 col-span-3 sm:col-span-5">{each.text}</div>
+            <div className="p-1">$ {each.value}</div>
         </div>
     })
 
@@ -61,7 +69,8 @@ const OrdenTotals = ({edit,prices,functions,order}) => {
         </div>
     })
 
-
+    const discountSum = order.discountsApplied.reduce((agg,each)=>agg+each.value,0);
+    
     return <>
         {listOfItems}
         {order.others.length>0 &&
@@ -73,27 +82,27 @@ const OrdenTotals = ({edit,prices,functions,order}) => {
             {othersArray}
         </div>
         }
+        {discountSum>0 &&
+        <div className="p-3 flex flex-col bg-sky-200 rounded-md shadow-md">
+        <div className="grid grid-cols-4 sm:grid-cols-6 border-b-2 border-sky-400">
+            <div className="col-span-3 sm:col-span-5 p-1 font-bold">Concepto</div>
+            <div className="col-span-1 p-1">Descuento</div>
+        </div>
+        {discountArray}
+        </div>}
         <Total
             order={order} 
             functions={functions}
             edit={edit}
+            discount={discountSum}
         /> 
     </>
 }
 
 
 
-const Total = ({order, functions, edit}) => {
+const Total = ({order, functions, edit, discount}) => {
     const {orderList, mediaCarga, others, othersTinto} = order;
-
-    // const priceList = Object.values(prices).reduce((prev,value)=>{
-    //     return {...prev,...value.prices}
-    // },{})
-
-    console.log("calculating total")
-
-    // let total = ;
-    // let totalTinto = 0;
 
     let [total,totalTinto] = Object.values(orderList).reduce((agg,value)=>{
         return [
@@ -104,19 +113,28 @@ const Total = ({order, functions, edit}) => {
 
     total += others.reduce((agg,each)=>agg + Number(each.price),0);
 
+    const totalDescontado = total - discount;
+
     return <div className="p-3 grid grid-cols-4 sm:grid-cols-6">
-        <div className={`col-span-1 sm:col-span-4 ${others.length>1?"row-span-4":"row-span-3"} text-end self-center`}></div>
-        <div className="col-span-2 sm:col-span-1 p-1 text-end">Total</div>
-        <div className="font-semibold p-1" >$ {total}</div>
+        <div className="sm:col-span-3 row-span-5 text-end self-center"></div>
+        {total==totalDescontado?<>
+            <div className="col-span-2 p-1 text-end">Total</div>
+            <div className="font-semibold p-1" >$ {total}</div>
+        </>:<>
+            <div className="col-span-2 line-through p-1 text-end text-sky-500">Total</div>
+            <div className="font-semibold p-1 line-through text-sky-500" >$ {total}</div>
+            <div className="col-span-2 p-1 text-end">Total con descuento</div>
+            <div className="font-semibold p-1" >$ {totalDescontado}</div>
+        </>}
         {edit && <>
-        <div className="col-span-2 sm:col-span-1 text-nowrap p-1 text-end text-orange-800">- Tintorería</div>
+        <div className="col-span-2 text-nowrap p-1 text-end text-orange-800">- Tintorería</div>
         <div className="font-semibold text-orange-700 p-1">$ {totalTinto}</div>
         {others.length>1 && <>
-        <div className="col-span-2 sm:col-span-1 text-nowrap p-1 text-end text-orange-800">- Tinto (otros)</div>
+        <div className="col-span-2 text-nowrap p-1 text-end text-orange-800">- Tinto (otros)</div>
         <div className="p-1 flex gap-1 font-semibold text-orange-700">$ <input className="font-semibold no-arrow text-orange-700 !py-0 !px-2 !h-auto" type="number" onChange={functions.othersTintoHandle} value={othersTinto||""}/></div>  
         </>}  
-        <div className="col-span-2 sm:col-span-1 text-nowrap border-t-2 border-black text-end p-1">Total Neto</div>
-        <div className="font-semibold border-t-2 border-black p-1">$ {total-totalTinto-othersTinto}</div> 
+        <div className="col-span-2 text-nowrap border-t-2 border-black text-end p-1">Total Neto</div>
+        <div className="font-semibold border-t-2 border-black p-1">$ {totalDescontado-totalTinto-othersTinto}</div> 
         </>}
     </div>
 }
