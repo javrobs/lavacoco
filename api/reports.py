@@ -1,5 +1,5 @@
 
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Count
 from .models import *
 import time
 from django.http import JsonResponse
@@ -32,10 +32,10 @@ def month_year_info(request, month=timezone.localdate().month, year=timezone.loc
                         order__status=4,
                         order__last_modified_at__month=month,
                         order__last_modified_at__year=year
-                    ).aggregate(total=Sum(F("price_due")*F("quantity")))["total"]
-                if agg:
-                    cat_value += agg
-                    append_three(f" {price.text} ",agg,f" {cat.text} ")
+                    ).aggregate(total=Sum(F("price_due")*F("quantity")),count=Sum("quantity"))
+                if agg["total"]:
+                    cat_value += agg["total"]
+                    append_three(f" {price.text} ({agg["count"]}) ",agg["total"],f" {cat.text} ")
             if cat.text == "Lavandería":
                 total_medias_cargas = Order.objects.filter(
                     status=4,
@@ -45,22 +45,7 @@ def month_year_info(request, month=timezone.localdate().month, year=timezone.loc
                 if total_medias_cargas:
                     cat_value += total_medias_cargas
                     append_three(" Media carga ",total_medias_cargas,f" {cat.text} ")
-                discounts_invited = User_recommendation.objects.filter(
-                    discount_invited__status=4,
-                    discount_invited__last_modified_at__month=month,
-                    discount_invited__last_modified_at__year=year
-                ).aggregate(Sum("value_invited"))["value_invited__sum"]
-                if discounts_invited:
-                    total_discounts += discounts_invited
-                    append_three(" Invitados ",discounts_invited," Descuentos ")
-                discounts_reference = User_recommendation.objects.filter(
-                    discount_reference__status=4,
-                    discount_reference__last_modified_at__month=month,
-                    discount_reference__last_modified_at__year=year
-                ).aggregate(Sum("value_reference"))["value_reference__sum"]
-                if discounts_reference:
-                    total_discounts += discounts_reference
-                    append_three(" Referencias ", discounts_reference," Descuentos ")
+                
             if cat_value:
                 total_earnings += cat_value
                 append_three(f" {cat.text} ",cat_value," Entradas ")
@@ -71,13 +56,42 @@ def month_year_info(request, month=timezone.localdate().month, year=timezone.loc
                 order__last_modified_at__month=month,
                 order__last_modified_at__year=year
             ).aggregate(total=Sum(F("price")))["total"]
-        
+
         if others_total:
             total_earnings += others_total
             append_three(" Otros ",others_total," Entradas ")
 
         if total_earnings:
             append_three(" Entradas ", total_earnings, f"{month_names[month - 1]} {year}")
+
+        # Aggregate discounts
+        discounts_invited = User_recommendation.objects.filter(
+            discount_invited__status=4,
+            discount_invited__last_modified_at__month=month,
+            discount_invited__last_modified_at__year=year
+        ).aggregate(Sum("value_invited"),Count("value_invited"))
+        if discounts_invited["value_invited__sum"]:
+            total_discounts += discounts_invited["value_invited__sum"]
+            append_three(f" Invitados ({discounts_invited['value_invited__count']})",discounts_invited["value_invited__sum"]," Descuentos ")
+
+        discounts_reference = User_recommendation.objects.filter(
+            discount_reference__status=4,
+            discount_reference__last_modified_at__month=month,
+            discount_reference__last_modified_at__year=year
+        ).aggregate(Sum("value_reference"),Count("value_reference"))
+        if discounts_reference["value_reference__sum"]:
+            total_discounts += discounts_reference["value_reference__sum"]
+            append_three(f" Referencias ({discounts_reference["value_reference__count"]})", discounts_reference["value_reference__sum"]," Descuentos ")
+
+        discounts_stars = Star_discount.objects.filter(
+            order__status=4,
+            order__last_modified_at__month=month,
+            order__last_modified_at__year=year
+        ).aggregate(Sum("value"),Count("value"))
+        print(discounts_stars)
+        if discounts_stars["value__sum"]:
+            total_discounts += discounts_stars["value__sum"]
+            append_three(f" Cliente frecuente ({discounts_stars['value__count']}) ", discounts_stars["value__sum"]," Descuentos ")
 
         if total_discounts:
             append_three(" Descuentos ", total_discounts, f"{month_names[month - 1]} {year}")
