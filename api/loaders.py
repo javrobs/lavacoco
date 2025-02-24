@@ -9,7 +9,7 @@ from django.utils import timezone
 from .jwt import invite_user_admin_decode, recover_password_decode, invite_user_friend, invite_user_friend_decode
 
 
-def home_info(request):
+def home_info(request, page = 1):
     user = request.user
     result = {}
     if user.is_anonymous:
@@ -20,11 +20,30 @@ def home_info(request):
         result["status_strings"] = ["Nueva","Abierta","Cerrada","Lista","Terminada"]
         return JsonResponse(result)
     else:
+        result = {"success":True}
         result["user_link"] = invite_user_friend(request,user)
-        result["orden_activa"] = list(user.order_set.filter(status__lte=4).order_by("-created_at").values())
-        result["orden_pasada"] = []
-        order_query = Order.objects.filter(user=user)
-        result["cliente_freq"] = order_query.count()%5
+        result["ordenes_activas"] = [{"id":order.id,
+            "price":order.earnings()-order.discounts(),
+            "status":order.status,
+            "date":order.date.strftime("%d-%m-%y"),
+            "status_string":order.status_string()} for order 
+            in user.order_set.filter(status__lt=4).order_by("-last_modified_at").all()]
+        ordenes_pasivas = user.order_set.filter(status=4).order_by("-last_modified_at").all()
+        paginator = Paginator(ordenes_pasivas,4)
+        if page < 1:
+            page = 1
+        if page > paginator.num_pages:
+            page = paginator.num_pages
+        result["ordenes_pasivas"] = [{"id":order.id,
+            "price":order.earnings() - order.discounts(),
+            "status":order.status,
+            "date":order.last_modified_at.strftime("%d-%m-%y"),
+            "status_string":order.status_string()} for order 
+            in paginator.get_page(page)]
+        result['page'] = page
+        result['num_pages'] = paginator.num_pages
+        order_query = user.order_set.filter(status=4)
+        result["cliente_freq"] = order_query.count() % 5
         if result["cliente_freq"] == 0:
             result["cliente_freq"] = 5 if order_query.exists() else 0
     return JsonResponse(result)
