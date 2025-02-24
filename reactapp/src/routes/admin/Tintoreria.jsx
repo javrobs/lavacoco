@@ -81,6 +81,7 @@ const Tintoreria = () => {
                 fetchURL="/api/edit_drycleaning/" 
                 setMovementState={setMovementState}
                 refreshState={refreshState}
+                loader="drycleaning"
             />
         </div>
     </main>

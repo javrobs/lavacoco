@@ -105,7 +105,8 @@ const Gastos = () => {
                     movementState={movementState} 
                     fetchURL="/api/edit_spending/" 
                     setMovementState={setMovementState} 
-                    refreshState={refreshState} 
+                    refreshState={refreshState}
+                    loader="spending"
                 />
             </div>
         </main>

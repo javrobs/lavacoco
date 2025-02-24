@@ -1,14 +1,13 @@
 import React,{useEffect, useRef, useState} from "react";
 import MiniIconButton from "./MiniIconButton.jsx";
 import { Link } from "react-router";
-import defaultLoader from "../utils/defaultLoader.js";
 import Icon from "./Icon.jsx";
 import cookieCutter from "../utils/cookieCutter.js";
+import Paginator from "./Paginator.jsx";
 
-const ListOfPayments = ({movementState,setMovementState,loader,refreshState, fetchURL}) => {
+const ListOfPayments = ({movementState, setMovementState, loader, refreshState, fetchURL}) => {
     const {movements} = movementState;
     const [edit,setEdit] = useState({});
-    const pageInput = useRef(null);
     const editInput = useRef(null);
 
     useEffect(()=>{
@@ -16,7 +15,7 @@ const ListOfPayments = ({movementState,setMovementState,loader,refreshState, fet
             editInput.current.focus();
     }},[edit])
     
-    const saveEdits = async (e) => {
+    const saveEdits = async () => {
         const response = await fetch(fetchURL,{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
@@ -77,57 +76,22 @@ const ListOfPayments = ({movementState,setMovementState,loader,refreshState, fet
             !each.id_order&&<MiniIconButton classNameExtra="me-1 shrink-0 text-black" icon="edit" onClick={()=>{selectEdit(each.id)}}/>}
         </div>
     })
+    console.log(loader);
 
-    async function backPage(){
-        const {success, ...getFreshState} = await defaultLoader(loader,movementState.page-1);
-        if(success){
-            setMovementState(getFreshState);
-            pageInput.current.value = getFreshState.page;
-        }
-    }
-
-    async function nextPage(){
-        const {success, ...getFreshState} = await defaultLoader(loader,movementState.page+1);
-        if(success){
-            setMovementState(getFreshState);
-            pageInput.current.value = getFreshState.page;
-        }
-    }
-
-    async function changePage(e){
-        let {value} = e.target;
-        value = Number(value);
-        if(value > movementState.num_pages) value = movementState.num_pages;
-        if(value > 0){
-            const {success,...getFreshState} = await defaultLoader(loader,value);
-            if(success){
-                setMovementState(getFreshState);
-                pageInput.current.value = getFreshState.page;
-                pageInput.current.blur();
-            }
-        }
-    }
-
-    async function changePageOnEnter(e){
-        console.log(e,e.target.value);
-        if(e.key=="Enter") changePage(e);
-    }
-
-    return <div className="divide-y-[1px] divide-slate-500">
+    return <Paginator 
+                page= {movementState.page}
+                num_pages= {movementState.num_pages} 
+                resetState={setMovementState}
+                loader={loader}
+                className="divide-y-[1px] divide-slate-500">
     <div className="flex">
         {hasCardPayments && <div className="px-1 shrink-0 w-14 text-center">Pago</div>}
         <div className="px-1 shrink-0 w-24 text-center">Fecha</div>
         <div className="px-1 shrink-0 w-24 text-center">Cantidad</div>
         <div className="grow px-1">Concepto</div>
-        
     </div>
     {listOfPayments}
-    {movementState.num_pages > 1 && <div className="flex justify-center gap-1 py-1 items-center">
-        <MiniIconButton icon="chevron_backward" onClick={backPage} disabled={movementState.page == 1}/>
-        <input ref={pageInput} className="!w-12 !h-6" onBlur={changePage} onKeyDown={changePageOnEnter} defaultValue={movementState.page}/> de {movementState.num_pages}
-        <MiniIconButton icon="chevron_forward" onClick={nextPage} disabled={movementState.page == movementState.num_pages}/>
-    </div>}
-</div>
+    </Paginator>
 }
 
 

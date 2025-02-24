@@ -1,15 +1,17 @@
-import React , {useState} from "react"
-import {useLoaderData} from "react-router"
+import React , {useState, useEffect} from "react"
+import {useLoaderData, Link} from "react-router"
 import FrequentCustomerPlot from "../../plots/FrequentCustomerPlot.jsx"
 import Icon from "../../components/Icon.jsx"
-
+import Paginator from "../../components/Paginator.jsx"
+import MiniIconButton from "../../components/MiniIconButton.jsx"
 
 const LoggedUser = ({user}) => {
-    const loaderData = useLoaderData()
+    const {success,...initialLoad} = useLoaderData()
     const [copied,setCopied] = useState(false);
+    const [{ordenes_activas,user_link,page,num_pages,cliente_freq,ordenes_pasivas},reload] = useState(initialLoad);
 
     function copyLinkToClipboard(){
-        navigator.clipboard.writeText(loaderData.user_link).then(()=>{
+        navigator.clipboard.writeText(user_link).then(()=>{
             console.log("texto copiado")
             setCopied(true);
         },()=>{
@@ -17,51 +19,99 @@ const LoggedUser = ({user}) => {
         })
     }
 
-    return <main className="container grow mx-auto grid grid-cols-12 p-3 gap-3 grid-rows-2">
-        <div className="col-span-12 sm:col-span-6 bubble-div-with-title">
+    useEffect(()=>{
+        function returnCopiedState(){
+            setCopied(false);
+            console.log("clicked and now we remove")
+            document.removeEventListener("click",returnCopiedState);
+        }
+        document.addEventListener("click",returnCopiedState);
+        return ()=>{document.removeEventListener("click",returnCopiedState);}
+    },[copied])
+
+    const ordenesActivas = ordenes_activas.map(each => <OrderCardActive key={each.id} order={each}/>)
+    const ordenesPasivas = ordenes_pasivas.map(each => <OrderCard key={each.id} order={each}/>)
+
+    return <main className="container mx-auto grid grid-cols-1 sm:grid-cols-2 py-3 sm:px-3 gap-3">
+        
+        {ordenesActivas.length > 0 &&
+        <div className="bubble-div-with-title sm:col-span-2 divide-y-2 divide-slate-900">
+            <div className="bubble-div-title">Orden activa<Icon icon='receipt'/></div>
+            {ordenesActivas}
+        </div>
+        }
+        <div className="bubble-div-with-title">
             <div className="bubble-div-title">Cliente frecuente<Icon icon='award_star'/></div>
             <div className="p-4">
                 <h1>Hola, {user.first_name}</h1>
                 
-                {loaderData.cliente_freq==5?
+                {cliente_freq==5?
                 'Acumulaste 5 visitas ¡Tienes una carga gratis!':
-                `Llevas ${loaderData.cliente_freq} visita${loaderData.cliente_freq>1?"s":""}. Junta 5 para obtener una carga gratis en tu siguiente visita.`}
+                `Llevas ${cliente_freq} visita${cliente_freq>1?"s":""}. Junta 5 para obtener una carga gratis en tu siguiente visita.`}
                 <div className="shadow-sm h-8 relative">
-                <FrequentCustomerPlot value={loaderData.cliente_freq}/>
+                <FrequentCustomerPlot value={cliente_freq}/>
                 </div>
             </div>
         </div>
-        <div className="col-span-12 sm:col-span-6 sm:row-span-2 bubble-div-with-title">
-            <div className="bubble-div-title">Órdenes<Icon icon='receipt_long'/></div>
-            <div className="p-4">
-                
-                {loaderData.orden_activa?<div className="border-b-2 border-orange-700">
-                    Orden activa
-                </div>:<div className="rounded-md bg-slate-300 text-center flex flex-col gap-1 p-3">
-                    No tienes una orden activa por el momento.</div>}
-                {loaderData.ordenes_pasadas?.length>0 && <div className="border-b-2 border-orange-700">
-                    Órdenes pasadas
-                </div>}
-            </div>
-        </div>
-        <div className="col-span-12 sm:col-span-6 bubble-div-with-title">
+        <div className="bubble-div-with-title">
             <div className="bubble-div-title">Invita a un amigo<Icon icon='group_add'/></div>
-            <div className="p-4 flex items-stretch flex-col gap-2">
+                <div className="p-4 flex items-stretch flex-col gap-2">
                 ¡Comparte tu enlace de lavandería coco y obtén una carga gratis con la primera visita de tu amigo!
-                <div className="rounded-md bg-slate-300 text-center break-words flex flex-col gap-1 p-3">
-                    {loaderData.user_link}
-                    <button onClick={copyLinkToClipboard} className={`btn btn-go mx-auto ${copied?"!bg-lime-500 hover:!bg-lime-600":""}`}>
-                        {copied?
-                        <>Copiado<Icon icon='check'/></>:
-                        <>Copiar liga<Icon icon='content_copy'/></>
-                        }
-                    </button>
-                </div>
-                
+                <button onClick={copyLinkToClipboard} className={`btn btn-go mx-auto ${copied?"!bg-lime-500 hover:!bg-lime-600":""}`}>
+                    {copied?
+                    <>Copiado<Icon icon='check'/></>:
+                    <>Copiar liga<Icon icon='link'/></>
+                    }
+                </button>
             </div>
         </div>
+        {ordenesPasivas.length > 0 &&
+        <div className="bubble-div-with-title sm:col-span-2">
+            <div className="bubble-div-title">Órdenes pasadas<Icon icon='receipt_long'/></div>
+            <Paginator
+                page={page}
+                num_pages={num_pages}
+                resetState={reload}
+                loader="home"
+                className="p-4 flex flex-col gap-2"
+            >
+                <div className="gap-2 grid sm:grid-cols-2 lg:grid-cols-4">
+                {ordenesPasivas}
+                </div>
+            </Paginator>
+        </div>}
+        
+        
     </main>
 }
 
 export default LoggedUser;
 
+
+const OrderCard = ({order}) => {
+
+    return <div className="flex flex-col gap-1 items-stretch justify-between bg-white rounded-md shadow-sm p-3">
+        <div className="flex items-center gap-3 col-span-2  justify-between">
+            Orden #{order.id}
+            <Link className="!text-black" to={`/orden/${order.id}/`}><MiniIconButton icon="visibility"/></Link>
+        </div>
+        <div className="flex gap-3 justify-between">
+            {order.date}
+            <div>$ {order.price}</div>
+        </div>
+    </div>
+}
+
+const OrderCardActive = ({order}) => {
+    return <div className="flex gap-2 items-center shadow-md p-4">
+        <div className="flex flex-col grow me-auto">
+            <p className="!font-normal text-xl">Orden #{order.id}</p>
+            <div>Entrega: {order.date}</div>
+            <div>Estado: {order.status_string}</div>
+        </div>
+        {order.price>0 && <div className="text-nowrap">$ {order.price}</div>}
+        <Link className="self-center shrink" to={`/orden/${order.id}/`}>
+            <button className="flex items-center max-md:!rounded-full max-md:!text-base gap-1 btn-go p-3 rounded-md shadow-sm"><span className="max-md:hidden">Ver detalles</span><Icon icon="visibility"/></button>
+        </Link>
+    </div>
+}

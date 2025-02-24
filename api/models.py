@@ -57,7 +57,7 @@ class Order(models.Model):
     opened_datetime = models.DateTimeField(null = True)
     
     def __str__(self):
-        return f"Orden de {self.user.get_full_name()} - {self.date}"
+        return f"Orden {self.id} de {self.user.get_full_name()} - {self.date}"
 
     def days_left_string(self):
         week_days = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
@@ -82,10 +82,17 @@ class Order(models.Model):
         months = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
         return f'{self.date.day} de {months[self.date.month-1]} ({self.days_left_string()})'
     
+    def discounts(self):
+        invite_discounts = self.discountinvited.aggregate(Sum("value_invited"))["value_invited__sum"] or 0
+        reference_discounts = self.discountreference.aggregate(Sum("value_reference"))["value_reference__sum"] or 0
+        stars_discounts = self.star_discount_set.aggregate(Sum("value"))["value__sum"] or 0
+        return invite_discounts + reference_discounts + stars_discounts
+
     def earnings(self):
         total = self.list_of_order_set.aggregate(total = Sum(F("price_due") * F("quantity")))["total"] or 0
         other_sum = self.list_of_others_set.aggregate(Sum("price"))["price__sum"] or 0
-        return (total + other_sum)
+
+        return total + other_sum + self.has_half
     
     def status_string(self):
         status_ref = ["Nueva","Abierta","Cerrada","Lista","Terminada"]
