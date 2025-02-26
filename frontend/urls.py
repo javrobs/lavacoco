@@ -28,12 +28,15 @@ urls_admin_only = [
     "lavadoras/",
     "lavadoras/<int:day>/<int:month>/<int:year>/",
     "clientes/",
+    "editar-cliente/<int:user_id>/",
     "reportes/<int:month>/<int:year>/",
 ]
 
 urls_all_users_only = [
     # 'cliente-frecuente/',
     'configuracion/',
+    'configuracion/cambiar-contrasena/',
+    'configuracion/mis-datos/',
 ]
 
 urls_users_only = [

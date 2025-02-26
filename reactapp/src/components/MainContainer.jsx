@@ -1,7 +1,7 @@
 import React from "react"
 
 
-const MainContainer = ({children, size}) => {
+const MainContainer = ({children, size,ignore}) => {
     
     let sizeClass = ""
     switch(size){
@@ -16,7 +16,7 @@ const MainContainer = ({children, size}) => {
             break;
     }
 
-    return <main className={`sm:py-3 flex flex-col sm:gap-3 mx-auto container ${sizeClass}`}>
+    return ignore?<>{children}</>:<main className={`sm:py-3 flex flex-col sm:gap-3 mx-auto container ${sizeClass}`}>
         {children}
     </main>
 }

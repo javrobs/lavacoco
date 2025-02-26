@@ -1,15 +1,15 @@
 import React, {useState, useEffect, createContext} from "react"
-import { RouterProvider, createBrowserRouter, useNavigate, useNavigation} from "react-router"
+import { RouterProvider, createBrowserRouter, Navigate } from "react-router"
 import Home from "../routes/Home.jsx"
 import Login from "../routes/guest/Login.jsx"
 import Signup from "../routes/Signup.jsx"
 import PreguntasFrecuentes from "../routes/PreguntasFrecuentes.jsx"
 import CrearOrden from "../routes/admin/CrearOrden.jsx"
 import Orden from "../routes/admin/Orden.jsx"
-import Configuracion from "../routes/Configuracion.jsx"
 import Layout from "./Layout.jsx"
 import ErrorComponent from './ErrorComponent.jsx'
 import ListaDePrecios from "../routes/ListaDePrecios.jsx"
+import Configuracion from "../routes/Configuracion.jsx"
 import defaultLoader from "../utils/defaultLoader.js"
 import Tintoreria from "../routes/admin/Tintoreria.jsx"
 import Gastos from "../routes/admin/Gastos.jsx"
@@ -52,7 +52,11 @@ export default function App(){
                 {path:"/crear-orden", element:<CrearOrden/>, loader:()=>defaultLoader('create_order')},
                 {path:"/crear-orden/:userId", element:<CrearOrden/>, loader:()=>defaultLoader('create_order')},
                 {path:"/crear-cliente", element:<Signup admin={true}/>,loader:()=>defaultLoader('signup')},
-                {path:"/configuracion", element:<Configuracion/>},
+                {path:"/configuracion", element:<Configuracion/>,children:[
+                    {index:"true",element:<Navigate to='/configuracion/mis-datos/' replace/>},
+                    {path:"/configuracion/mis-datos",element:<Signup config={true}/>,loader:()=>defaultLoader('config')},
+                    {path:"/configuracion/cambiar-contrasena",element:<RegisterPassword config={true}/>},
+                ]},
                 {path:"/gastos", element:<Gastos/>, loader:()=>defaultLoader("spending")},
                 {path:"/reportes/:month/:year", element:<Reportes/>, loader:({params})=>defaultLoader("reports",params.month,params.year)},
                 {path:"/reportes/", element:<Reportes/>, loader:()=>defaultLoader("reports")},
@@ -63,6 +67,7 @@ export default function App(){
                 {path:"/lavadoras",element:<Lavadoras/>,loader:()=>defaultLoader('laundry_machines')},
                 {path:"/lavadoras/:day/:month/:year",element:<Lavadoras/>,loader:({params})=>defaultLoader('laundry_machines',params.day,params.month,params.year)},
                 {path:"/clientes",element:<Clientes/>,loader:()=>defaultLoader('clients')},
+                {path:"/editar-cliente/:userID",element:<Signup admin={true} config={true}/>, loader:({params})=>defaultLoader('edit_user',params.userID)},
                 {path:"/invitacion-admin/:JWTinvite",element:<RegisterPassword/>,loader:({params})=>defaultLoader('signup_admin_invite',params.JWTinvite)},
                 {path:"/recuperar-contrasena/:JWTinvite",element:<RegisterPassword recover={true}/>,loader:({params})=>defaultLoader('recover_pw',params.JWTinvite)},
             ],

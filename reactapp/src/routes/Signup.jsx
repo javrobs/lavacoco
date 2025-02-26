@@ -7,13 +7,15 @@ import cookieCutter from "../utils/cookieCutter.js"
 import HoverInput from "../components/HoverInput.jsx"
 import HoverSelect from "../components/HoverSelect.jsx"
 import MiniBlueLabel from "../components/MiniBlueLabel.jsx"
+import defaultLoader from "../utils/defaultLoader.js"
 
-export default function Signup({admin}){
-    const {codes,reference_user} = useLoaderData();
-    const [signupState,setSignupState] = useState({})
-    const [signupFailed,setSignupFailedState] = useState(false)
-    const [extendAddressForm,setExtendAddressForm] = useState(false);
-    const [chooseCountryCode,setChooseCountryCode] = useState(false);
+export default function Signup({admin,config}){
+    const {codes,reference_user,select_user} = useLoaderData();
+    const [signupState,setSignupState] = useState(config?select_user.info:{});
+    const [signupFailed,setSignupFailedState] = useState(false);
+    const [trackChanges,setTrackChanges] = useState(false);
+    const [extendAddressForm,setExtendAddressForm] = useState(config?select_user.has_address:false);
+    const [chooseCountryCode,setChooseCountryCode] = useState(config?select_user.has_country_code:false);
     const navigate = useNavigate();
     const {refreshFunction} = useContext(userContext);
     const selectCountryRef = useRef(null);
@@ -23,30 +25,34 @@ export default function Signup({admin}){
             selectCountryRef.current.focus();           
         }},[chooseCountryCode])
 
-    function toggleAddressForm(){
-        setExtendAddressForm(value=>!value);
+    function toggleAddressForm(e){
+        setTrackChanges(true);
+        setExtendAddressForm(e.target.checked);
+        if(e.target.checked==false){
+            setSignupState(oldValue=>{
+                const {calle,colonia,cp,numero_ext,numero_int,...filtered} = oldValue;
+                return filtered;
+            })
+        }
     }
 
-    function toggleCountryCode(){
-        setChooseCountryCode(oldValue=>!oldValue)
-        setSignupState(oldValue => {
-            if(oldValue.countryCode){
+    function toggleCountryCode(e){
+        setTrackChanges(true);
+        setChooseCountryCode(e.target.checked);
+        if(e.target.checked==false){
+            setSignupState(oldValue => {
                 const {countryCode,...others} = oldValue;
-                return others
-            } else {
-                return oldValue;
-            }
-        })
+                return others;
+            })
+        }
     }
-
-    
-    
 
     function phoneInputChange(e){
+        setTrackChanges(true);
         const {value} = e.target;
         const onlyNumbers = new RegExp(/^[0-9]*$/);
         const tenNumbers = new RegExp(/^[0-9]{10}$/);
-        if (onlyNumbers.test(value)){
+        if (onlyNumbers.test(value)&&value.length<11){
             setSignupState(oldState=>({...oldState,username:value}));
         }
         if (tenNumbers.test(value)){
@@ -55,16 +61,33 @@ export default function Signup({admin}){
     }
     
     function handleChange(e){
+        setTrackChanges(true)
         const {name,value} = e.target;
         setSignupState(oldState=>({...oldState,[name]:value}))
     }
 
-    const apiURL = admin?"/api/create_client/":"/api/signup/";
+    async function syncChanges(){
+        const result =  admin ? await defaultLoader("edit_user",select_user.info.id):await defaultLoader("config");
+        const selectUser = result.select_user;
+        console.log(selectUser);
+        setSignupState(selectUser.info);
+        setTrackChanges(false);
+        setExtendAddressForm(selectUser.has_address);
+        setChooseCountryCode(selectUser.has_country_code);
+        setSignupFailedState("");
+    }
+
+    const apiURL = admin?
+        (config?
+            "/api/edit_user/":
+            "/api/create_client/"):
+        (config?
+            "/api/edit_my_user/":
+            "/api/signup/");
     let afterSubmitURL = admin?'/crear-orden/':'/iniciar-sesion/';
 
     function handleSubmit(e){
         e.preventDefault();
-        console.log(e);
         const sendState = reference_user? {...signupState,reference_user_id:reference_user.id}: signupState
         fetch(apiURL,{
             method:"POST",
@@ -75,24 +98,28 @@ export default function Signup({admin}){
             console.log(data);
             if (data.success){
                 console.log("succesful!");
-                if(admin){
-                    afterSubmitURL += `${data.user_id}/`
+                if(config){
+                    syncChanges();
                 } else {
-                    refreshFunction();
+                    if(admin){
+                        afterSubmitURL += `${data.user_id}/`
+                    } else {
+                        refreshFunction();
+                    }
+                    navigate(afterSubmitURL);
                 }
-                navigate(afterSubmitURL);
             } else {
                 setSignupFailedState(data.error)
             }
         });
     }
 
-    const countryOptions = codes.map(each=>{
+    const countryOptions = codes?codes.map(each=>{
         return <option key={each.id} value={each.id}>{each.name} {String.fromCodePoint(each.code[0])+String.fromCodePoint(each.code[1])}</option>
-    })
+    }):[]
 
-    return <form className="flex max-w-lg mx-auto flex-col gap-y-3 p-3 px-5 sm:mt-3 rounded-xl bubble-div justify-center text-center" onSubmit={handleSubmit}>
-        <h1 className="text-center text-orange-700">{admin?"Cliente nuevo":"Regístrate"}</h1>
+    return <form className={`flex ${ config && !admin ?"":"bubble-div text-center max-w-lg rounded-xl sm:mt-3"} mx-auto flex-col gap-y-3 p-3 px-5`} onSubmit={handleSubmit}>
+        <h1 className="text-orange-700">{admin?(config?`Editar datos de ${select_user.info.first_name}`:"Cliente nuevo"):config?"Modificar mis datos":"Regístrate"}</h1>
         {reference_user && <div className="flex flex-wrap gap-3 mx-3 items-center">
             Referencia:
             <MiniBlueLabel icon="person" text={reference_user.name}/>
@@ -101,13 +128,13 @@ export default function Signup({admin}){
             <ErrorMessage errorContent={signupFailed}/>
         </div>}
         <div className="grid sm:grid-cols-2 gap-1 mx-6">
-            {!admin && 
+            {!admin && !config && 
             <p className='text-left sm:col-span-2 -mx-3'>
                 {reference_user?
                 `Recibe tu segunda carga gratis y ${reference_user.name.split(" ")[0]} recibirá una cuando finalices tu primera órden. ¡Ganar, ganar!`:
                 "Lleva seguimiento de tus órdenes y accede al programa de cliente frecuente."}
             </p>}
-            <HoverInput className="flex sm:col-span-2" label="Teléfono">
+            <HoverInput className="flex sm:col-span-2" label="Teléfono (10 dígitos)">
                 <input type="tel" pattern='[0-9]{10}' required value={signupState.username||""} onInput={phoneInputChange} name="username"/>
             </HoverInput>
             <HoverInput label="Nombre">
@@ -116,8 +143,10 @@ export default function Signup({admin}){
             <HoverInput label="Apellido">
                 <input required value={signupState.last_name||""} onInput={handleChange} name="last_name" />
             </HoverInput>
-            {!admin && <PasswordInputs signupState={signupState} handleChange={handleChange}/>}
+            {!admin && !config && <PasswordInputs signupState={signupState} handleChange={handleChange}/>}
         </div>
+        {(!config || !select_user.is_admin) &&
+        <>
         <label className="flex gap-1 items-center mx-3 mt-2">
             <input checked={chooseCountryCode} onChange={toggleCountryCode} className="accent-blue-600" type='checkbox'/>
             <div className="text-start text-nowrap">{admin?"El teléfono no es mexicano.":"Mi teléfono no es mexicano"}</div>
@@ -134,21 +163,30 @@ export default function Signup({admin}){
             <input checked={extendAddressForm} onChange={toggleAddressForm} className="accent-blue-600 mt-1.5" type='checkbox'/>
             <span className="text-start">{admin?"Registrar dirección para entregas a domicilio.":"Opcional: Proporcionar mi dirección para entregas a domicilio, si están disponibles en mi zona."}</span>
         </label>
+        </>
+        }
         {extendAddressForm&&<AddressForm formState={signupState} handleChange={handleChange}/>}
+        
         <div className="justify-center flex gap-2">
-            {admin?
-            <button className="btn-back btn" onClick={()=>{history.back()}}>
-                Regresar
-                <Icon icon='undo'/>
-            </button>:
-            <Link className="btn-back btn" to='/iniciar-sesion/'>
-                Regresar
-                <Icon icon='undo'/>
-            </Link>}
-            <button className="btn-go btn">
-                Continuar
+        {config?<>
+            <button className="btn btn-back disabled:!bg-slate-400" type="button" onClick={syncChanges} disabled={!trackChanges}>Reestablecer<Icon icon="undo"/></button>
+            <button className="btn-go text-nowrap flex items-center gap-1 disabled:!bg-slate-400" disabled={!trackChanges}>Guardar cambios<Icon icon='arrow_forward'/></button>
+        </>:
+        <>{
+            admin?
+                <button className="btn-back btn" onClick={()=>{history.back()}}>
+                    Regresar
+                    <Icon icon='undo'/>
+                </button>:
+                <Link className="btn-back btn" to='/iniciar-sesion/'>
+                    Regresar
+                    <Icon icon='undo'/>
+                </Link>}
+            <button className="btn-go text-nowrap flex items-center gap-1">
+                {config?"Guardar cambios":"Continuar"}
                 <Icon icon='arrow_forward'/>
             </button>
+        </>}
         </div>
     </form>
 }
@@ -177,7 +215,7 @@ export function AddressForm({handleChange,formState,notEditable}){
         </fieldset>
 }
 
-export const PasswordInputs = ({signupState,handleChange}) => {
+export const PasswordInputs = ({signupState,handleChange,config}) => {
     const pw2 = useRef(null);
 
     function verifyPW(e){
@@ -189,12 +227,16 @@ export const PasswordInputs = ({signupState,handleChange}) => {
     function verifyPW2(e){
         const {value} = e.target;
         handleChange(e);
-        pw2.current.setCustomValidity(signupState.password != value?'Las contraseñas no coinciden':"");  
+        if(config){
+            pw2.current.setCustomValidity(signupState.new_password != value?'Las contraseñas no coinciden':""); 
+        } else {
+            pw2.current.setCustomValidity(signupState.password != value?'Las contraseñas no coinciden':""); 
+        }
     }
 
     return <>
-    <HoverInput label="Contraseña">
-        <input required value={signupState.password||""} onInput={verifyPW} name="password" type="password" minLength={8}/>
+    <HoverInput label={config?"Nueva contraseña":"Contraseña"}>
+        <input required value={config?signupState.new_password||"":(signupState.password||"")} onInput={verifyPW} name={config?"new_password":"password"} type="password" minLength={8}/>
     </HoverInput>
     <HoverInput label="Repite la contraseña">
         <input required ref={pw2} value={signupState.password_2||""} onInput={verifyPW2} name="password_2" type="password" />

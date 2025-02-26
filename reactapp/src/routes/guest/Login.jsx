@@ -66,7 +66,7 @@ export default function Login(){
         <form className="flex max-w-lg mx-auto flex-col sm:mt-3 gap-3 bubble-div justify-center text-center" onSubmit={handleSubmit} autoComplete="on">
             <h1 className="text-center text-orange-700">Inicia sesión</h1>
             <ErrorMessage errorContent={loginFailed}/>
-            <HoverInput label="Teléfono">
+            <HoverInput label="Teléfono (10 dígitos)">
                 <input type="tel" id='username' value={loginState.username||""} onInput={phoneInputChange} pattern='[0-9]{10}' name="username" autoComplete="username" required/>
             </HoverInput>
             <HoverInput label="Contraseña">

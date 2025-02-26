@@ -1,11 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
 html,body,#root{
     @apply bg-slate-300;
     min-height: 100dvh;
-    font-family:Tahoma, Geneva, Verdana, sans-serif;
+    font-family:"Open Sans",Tahoma, Geneva, Verdana, sans-serif;
     z-index: -10;
     overflow-x: hidden;
 }

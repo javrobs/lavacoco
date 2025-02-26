@@ -29,21 +29,25 @@ def login_user(request):
         return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
 
 @require_POST
-def create_user(request, admin_created = False):
+def create_user(request, admin_created = False, edit_self = False):
     try:
         json_data = json.loads(request.body)
 
         with transaction.atomic():
 
-            if User.objects.filter(username = json_data["username"]).exists():
+            if (edit_self and User.objects.filter(username=json_data["username"]).exclude(id=edit_self.id).exists()) or \
+            (not edit_self and User.objects.filter(username = json_data["username"]).exists()):
                 raise Exception(f"El usuario ya existe")
             
             if not re.compile(r'[0-9]{10}').fullmatch(json_data.get("username")):
                 raise Exception(f"Error en el teléfono")
         
-            user = User(username=json_data["username"]) 
+            user = edit_self or User(username=json_data["username"]) 
             
-            if not admin_created:
+            if edit_self:
+                user.username = json_data.get("username")
+
+            if not admin_created and not edit_self:
                 if len(json_data.get("password")) >= 8 and json_data.get("password_2") == json_data['password']:
                     user.set_password(json_data['password'])
                 else:
@@ -57,14 +61,20 @@ def create_user(request, admin_created = False):
                 
             user.save()
 
+            if edit_self:
+                edit_self.country_code_set.clear()
+            
             country_code = json_data.get("countryCode")
             if country_code:
                 try:
+                    print("are you trying here",country_code)
                     country = Country_code.objects.get(id=country_code)
                     country.users.add(user)
                 except Exception as e:
                     raise Exception(f"Error asignando país: {str(e)}")
-                
+            
+            if edit_self:
+                Address.objects.filter(user=edit_self).all().delete()
             address_keys = ["calle","colonia","numero_ext"]
             new_address = Address(user = user)
             for key in address_keys:
@@ -97,7 +107,7 @@ def create_user(request, admin_created = False):
                 "address": bool(new_address),
                 "country_code": bool(country_code),
                 "reference": bool(reference)})
-                
+        
     except Exception as e:
         print(e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)
@@ -197,3 +207,43 @@ def set_recover_password(request):
             return JsonResponse({"success":False,"error":"La contraseña falló."})
     except Exception as e:
         return JsonResponse({"success":False, "error":str(e)},status=500)
+    
+@require_POST
+def edit_my_user(request):
+    try:
+        json_data = json.loads(request.body)
+        user = User.objects.get(id=json_data["id"])
+        if user == request.user:
+            return create_user(request,False,user)
+        else:
+            raise Exception("Usuario incorrecto")
+    except Exception as e:
+        return JsonResponse({"succes":False,"error":str(e)},status=500) 
+    
+@require_POST
+@login_required
+def change_my_password(request):
+    try:
+        json_data = json.loads(request.body)
+        print(json_data)
+        user = request.user
+        if not user.check_password(json_data['password']):
+            raise Exception("La contraseña es incorrecta")    
+        if len(json_data["new_password"])<8 or json_data["new_password"] != json_data["password_2"]:
+            raise Exception("La nueva contraseña es incorrecta")   
+        user.set_password(json_data["new_password"])
+        user.save()
+        login(request,user)
+        return JsonResponse({"success":True})
+    except Exception as e:
+        return JsonResponse({"succes":False,"error":str(e)},status=500)   
+    
+@require_POST
+@staff_member_required
+def edit_user(request):
+    try:
+        json_data = json.loads(request.body)
+        user = User.objects.get(id=json_data["id"])
+        return create_user(request,False,user)
+    except Exception as e:
+        return JsonResponse({"succes":False,"error":str(e)},status=500) 
