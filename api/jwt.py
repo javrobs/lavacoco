@@ -12,11 +12,11 @@ def root_url(request):
 
 #Encoders
 def invite_user_admin(request,user):
-    encode_user = jwt.encode({"user":user.id,"type":"admin_invite","exp":timezone.now()+datetime.timedelta(hours=3)},key=SECRET_KEY,algorithm="HS256")
+    encode_user = jwt.encode({"user":user.id,"type":"admin_invite","exp":timezone.now()+datetime.timedelta(hours=12)},key=SECRET_KEY,algorithm="HS256")
     return root_url(request) + "/invitacion-admin/" + encode_user
 
 def recover_password_admin(request,user):
-    encode_user = jwt.encode({"user":user.id,"type":"recover_password","exp":timezone.now()+datetime.timedelta(hours=3)},key=SECRET_KEY,algorithm="HS256")
+    encode_user = jwt.encode({"user":user.id,"type":"recover_password","exp":timezone.now()+datetime.timedelta(hours=12)},key=SECRET_KEY,algorithm="HS256")
     return root_url(request) + "/recuperar-contrasena/" + encode_user
 
 def invite_user_friend(request,user):

@@ -67,10 +67,8 @@ const OrderList = () => {
             handleOther : (e)=>{
                 const {value, name, type} = e.target;
                 const [key, index] = name.split('-');
-                console.log(value, name, type);
                 setSendState(oldValue => {
                     const onlyNumbers = new RegExp(/^[0-9]*$/);
-                    console.log(oldValue.others[index].concept);
                     if (type == 'text' && oldValue.others[index].concept == "" && index == oldValue.others.length - 1){
                         return {...oldValue,
                             others: [...oldValue.others.map((each, i) => i == index? {...each, [key]: value} : each), {concept: "", price: ""}]
@@ -101,7 +99,7 @@ const OrderList = () => {
     };
     
     const [listMode, setListMode] = useState(false);
-    const [areYouSure, setAreYouSure] = useState(false);
+    const [areYouSure, setAreYouSure] = useState("");
     
     const inputRef = useRef(null);
     const formRef = useRef(null);
@@ -181,13 +179,13 @@ const OrderList = () => {
 
     function sendFinish(){
         if(formRef.current.reportValidity()){
-            fetcher(`/api/set_order_list/${order.id}/`,()=>{setAreYouSure(true)});
+            fetcher(`/api/set_order_list_get_message/${order.id}/`);
         }
     }
     
     function sendReturn(){
         if(formRef.current.reportValidity()){
-            fetcher(`/api/set_order_list/${order.id}/`,()=>{navigate("/")});
+            fetcher(`/api/set_order_list/${order.id}/`);
         }
     }
 
@@ -205,7 +203,7 @@ const OrderList = () => {
         }});
     }
 
-    function fetcher(url,thenDoThis){
+    function fetcher(url){
         fetch(url,{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
@@ -213,21 +211,16 @@ const OrderList = () => {
         .then(result => result.json())
         .then(data=>{
             if(data.success){
-                thenDoThis();
-            } else {
-                console.log(data);
+                if(data.message){
+                    setAreYouSure(data.message);
+                } else {
+                    navigate("/")
+                }
             }
         })
     }
 
-    
-    const total = Object.values(sendState.orderList).reduce((agg,value)=>{
-        return agg + value.qty*value.price_due;
-    },sendState.mediaCarga) + sendState.others.reduce((agg,each) => {
-        return agg + Number(each.price);
-    },0) - sendState.discountsApplied.reduce((agg, each) => agg + each.value, 0);
 
-    const messageToSend = `Hola ${order.user.split(" ")[0]}, el total de tu orden es de $${total}. Te avisaremos cuando tu ropa esté lista. Puedes revisar más detalles en: ${location.href} `;
 
     return <main className="container mx-auto my-2">
             <div className="bubble-div p-4">
@@ -249,8 +242,8 @@ const OrderList = () => {
                         <button type="button" className="flex items-center gap-1 btn-go" onClick={sendFinish}>Guardar y terminar<Icon icon="shopping_cart_checkout"/></button>
                     </div>
                     <Notify 
-                        show={areYouSure}
-                        message={messageToSend}
+                        show={Boolean(areYouSure)}
+                        message={areYouSure}
                         number={order.phone}
                         backFunction={()=>setAreYouSure(false)}
                         afterFunction={promoteAndReturn}

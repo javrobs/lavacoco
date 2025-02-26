@@ -106,13 +106,17 @@ const Orders = ({statusValue, loaderData, setNotify, promoteOrder}) => {
                 actions = <IconButton onClick={()=>nav(`/orden/${each.id}`)} icon='list'/>
                 break;
             case 2:
-                const notifyThenPromote = () => {
-                    setNotify({show:true,
-                        number:each.phone,
-                        message:`Hola ${each.user}, tu ropa está lista. Puedes ver los detalles aquí: ${location.href}order/${each.id}`,
-                        backFunction: ()=>{setNotify({show:false})},
-                        afterFunction: ()=>{promoteOrder(each.id);setNotify({show:false})}
-                    })
+                const notifyThenPromote = async () => {
+                    const response = await fetch(`/api/clothes_ready_message/${each.id}/`);
+                    const {success,message} = await response.json();
+                    if(success){
+                        setNotify({show:true,
+                            number:each.phone,
+                            message:message,
+                            backFunction: ()=>{setNotify({show:false})},
+                            afterFunction: ()=>{promoteOrder(each.id);setNotify({show:false})}
+                        })
+                    }
                 }
                 actions = <>
                     <IconButton onClick={()=>nav(`/orden/${each.id}`)} icon='description'/>
@@ -120,12 +124,16 @@ const Orders = ({statusValue, loaderData, setNotify, promoteOrder}) => {
                 </>
                 break;
             case 3:
-                const notify = () => {
-                    setNotify({show:true,
+                const notify = async () => {
+                    const response = await fetch(`/api/clothes_ready_message/${each.id}/`);
+                    const {success,message} = await response.json();
+                    if(success){
+                        setNotify({show:true,
                         number:each.phone,
-                        message:`Hola ${each.user}, te recordamos que tu ropa está lista. Puedes ver los detalles aquí: ${location.href}order/${each.id}`,
+                        message:message,
                         backFunction: ()=>{setNotify({show:false})},
-                    })
+                        })
+                    }
                 }
                 actions = <>
                         <IconButton onClick={()=>nav(`/orden/${each.id}`)} icon='point_of_sale'/>

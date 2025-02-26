@@ -4,7 +4,6 @@ import MiniIconButton from "../../components/MiniIconButton.jsx";
 const OrdenTotals = ({edit,prices,functions,order}) => {
  
     const othersArray = order.others.map((each,i)=>{
-        console.log(each)
         return <div className="grid grid-cols-4 sm:grid-cols-6" key={`other-${i}`}>
             {edit?
             <>
@@ -22,7 +21,6 @@ const OrdenTotals = ({edit,prices,functions,order}) => {
     })
 
     const discountArray = order.discountsApplied.map((each,i)=>{
-        console.log(each)
         return <div className="grid grid-cols-4 sm:grid-cols-6" key={each.id}>
             <div className="p-1 col-span-3 sm:col-span-5">{each.text}</div>
             <div className="p-1">$ {each.value}</div>

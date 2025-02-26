@@ -123,7 +123,7 @@ const SelectClientShowLink = ({options,notifyOn,text,link}) =>{
         </div>
         {results.link && 
         <div className="flex flex-col gap-2 mt-3">
-            <p>La siguiente liga expira en 3 horas:</p>
+            <p>La siguiente liga expira en 12 horas:</p>
             <div className="bg-slate-300 shadow-md rounded-md p-3 break-words italic">
                 {results.link}
             </div>

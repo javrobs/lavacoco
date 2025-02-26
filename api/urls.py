@@ -26,6 +26,8 @@ urlpatterns = [
     path('promote_order/',orders.promote_order),
     path('save_payment_and_continue/',orders.save_payment_and_continue),
     path('set_order_list/<int:order_id>/',orders.set_order_list),
+    path('set_order_list_get_message/<int:order_id>/',orders.set_order_list),
+    path('clothes_ready_message/<int:order_id>/',orders.clothes_ready_message),
 
     path('dryclean_payment/',payments.dryclean_payment),
     path('spending_payment/',payments.spending_payment),

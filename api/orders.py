@@ -5,9 +5,11 @@ from django.contrib.auth.models import User
 from django.contrib.admin.views.decorators import staff_member_required
 import datetime
 from django.utils import timezone
+from django.db import transaction
 
 import json
 from .models import Address,Order,Price,User_recommendation,Star_discount
+from .jwt import root_url,invite_user_admin
 
 
 @require_POST
@@ -68,48 +70,53 @@ def promote_order(request):
 @staff_member_required
 def set_order_list(request,order_id):
     try:
-        order = Order.objects.get(id = order_id)
-        json_data = json.loads(request.body)
-        order_list = order.list_of_order_set
-        order_list.all().delete()
-        order.has_half = json_data['mediaCarga']
-        for discount in order.discountinvited.all():
-            discount.discount_invited = None
-            discount.save()
-        for discount in order.discountreference.all():
-            discount.discount_reference = None
-            discount.save()
-        set_value = Price.objects.get(id=1).price
-        for discount in json_data['discountsApplied']:
-            if discount["type"] == "recs_reference":
-                rec=User_recommendation.objects.get(id=discount["id"])
-                rec.discount_reference = order
-                rec.value_reference = set_value
-                rec.save()
-            elif discount["type"] == "recs_invite":
-                rec=User_recommendation.objects.get(id=discount["id"])
-                rec.discount_invited = order
-                rec.value_invited = set_value
-                rec.save()
-            elif discount["type"] == "star":
-                star=Star_discount.objects.get(id=discount["id"])
-                star.order = order
-                star.value = set_value
-                star.save()
-        for key,value in json_data['orderList'].items():
-            price = Price.objects.get(id = key)
-            order_list.create(concept = price, 
-                              quantity = value["qty"], 
-                              price_due = price.price, 
-                              price_dryclean_due = price.price_dryclean)
-        other_list = order.list_of_others_set
-        other_list.all().delete()
-        for other in json_data["others"]:
-            if other.get("concept") and other.get("price"):
-                other_list.create(concept = other['concept'], price = other['price'])
-        order.tinto_others = json_data['othersTinto'] or 0
-        order.save()
-        return JsonResponse({"success":True})
+        with transaction.atomic():
+            order = Order.objects.get(id = order_id)
+            json_data = json.loads(request.body)
+            order_list = order.list_of_order_set
+            order_list.all().delete()
+            order.has_half = json_data['mediaCarga']
+            for discount in order.discountinvited.all():
+                discount.discount_invited = None
+                discount.save()
+            for discount in order.discountreference.all():
+                discount.discount_reference = None
+                discount.save()
+            set_value = Price.objects.get(id=1).price
+            for discount in json_data['discountsApplied']:
+                if discount["type"] == "recs_reference":
+                    rec=User_recommendation.objects.get(id=discount["id"])
+                    rec.discount_reference = order
+                    rec.value_reference = set_value
+                    rec.save()
+                elif discount["type"] == "recs_invite":
+                    rec=User_recommendation.objects.get(id=discount["id"])
+                    rec.discount_invited = order
+                    rec.value_invited = set_value
+                    rec.save()
+                elif discount["type"] == "star":
+                    star=Star_discount.objects.get(id=discount["id"])
+                    star.order = order
+                    star.value = set_value
+                    star.save()
+            for key,value in json_data['orderList'].items():
+                price = Price.objects.get(id = key)
+                order_list.create(concept = price, 
+                                quantity = value["qty"], 
+                                price_due = price.price, 
+                                price_dryclean_due = price.price_dryclean)
+            other_list = order.list_of_others_set
+            other_list.all().delete()
+            for other in json_data["others"]:
+                if other.get("concept") and other.get("price"):
+                    other_list.create(concept = other['concept'], price = other['price'])
+            order.tinto_others = json_data['othersTinto'] or 0
+            order.save()
+            result = {"success":True}
+            if "set_order_list_get_message" in request.path:
+                result["message"] = f'Hola {order.user.first_name}, el total de tu orden es de ${order.earnings() - order.discounts()}. Te avisaremos cuando tu ropa esté lista. '
+                result["message"] += f'Te invito al sitio web de lavandería coco. Regístrate aquí: {invite_user_admin(request,order.user)}' if order.user.password == "" else f"Puedes revisar más detalles en: {root_url(request)}/orden/{order.id}/"
+            return JsonResponse(result)
     except Exception as e:
         print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500)
@@ -131,3 +138,18 @@ def save_payment_and_continue(request):
     except Exception as e:
         print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500)    
+
+
+@staff_member_required
+def clothes_ready_message(request,order_id):
+    try:
+        response = {"success":True}
+        order = Order.objects.get(id=order_id)
+        user = order.user
+        response["message"] = f"Hola {user.first_name}, "
+        response["message"] += "tu ropa está lista. " if order.status == 2 else "te recordamos que tu ropa está lista. "
+        response["message"] += f'Te invito al sitio web de lavandería coco. Regístrate aquí: {invite_user_admin(request,user)}' if user.password == "" else f"Puedes ver los detalles aquí: {root_url(request)}/orden/{order.id}/"
+        return JsonResponse(response)
+    except Exception as e:
+        print(e)
+        return JsonResponse({"success":False},status=500)
