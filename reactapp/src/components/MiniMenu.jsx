@@ -79,7 +79,7 @@ const MiniMenu = () => {
     <button className='mini-menu-button ms-auto min-h-16 w-16 self-stretch hover:bg-sky-400 hover:bg-opacity-20' onClick={()=>setMenuShowing(true)}>
         <Icon classNameExtra='text-3xl' icon="menu"/>
     </button>
-    <div style={style} className="fixed w-64 -right-64 top-0 flex flex-col gap-2 h-dvh bg-slate-950 text-blue-50">
+    <div style={style} className="fixed z-40 w-64 -right-64 top-0 flex flex-col gap-2 h-dvh bg-slate-950 text-blue-50">
         <div className="mini-menu-links overflow-auto no-scrollbar flex flex-col justify-start">
             <button className="text-start p-2" onClick={()=>setMenuShowing(false)}><Icon icon='close'/></button>
             {links}
@@ -92,6 +92,9 @@ const MiniMenu = () => {
             </button>
         </div>
     </div>
+    {menuShowing &&
+    <div className="bg-slate-950 bg-opacity-80 fixed top-0 left-0 z-30 h-dvh w-dvw" onClick={()=>setMenuShowing(false)}></div>
+    }
     </>
 }
 
