@@ -16,6 +16,9 @@ urlpatterns = [
     path('get_link_recover_password_admin/',logins.get_link_recover_password_admin),
     path('add_password_admin_invite/',logins.add_password_admin_invite),
     path('set_recover_password/',logins.set_recover_password),
+    path('edit_my_user/',logins.edit_my_user),
+    path('change_my_password/',logins.change_my_password),
+    path('edit_user/',logins.edit_user),
 
     path('change_prices/',prices.change_prices),
 
@@ -37,6 +40,7 @@ urlpatterns = [
     path('home_info/<int:page>/',loaders.home_info),
     path('signup_info/',loaders.signup_info),
     path('signup_info/<str:JWTCode>/',loaders.signup_info),
+    path('config_info/',loaders.config_info),
     path('faq_info/',loaders.faq_info),
     path('price_info/',loaders.price_info),
     path('create_order_info/',loaders.create_order_info),
@@ -48,6 +52,7 @@ urlpatterns = [
     path('laundry_machines_info/',loaders.laundry_machines_info),
     path('laundry_machines_info/<int:day>/<int:month>/<int:year>/',loaders.laundry_machines_info),
     path('clients_info/',loaders.clients_info),
+    path('edit_user_info/<int:user_id>/',loaders.edit_user_info),
     path('signup_admin_invite_info/<str:JWTInvite>/',loaders.signup_admin_invite_info),
     path('recover_pw_info/<str:JWTInvite>/',loaders.recover_pw_info),
 ]

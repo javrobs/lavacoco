@@ -49,12 +49,28 @@ def home_info(request, page = 1):
     return JsonResponse(result)
 
 
-def signup_info(request,JWTCode=None):
+def signup_info(request, JWTCode = None, select_user = None):
     try:
-        result = {"success":True,"codes":Country_code.all_country_codes()}
+        result = {"success":True}
         if JWTCode:
             ref_user = User.objects.get(id=invite_user_friend_decode(JWTCode)["user"])
             result["reference_user"] = {"id":ref_user.id,"name": ref_user.get_full_name()}
+        if select_user:
+            keys=['id','first_name','last_name','username']
+            info = {key:getattr(select_user,key) for key in keys}
+            country_code = Country_code.objects.filter(users = select_user).first()
+            if country_code:
+                info['countryCode'] = country_code.id
+            address = Address.objects.filter(user = select_user).first()
+            if address:
+                keys=["calle","colonia","numero_int","numero_ext","cp"]
+                for key in keys:
+                    attribute = getattr(address,key)
+                    if attribute:
+                        info[key] = attribute
+            result['select_user'] = {"info":info,"has_address":bool(address),"is_admin":select_user.is_superuser,"has_country_code":bool(country_code)}
+        if not (select_user and select_user.is_superuser):
+            result["codes"] = Country_code.all_country_codes()
         return JsonResponse(result)
     except Exception as e:
         return JsonResponse({"success":False,"error":str(e)},status=500)
@@ -79,6 +95,19 @@ def signup_admin_invite_info(request,JWTInvite):
         except Exception as e:
             print(e)
             return JsonResponse({"success":False,"error":str(e)},error=500)
+    return JsonResponse({"success":False},error=500)
+
+@login_required
+def config_info(request):
+    if request.user.is_authenticated:
+        return signup_info(request,None,request.user)
+    return JsonResponse({"success":False},error=500)
+
+@staff_member_required
+def edit_user_info(request,user_id):
+    if request.user.is_authenticated:
+        find_user = User.objects.get(id=user_id)
+        return signup_info(request,None,find_user)
     return JsonResponse({"success":False},error=500)
 
 def recover_pw_info(request,JWTInvite):

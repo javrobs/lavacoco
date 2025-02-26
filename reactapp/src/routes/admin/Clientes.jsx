@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import { useLoaderData } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 import MainContainer from "../../components/MainContainer.jsx";
 import HoverSelect from "../../components/HoverSelect.jsx";
 import Icon from "../../components/Icon.jsx";
@@ -11,6 +11,7 @@ import ErrorMessage from "../../components/ErrorMessage.jsx";
 const Clientes = () => {
     const {clients} = useLoaderData();
     const [selectStatus,setSelectStatus] = useState(0)
+    const nav = useNavigate();
 
     const clientShowLink = [
         {key:"pw",
@@ -38,6 +39,17 @@ const Clientes = () => {
                 })}
             </div>
             <SelectClientShowLink {...clientShowLink[selectStatus]}/>
+        </div>
+        <div className="bubble-div">
+            <h1 className="text-orange-700">Editar datos de cliente</h1>
+            <div className="flex">
+                <HoverSelect className="grow" label="Cliente">
+                    <select onChange={(e)=>nav("/editar-cliente/"+e.target.value+"/")}>
+                        <option value="" disabled>Selecciona...</option>
+                        {clients.map(each=><option key={each.id} value={each.id}>{each.name}</option>)}
+                    </select>
+                </HoverSelect>
+            </div>
         </div>
     </MainContainer>
 }
@@ -101,7 +113,7 @@ const SelectClientShowLink = ({options,notifyOn,text,link}) =>{
         {text}
         <ErrorMessage errorContent={errorContent}/>
         <div className="flex items-center">
-            <HoverSelect className="grow" label="Clientes">
+            <HoverSelect className="grow" label="Cliente">
                 <select className="!rounded-e-none" value={selectUser||""} onChange={handleSelect}>
                     <option value="" disabled>Selecciona...</option>
                     {clientOptions}

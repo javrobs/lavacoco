@@ -31,7 +31,7 @@ class SpendingAdmin(admin.ModelAdmin):
     list_display = ["amount","category","created_at","card_payment"]    
 
 class CountriesAdmin(admin.ModelAdmin):
-    list_display = ["name","phone","unicode_1","unicode_2"]
+    list_display = ["id","name","phone","unicode_1","unicode_2"]
 
 class RecommendationsAdmin(admin.ModelAdmin):
     list_display = ['invited__first_name','reference__first_name','discount_invited','discount_reference','value_invited','value_reference']
