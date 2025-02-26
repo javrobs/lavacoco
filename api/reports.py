@@ -35,7 +35,7 @@ def month_year_info(request, month=timezone.localdate().month, year=timezone.loc
                     ).aggregate(total=Sum(F("price_due")*F("quantity")),count=Sum("quantity"))
                 if agg["total"]:
                     cat_value += agg["total"]
-                    append_three(f" {price.text} ({agg["count"]}) ",agg["total"],f" {cat.text} ")
+                    append_three(f" {price.text} ({agg['count']}) ",agg["total"],f" {cat.text} ")
             if cat.text == "Lavandería":
                 total_medias_cargas = Order.objects.filter(
                     status=4,
@@ -81,7 +81,7 @@ def month_year_info(request, month=timezone.localdate().month, year=timezone.loc
         ).aggregate(Sum("value_reference"),Count("value_reference"))
         if discounts_reference["value_reference__sum"]:
             total_discounts += discounts_reference["value_reference__sum"]
-            append_three(f" Referencias ({discounts_reference["value_reference__count"]})", discounts_reference["value_reference__sum"]," Descuentos ")
+            append_three(f" Referencias ({discounts_reference['value_reference__count']})", discounts_reference["value_reference__sum"]," Descuentos ")
 
         discounts_stars = Star_discount.objects.filter(
             order__status=4,
