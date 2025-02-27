@@ -17,16 +17,15 @@ def login_user(request):
         json_data = json.loads(request.body)
         print(json_data)
         if not User.objects.filter(username = json_data['username']).exists():
-            return JsonResponse({"success": False, "error": "El teléfono no se encontró"}, status=403)
+            raise Exception("El teléfono no se encontró")
         user = authenticate(request, username = json_data['username'], password = json_data['pw'])
         print(user)
-        if user:
-            login(request,user)
-            return JsonResponse({"success": True})
-        else:
-            return JsonResponse({"success": False, "error": "La contraseña es incorrecta"}, status=403)
-    except json.JSONDecodeError:
-        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+        if not user:
+            raise Exception("La contraseña es incorrecta")
+        login(request,user)
+        return JsonResponse({"success": True})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 @require_POST
 def create_user(request, admin_created = False, edit_self = False):
@@ -48,16 +47,15 @@ def create_user(request, admin_created = False, edit_self = False):
                 user.username = json_data.get("username")
 
             if not admin_created and not edit_self:
-                if len(json_data.get("password")) >= 8 and json_data.get("password_2") == json_data['password']:
-                    user.set_password(json_data['password'])
-                else:
+                if len(json_data.get("password")) < 8 or len(json_data.get("password")) > 20 or json_data.get("password_2") == json_data['password']:
                     raise Exception(f"Error en la contraseña")
+                user.set_password(json_data['password'])
                 
+
             for key in ["first_name","last_name"]:
-                if json_data.get(key):
-                    setattr(user,key,json_data.get(key))
-                else:
+                if not json_data.get(key):
                     raise Exception(f"Datos incompletos")
+                setattr(user,key,json_data.get(key))                
                 
             user.save()
 
@@ -75,6 +73,7 @@ def create_user(request, admin_created = False, edit_self = False):
             
             if edit_self:
                 Address.objects.filter(user=edit_self).all().delete()
+                
             address_keys = ["calle","colonia","numero_ext"]
             new_address = Address(user = user)
             for key in address_keys:
@@ -123,7 +122,6 @@ def logout_user(request):
 def load_user(request):
     user = request.user
     if user.is_authenticated:
-        print(user)
         return JsonResponse({"success":True,"logged_in":True,"superuser":user.is_superuser,"first_name":user.first_name,"last_name":user.last_name})
     return JsonResponse({"success":True,"logged_in":False})
 
@@ -135,79 +133,57 @@ def create_client(request):
 
 @require_POST
 @staff_member_required
-def get_link_invite_admin(request):
+def get_link_recover_password_admin(request,already_has_password = True):
     try:
         json_data = json.loads(request.body)
         user_id=json_data.get("selectUser")
         find_user = User.objects.get(id=user_id)
-        if find_user.password == "":
-            phone = Country_code.extend_phone(find_user)
-            link = invite_user_admin(request,find_user)
-            return JsonResponse({"success":True, 
-                                "link":link,
-                                "phone":phone,
-                                "message":f'Hola {find_user.first_name}, te invito al sitio web de lavandería coco. Regístrate aquí: {link}'})
-        
-        return JsonResponse({"success":False, "error":f"{find_user.first_name} ya tiene contraseña"},status=500)
+        if already_has_password and not find_user.password:
+            raise Exception(f"{find_user.first_name} no tiene contraseña")
+        elif not find_user.password == "":
+            raise Exception(f"{find_user.first_name} ya tiene contraseña")
+        phone = Country_code.extend_phone(find_user)
+        link = recover_password_admin(request,find_user)
+        message = f'Hola {find_user.first_name}, recupera tu contraseña aquí: {link}' if already_has_password else f'Hola {find_user.first_name}, te invito al sitio web de lavandería coco. Regístrate aquí: {link}'
+        return JsonResponse({"success":True,
+            "phone":phone,
+            "link":recover_password_admin(request,find_user),
+            "message":message})
     except Exception as e:
         return JsonResponse({"success":False, "error":str(e)},status=500)
     
 
 @require_POST
 @staff_member_required
-def get_link_recover_password_admin(request):
+def get_link_invite_admin(request):
+    return get_link_recover_password_admin(request, False)
+    
+@require_POST
+def set_recover_password(request,already_has_password = True):
     try:
         json_data = json.loads(request.body)
-        user_id=json_data.get("selectUser")
+        user_id=json_data.get("userId")
         find_user = User.objects.get(id=user_id)
-        phone = Country_code.extend_phone(find_user)
-        if find_user.password:
-            link = recover_password_admin(request,find_user)
-            return JsonResponse({"success":True,
-                                "phone":phone,
-                                "link":recover_password_admin(request,find_user),
-                                "message":f'Hola {find_user.first_name}, recupera tu contraseña aquí: {link}'})
-        return JsonResponse({"success":False, "error":f"{find_user.first_name} no tiene contraseña"},status=500)
+
+        if already_has_password and find_user.password == "":
+            raise Exception("No existe una contraseña")
+        elif find_user.password:
+            raise Exception("Ya existe una contraseña")
+        
+        if len(json_data.get("password")) < 8 or len(json_data.get("password")) > 20 or json_data.get("password") != json_data.get("password_2"):
+            raise Exception("La contraseña falló.")
+        
+        find_user.set_password(json_data['password'])
+        find_user.save()
+        return JsonResponse({"success":True, "user_logged_in":find_user.id})
+
     except Exception as e:
         return JsonResponse({"success":False, "error":str(e)},status=500)
     
 @require_POST
 def add_password_admin_invite(request):
-    try:
-        json_data = json.loads(request.body)
-        print(json_data)
-        user_id=json_data.get("userId")
-        find_user = User.objects.get(id=user_id)
-        if find_user.password:
-            return JsonResponse({"success":False, "error": "Ya existe una contraseña"},status=400)
-        if len(json_data.get("password")) >= 8 and json_data.get("password") == json_data.get("password_2"):
-            find_user.set_password(json_data['password'])
-            find_user.save()
-            return JsonResponse({"success":True, "user_logged_in":find_user.id})
-        else:
-            return JsonResponse({"success":False,"error":"La contraseña falló."},status=400)
-    except Exception as e:
-        return JsonResponse({"success":False, "error":str(e)},status=500)
+    return set_recover_password(request,False)
 
-    
-@require_POST
-def set_recover_password(request):
-    try:
-        json_data = json.loads(request.body)
-        print(json_data)
-        user_id=json_data.get("userId")
-        find_user = User.objects.get(id=user_id)
-        if find_user.password == "":
-            return JsonResponse({"success":False, "error": "No existe una contraseña"},status=400)
-        if len(json_data.get("password")) >= 8 and json_data.get("password") == json_data.get("password_2"):
-            find_user.set_password(json_data['password'])
-            find_user.save()
-            return JsonResponse({"success":True, "user_logged_in":find_user.id})
-        else:
-            return JsonResponse({"success":False,"error":"La contraseña falló."})
-    except Exception as e:
-        return JsonResponse({"success":False, "error":str(e)},status=500)
-    
 @require_POST
 def edit_my_user(request):
     try:
@@ -229,7 +205,7 @@ def change_my_password(request):
         user = request.user
         if not user.check_password(json_data['password']):
             raise Exception("La contraseña es incorrecta")    
-        if len(json_data["new_password"])<8 or json_data["new_password"] != json_data["password_2"]:
+        if len(json_data["new_password"])<8 and len(json_data.get("password")) <= 20 or json_data["new_password"] != json_data["password_2"]:
             raise Exception("La nueva contraseña es incorrecta")   
         user.set_password(json_data["new_password"])
         user.save()
