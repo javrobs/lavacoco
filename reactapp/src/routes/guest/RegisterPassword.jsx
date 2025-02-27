@@ -65,9 +65,11 @@ const RegisterPassword = ({recover,config}) => {
                 </p>
             <ErrorMessage errorContent={errorMessage}/>
             <div className="grid sm:grid-cols-2 gap-2 self-stretch">
+                {config &&
                 <HoverInput className="col-span-2" label="Contraseña actual">
                     <input value={signupState.password||""} onChange={handleChange} name="password" minLength={8} type="password" required/>
                 </HoverInput>
+                }
                 <PasswordInputs signupState={signupState} handleChange={handleChange} config={true}/>
             </div>
             {changesSaved?
