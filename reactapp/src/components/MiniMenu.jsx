@@ -3,7 +3,7 @@ import Icon from "./Icon.jsx"
 import { useNavigate, NavLink, redirect} from "react-router";
 import { userContext } from "./App.jsx";
 
-const MiniMenu = () => {
+const MiniMenu = ({onlyMiniMenu}) => {
     const user = useContext(userContext);
     const navigate = useNavigate();
     const [menuShowing,setMenuShowing] = useState(false);
@@ -17,10 +17,6 @@ const MiniMenu = () => {
     ]
 
     const LoggedInNav = [
-        // {to:'/nosotros',text:'¿Quiénes somos?',icon:'local_laundry_service'},
-        // {to:'/cliente-frecuente',text:'Cliente frecuente',icon:'award_star'},
-        // {to:'/mis-ordenes',text:'Mis órdenes',icon:'receipt_long'},
-        // {to:'/invitar',text:'Invitar a un amigo',icon:'group_add'},
         {to:"/",text:"Inicio",icon:"home"},
         {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'},
         {to:'/preguntas-frecuentes',text:'Preguntas frecuentes', icon:'help'},
@@ -28,11 +24,11 @@ const MiniMenu = () => {
     
     const AdminNav = [
         {to:"/",text:"Inicio",icon:"home"},
-        {to:'/crear-orden',text:'Crear orden',icon:'receipt_long'},
+        {to:'/crear-orden',text:'Crear orden',icon:'receipt_long',showLarge:true},
         {to:'/crear-cliente',text:'Nuevo cliente',icon:'person_add'},
-        {to:'/tintoreria',text:'Tintorería',icon:'dry_cleaning'},
-        {to:'/gastos',text:"Gastos",icon:"paid"},
-        {to:'/lavadoras',text:'Lavadoras', icon:'local_laundry_service'},
+        {to:'/tintoreria',text:'Tintorería',icon:'dry_cleaning',showLarge:true},
+        {to:'/gastos',text:"Gastos",icon:"paid",showLarge:true},
+        {to:'/lavadoras',text:'Lavadoras', icon:'local_laundry_service',showLarge:true},
         {to:'/reportes',text:'Reportes', icon:'savings'},
         {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'},
         {to:'/preguntas-frecuentes',text:'Preguntas frecuentes', icon:'help'},
@@ -43,6 +39,12 @@ const MiniMenu = () => {
         (user.superuser?AdminNav:LoggedInNav):
         NotLoggedInNav).map((each,i)=>{
             return <NavLink onClick={()=>setMenuShowing(false)} key={"link"+i} to={each.to}><Icon icon={each.icon}/>{each.text}</NavLink>
+        })
+
+    const linksLarge = (user.logged_in?
+        (user.superuser?AdminNav:LoggedInNav):
+        NotLoggedInNav).filter(({showLarge})=>showLarge).map((each,i)=>{
+            return <NavLink key={"link"+i} to={each.to}>{each.text}</NavLink>
         })
 
     const style = {
@@ -76,6 +78,10 @@ const MiniMenu = () => {
     }
 
     return <>
+    {!onlyMiniMenu&&
+    <div className="flex self-stretch text-nowrap items-center gap-4 md:gap-8 max-sm:!hidden">
+        {linksLarge}
+    </div>}
     <button className='mini-menu-button ms-auto min-h-16 w-16 self-stretch hover:bg-sky-400 hover:bg-opacity-20' onClick={()=>setMenuShowing(true)}>
         <Icon classNameExtra='text-3xl' icon="menu"/>
     </button>
