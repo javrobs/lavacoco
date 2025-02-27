@@ -127,7 +127,7 @@ export default function Signup({admin,config}){
         {signupFailed&&<div className="w-full">
             <ErrorMessage errorContent={signupFailed}/>
         </div>}
-        <div className="grid sm:grid-cols-2 gap-1 mx-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mx-6">
             {!admin && !config && 
             <p className='text-left sm:col-span-2 -mx-3'>
                 {reference_user?
@@ -217,6 +217,7 @@ export function AddressForm({handleChange,formState,notEditable}){
 
 export const PasswordInputs = ({signupState,handleChange,config}) => {
     const pw2 = useRef(null);
+    const [showRule, setShowRule] = useState(false);
 
     function verifyPW(e){
         const {value} = e.target;
@@ -233,13 +234,21 @@ export const PasswordInputs = ({signupState,handleChange,config}) => {
             pw2.current.setCustomValidity(signupState.password != value?'Las contraseñas no coinciden':""); 
         }
     }
+    
+    const condition = ((config?signupState.new_password:signupState.password)||"").length>=8&&((config?signupState.new_password:signupState.password)||"").length<=20
 
     return <>
+    
+    <div style={{transition:".4s"}} className={`${showRule?'max-h-40':'max-h-0'} overflow-hidden sm:col-span-2`}>
+        <div className={`flex p-1 shadow-sm gap-1 items-center rounded-lg ${condition?'bg-emerald-300':'bg-red-300'} px-3`}>
+        <Icon icon={condition?"check_circle":"cancel"}/>La contraseña debe tener entre 8 y 20 caracteres.
+        </div>
+    </div>
     <HoverInput label={config?"Nueva contraseña":"Contraseña"}>
-        <input required value={config?signupState.new_password||"":(signupState.password||"")} onInput={verifyPW} name={config?"new_password":"password"} type="password" minLength={8}/>
+        <input required value={config?signupState.new_password||"":(signupState.password||"")} onInput={verifyPW} onFocus={()=>setShowRule(true)} onBlur={()=>setShowRule(false)} name={config?"new_password":"password"} type="password" minLength={8} maxLength={20}/>
     </HoverInput>
     <HoverInput label="Repite la contraseña">
-        <input required ref={pw2} value={signupState.password_2||""} onInput={verifyPW2} name="password_2" type="password" />
+        <input required ref={pw2} value={signupState.password_2||""} onInput={verifyPW2} name="password_2" type="password" minLength={8} maxLength={20} />
     </HoverInput>
     </>
 }

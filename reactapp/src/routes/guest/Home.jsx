@@ -40,7 +40,7 @@ const NotLoggedUser = () => {
     return <div className="relative h-dvh no-scrollbar snap-proximity">
         <video autoPlay muted loop src='/static/frontend/bg-5.mp4' id="hero-vid"/>
         <header className="fixed top-0 bg-[#102142] z-20 right-0">
-            <MiniMenu/>
+            <MiniMenu onlyMiniMenu={true}/>
         </header>
         <section className="z-10 snap-start relative min-h-dvh flex items-center px-3 justify-center">
             <div className='dark-bubble gap-5 p-8 text-center items-center justify-center flex flex-col'>
