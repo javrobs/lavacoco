@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react"
 import {useLoaderData, useNavigate, useParams} from "react-router"
 import HoverInput from "../../components/HoverInput.jsx";
-import HoverSelect from "../../components/HoverSelect.jsx";
+import TextSelect from "../../components/TextSelect.jsx";
 import Icon from "../../components/Icon.jsx";
 import cookieCutter from "../../utils/cookieCutter.js";
 import ErrorMessage from '../../components/ErrorMessage.jsx';
@@ -82,8 +82,8 @@ const CrearOrden = () => {
         </div>
 
     return <main className="container mx-auto py-3">
-        <form className="bubble-div max-w-lg mx-auto grid grid-cols-1 sm:grid-cols-2 gap-1 align-middle" onSubmit={handleSubmit}>
-            <div className="flex flex-wrap items-center justify-between sm:col-span-2">
+        <form className="bubble-div max-w-lg mx-auto flex flex-col gap-1 align-middle" onSubmit={handleSubmit}>
+            <div className="flex flex-wrap items-center justify-between">
                 <h1 className="text-orange-700">Nueva orden</h1>
                 <div className="flex flex-col gap-1">
                     <label className="flex items-center gap-1">
@@ -97,24 +97,24 @@ const CrearOrden = () => {
                 </div>
                 
             </div>
-            {orderFailed&&<div className="text-center sm:col-span-2">
+            {orderFailed&&<div className="text-center">
                 <ErrorMessage errorContent={orderFailed}/>
             </div>}
-            <div className="mx-6 grid sm:col-span-2 gap-1">
-                <HoverSelect className="sm:col-span-2" label="Cliente">
-                    <select onChange={handleUserChange} id="user" name="user" value={formState.user||""} required>
-                        <option value="" disabled>Selecciona...</option>
-                        {load.users.map(each=><option key={`user-${each.id}`} value={each.id}>{each.first_name} {each.last_name}</option>)}
-                        <option className="bg-blue-200" value='new'>Cliente nuevo</option>
-                    </select>
-                </HoverSelect>
-                <HoverInput className="sm:col-span-2" label="Entrega">
+            <div className="mx-6 flex flex-col gap-1">
+                <TextSelect 
+                    label="Cliente" 
+                    idName="user"
+                    changeState={setFormState}
+                    value={formState.user} 
+                    optionList={load.users.map(each=>({id:each.id,text:`${each.first_name} ${each.last_name}`}))}
+                />
+                <HoverInput label="Entrega">
                     <input onChange={handleChange} type="date" name="date" id="date" value={formState.date||""} required/>
                 </HoverInput>
             </div>
             
             {formState.deliver&&formState.user&&AddressElement}
-            <button className="btn btn-go sm:col-span-2 justify-self-center mt-2">Crear orden<Icon icon='add_box'/></button>
+            <button className="btn btn-go self-center mt-2">Crear orden<Icon icon='add_box'/></button>
         </form>
         
     </main>
