@@ -38,7 +38,7 @@ const NotLoggedUser = () => {
                     ];
 
     return <div className="relative h-dvh no-scrollbar snap-proximity">
-        <video autoPlay muted loop src='/static/frontend/bg-5.mp4' id="hero-vid"/>
+        <video autoPlay playsInline muted loop src='/static/frontend/bg-5.mp4' id="hero-vid"/>
         <header className="fixed top-0 bg-[#102142] z-20 right-0">
             <MiniMenu onlyMiniMenu={true}/>
         </header>

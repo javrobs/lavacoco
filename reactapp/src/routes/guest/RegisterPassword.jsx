@@ -69,7 +69,7 @@ const RegisterPassword = ({recover,config}) => {
                 <HoverInput className="sm:col-span-2" label="Contraseña actual">
                     <input value={signupState.password||""} onChange={handleChange} name="password" minLength={8} maxLength={20} type="password" required/>
                 </HoverInput>}
-                <PasswordInputs signupState={signupState} handleChange={handleChange} config={true}/>
+                <PasswordInputs signupState={signupState} handleChange={handleChange} config={config}/>
             </div>
             {changesSaved?
                 <button className="btn-green gap-1 items-center flex text-nowrap self-center mt-4">Cambios guardados<Icon icon='check'/></button>:

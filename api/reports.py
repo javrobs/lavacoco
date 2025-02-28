@@ -40,11 +40,12 @@ def month_year_info(request, month=timezone.localdate().month, year=timezone.loc
                 total_medias_cargas = Order.objects.filter(
                     status=4,
                     last_modified_at__month=month,
-                    last_modified_at__year=year
-                ).aggregate(Sum("has_half"))["has_half__sum"]
-                if total_medias_cargas:
-                    cat_value += total_medias_cargas
-                    append_three(" Media carga ",total_medias_cargas,f" {cat.text} ")
+                    last_modified_at__year=year,
+                    has_half__gt=0
+                ).aggregate(sum=Sum("has_half"),count=Count('has_half'))
+                if total_medias_cargas['sum']:
+                    cat_value += total_medias_cargas['sum']
+                    append_three(f" Media carga ({total_medias_cargas['count']}) ",total_medias_cargas['sum'],f" {cat.text} ")
                 
             if cat_value:
                 total_earnings += cat_value

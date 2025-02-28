@@ -7,6 +7,7 @@ import cookieCutter from "../../utils/cookieCutter.js";
 import Notify from "../../components/Notify.jsx";
 import SubMenuButton from "../../components/SubMenuButton.jsx";
 import ErrorMessage from "../../components/ErrorMessage.jsx";
+import CopyLinkButton from "../../components/CopyLinkButton.jsx";
 
 const Clientes = () => {
     const {clients} = useLoaderData();
@@ -62,7 +63,6 @@ const SelectClientShowLink = ({options,notifyOn,text,link}) =>{
     const [results,setResults] = useState({});
     const [notify,setNotify] = useState({show:false});
     const [errorContent,setErrorContent] = useState("");
-    const [copied,setCopied] = useState(false);
 
 
     const clientOptions = options.map(each=>{
@@ -71,13 +71,11 @@ const SelectClientShowLink = ({options,notifyOn,text,link}) =>{
 
     function handleSelect(e){
         setSelectUser(e.target.value);
-        setCopied(false);
         setResults({});
         setErrorContent("");
     }
 
     async function getLink(){
-        setCopied(false);
         const response = await fetch(link,{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
@@ -94,19 +92,12 @@ const SelectClientShowLink = ({options,notifyOn,text,link}) =>{
     }
 
     function notifyOn(){
-        setCopied(false);
         setNotify(()=>{
             return {show:true,
             number:results.phone,
             message:results.message,
             backFunction: ()=>{setNotify({show:false})}
         }})
-    }
-
-    function copyLink(){
-        navigator.clipboard.writeText(results.link).then(()=>{
-            setCopied(true);
-        })
     }
 
     return <div className="p-3 pt-0 sm:px-5">
@@ -128,7 +119,7 @@ const SelectClientShowLink = ({options,notifyOn,text,link}) =>{
                 {results.link}
             </div>
             <div className="flex justify-center gap-1 items-center">
-                <button className={`btn-back flex gap-1 items-center ${copied?"!bg-lime-500 hover:!bg-lime-600":""}`} onClick={copyLink}>{copied?<>Copiado <Icon icon="check"/></>:<>Copiar <Icon icon="content_copy"/></>}</button>
+                <CopyLinkButton textToCopy={results.link}/>
                 <button className="btn-green flex gap-1 items-center" onClick={()=>notifyOn(results.link,selectUser)}>Notificar <i className="bi bi-whatsapp"></i></button>
             </div>
         </div>}

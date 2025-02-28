@@ -47,7 +47,7 @@ def create_user(request, admin_created = False, edit_self = False):
                 user.username = json_data.get("username")
 
             if not admin_created and not edit_self:
-                if len(json_data.get("password")) < 8 or len(json_data.get("password")) > 20 or json_data.get("password_2") == json_data['password']:
+                if len(json_data.get("password")) < 8 or len(json_data.get("password")) > 20 or json_data.get("password_2") != json_data['password']:
                     raise Exception(f"Error en la contraseña")
                 user.set_password(json_data['password'])
                 
@@ -140,14 +140,14 @@ def get_link_recover_password_admin(request,already_has_password = True):
         find_user = User.objects.get(id=user_id)
         if already_has_password and not find_user.password:
             raise Exception(f"{find_user.first_name} no tiene contraseña")
-        elif not find_user.password == "":
+        elif not already_has_password and not find_user.password == "":
             raise Exception(f"{find_user.first_name} ya tiene contraseña")
         phone = Country_code.extend_phone(find_user)
-        link = recover_password_admin(request,find_user)
+        link = recover_password_admin(request,find_user) if already_has_password else invite_user_admin(request,find_user)
         message = f'Hola {find_user.first_name}, recupera tu contraseña aquí: {link}' if already_has_password else f'Hola {find_user.first_name}, te invito al sitio web de lavandería coco. Regístrate aquí: {link}'
         return JsonResponse({"success":True,
             "phone":phone,
-            "link":recover_password_admin(request,find_user),
+            "link":link,
             "message":message})
     except Exception as e:
         return JsonResponse({"success":False, "error":str(e)},status=500)
@@ -167,7 +167,7 @@ def set_recover_password(request,already_has_password = True):
 
         if already_has_password and find_user.password == "":
             raise Exception("No existe una contraseña")
-        elif find_user.password:
+        elif not already_has_password and find_user.password:
             raise Exception("Ya existe una contraseña")
         
         if len(json_data.get("password")) < 8 or len(json_data.get("password")) > 20 or json_data.get("password") != json_data.get("password_2"):
@@ -205,7 +205,7 @@ def change_my_password(request):
         user = request.user
         if not user.check_password(json_data['password']):
             raise Exception("La contraseña es incorrecta")    
-        if len(json_data["new_password"])<8 and len(json_data.get("password")) <= 20 or json_data["new_password"] != json_data["password_2"]:
+        if len(json_data["new_password"]) < 8 or len(json_data.get("password")) > 20 or json_data["new_password"] != json_data["password_2"]:
             raise Exception("La nueva contraseña es incorrecta")   
         user.set_password(json_data["new_password"])
         user.save()

@@ -1,33 +1,14 @@
-import React , {useState, useEffect} from "react"
+import React , {useState} from "react"
 import {useLoaderData, Link} from "react-router"
 import FrequentCustomerPlot from "../../plots/FrequentCustomerPlot.jsx"
 import Icon from "../../components/Icon.jsx"
 import Paginator from "../../components/Paginator.jsx"
 import MiniIconButton from "../../components/MiniIconButton.jsx"
+import CopyLinkButton from "../../components/CopyLinkButton.jsx"
 
 const LoggedUser = ({user}) => {
     const {success,...initialLoad} = useLoaderData()
-    const [copied,setCopied] = useState(false);
     const [{ordenes_activas,user_link,page,num_pages,cliente_freq,ordenes_pasivas},reload] = useState(initialLoad);
-
-    function copyLinkToClipboard(){
-        navigator.clipboard.writeText(user_link).then(()=>{
-            console.log("texto copiado")
-            setCopied(true);
-        },()=>{
-            console.log("algo falló :(")
-        })
-    }
-
-    useEffect(()=>{
-        function returnCopiedState(){
-            setCopied(false);
-            console.log("clicked and now we remove")
-            document.removeEventListener("click",returnCopiedState);
-        }
-        document.addEventListener("click",returnCopiedState);
-        return ()=>{document.removeEventListener("click",returnCopiedState);}
-    },[copied])
 
     const ordenesActivas = ordenes_activas.map(each => <OrderCardActive key={each.id} order={each}/>)
     const ordenesPasivas = ordenes_pasivas.map(each => <OrderCard key={each.id} order={each}/>)
@@ -57,12 +38,9 @@ const LoggedUser = ({user}) => {
             <div className="bubble-div-title">Invita a un amigo<Icon icon='group_add'/></div>
                 <div className="p-4 flex items-stretch flex-col gap-2">
                 ¡Comparte tu enlace de lavandería coco y obtén una carga gratis con la primera visita de tu amigo!
-                <button onClick={copyLinkToClipboard} className={`btn btn-go mx-auto ${copied?"!bg-lime-500 hover:!bg-lime-600":""}`}>
-                    {copied?
-                    <>Copiado<Icon icon='check'/></>:
-                    <>Copiar liga<Icon icon='link'/></>
-                    }
-                </button>
+                <div className="flex justify-center">
+                <CopyLinkButton textToCopy={user_link}/>
+                </div>
             </div>
         </div>
         {ordenesPasivas.length > 0 &&
