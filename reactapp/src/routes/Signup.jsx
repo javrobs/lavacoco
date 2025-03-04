@@ -4,8 +4,8 @@ import {useNavigate,Link, useLoaderData} from "react-router"
 import Icon from "../components/Icon.jsx"
 import ErrorMessage from "../components/ErrorMessage.jsx"
 import cookieCutter from "../utils/cookieCutter.js"
+import TextSelect from "../components/TextSelect.jsx"
 import HoverInput from "../components/HoverInput.jsx"
-import HoverSelect from "../components/HoverSelect.jsx"
 import MiniBlueLabel from "../components/MiniBlueLabel.jsx"
 import defaultLoader from "../utils/defaultLoader.js"
 
@@ -18,12 +18,6 @@ export default function Signup({admin,config}){
     const [chooseCountryCode,setChooseCountryCode] = useState(config?select_user.has_country_code:false);
     const navigate = useNavigate();
     const {refreshFunction} = useContext(userContext);
-    const selectCountryRef = useRef(null);
-
-    useEffect(()=>{
-        if(selectCountryRef.current){
-            selectCountryRef.current.focus();           
-        }},[chooseCountryCode])
 
     function toggleAddressForm(e){
         setTrackChanges(true);
@@ -114,9 +108,14 @@ export default function Signup({admin,config}){
         });
     }
 
+    function setCountry(id){
+        setSignupState(oldState=>({...oldState,countryCode:id}))
+    }
+
     const countryOptions = codes?codes.map(each=>{
-        return <option key={each.id} value={each.id}>{each.name} {String.fromCodePoint(each.code[0])+String.fromCodePoint(each.code[1])}</option>
+        return {id:each.id,text:`${each.name} ${String.fromCodePoint(each.code[0])+String.fromCodePoint(each.code[1])}`}
     }):[]
+
 
     return <form className={`flex ${ config && !admin ?"":"bubble-div text-center max-w-lg rounded-xl sm:mt-3"} mx-auto flex-col gap-y-3 p-3 px-5`} onSubmit={handleSubmit}>
         <h1 className="text-orange-700">{admin?(config?`Editar datos de ${select_user.info.first_name}`:"Cliente nuevo"):config?"Modificar mis datos":"Regístrate"}</h1>
@@ -147,18 +146,22 @@ export default function Signup({admin,config}){
         </div>
         {(!config || !select_user.is_admin) &&
         <>
-        <label className="flex gap-1 items-center mx-3 mt-2">
-            <input checked={chooseCountryCode} onChange={toggleCountryCode} className="accent-blue-600" type='checkbox'/>
-            <div className="text-start text-nowrap">{admin?"El teléfono no es mexicano.":"Mi teléfono no es mexicano"}</div>
-            {chooseCountryCode && 
-            <HoverSelect className="grow ms-2 !mt-0 flex" label="País">
-                <select className="!mt-0" ref={selectCountryRef} value={signupState.countryCode||""} name="countryCode" onChange={handleChange} required={true}>
-                    <option value="" disabled={true}>Selecciona...</option>
-                    {countryOptions}
-                </select>
-            </HoverSelect>
+        <div className="flex flex-col gap-1 mx-3 mt-2">
+            <label className="flex items-center gap-1 text-start text-nowrap">
+                <input checked={chooseCountryCode} onChange={toggleCountryCode} className="accent-blue-600" type='checkbox'/>
+                {admin?"El teléfono no es mexicano.":"Mi teléfono no es mexicano"}
+            </label>
+        
+            {chooseCountryCode &&
+                <TextSelect 
+                label="País" 
+                idName="countryCode"
+                changeState={setCountry}
+                value={signupState.countryCode} 
+                optionList={countryOptions}
+                />
             }
-        </label>
+        </div>
         <label className="flex gap-1 items-start mx-3">
             <input checked={extendAddressForm} onChange={toggleAddressForm} className="accent-blue-600 mt-1.5" type='checkbox'/>
             <span className="text-start">{admin?"Registrar dirección para entregas a domicilio.":"Opcional: Proporcionar mi dirección para entregas a domicilio, si están disponibles en mi zona."}</span>
@@ -174,7 +177,7 @@ export default function Signup({admin,config}){
         </>:
         <>{
             admin?
-                <button className="btn-back btn" onClick={()=>{history.back()}}>
+                <button type="button" className="btn-back btn" onClick={()=>{history.back()}}>
                     Regresar
                     <Icon icon='undo'/>
                 </button>:

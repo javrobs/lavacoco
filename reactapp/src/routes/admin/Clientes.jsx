@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import { useLoaderData, useNavigate } from "react-router";
 import MainContainer from "../../components/MainContainer.jsx";
-import HoverSelect from "../../components/HoverSelect.jsx";
+import TextSelect from "../../components/TextSelect.jsx"
 import Icon from "../../components/Icon.jsx";
 import cookieCutter from "../../utils/cookieCutter.js";
 import Notify from "../../components/Notify.jsx";
@@ -25,9 +25,13 @@ const Clientes = () => {
         link: '/api/get_link_recover_password_admin/'}
     ]
 
+    function selectEditClient(id){
+        nav("/editar-cliente/"+id+"/")
+    }
+
     return <MainContainer size="md">
-        <div className="bubble-div flex flex-col gap-2 !p-0 overflow-hidden">
-            <div className="grid gap-0.5 shrink-0 bg-slate-300 shadow-sm grid-cols-2">
+        <div className="bubble-div flex flex-col gap-2 !p-0">
+            <div className="grid gap-0.5 overflow-hidden rounded-t-lg shrink-0 bg-slate-300 shadow-sm grid-cols-2">
                 {[["Invitar clientes","group_add"],["Reestablecer contraseña","key"]].map((each,i)=>{
                     return <SubMenuButton 
                         classNameExtra="!py-0"
@@ -44,12 +48,13 @@ const Clientes = () => {
         <div className="bubble-div">
             <h1 className="text-orange-700">Editar datos de cliente</h1>
             <div className="flex">
-                <HoverSelect className="grow" label="Cliente">
-                    <select onChange={(e)=>nav("/editar-cliente/"+e.target.value+"/")}>
-                        <option value="" disabled>Selecciona...</option>
-                        {clients.map(each=><option key={each.id} value={each.id}>{each.name}</option>)}
-                    </select>
-                </HoverSelect>
+                <TextSelect
+                    label="Cliente" 
+                    className="grow"
+                    idName="user"
+                    changeState={selectEditClient} 
+                    optionList={clients.map(each=>({id:each.id,text:each.name}))}
+                />
             </div>
         </div>
     </MainContainer>
@@ -65,12 +70,8 @@ const SelectClientShowLink = ({options,notifyOn,text,link}) =>{
     const [errorContent,setErrorContent] = useState("");
 
 
-    const clientOptions = options.map(each=>{
-        return <option key={each.id} value={each.id}>{each.name}</option>;
-    })
-
-    function handleSelect(e){
-        setSelectUser(e.target.value);
+    function handleSelect(id){
+        setSelectUser(id);
         setResults({});
         setErrorContent("");
     }
@@ -104,12 +105,15 @@ const SelectClientShowLink = ({options,notifyOn,text,link}) =>{
         {text}
         <ErrorMessage errorContent={errorContent}/>
         <div className="flex items-center">
-            <HoverSelect className="grow" label="Cliente">
-                <select className="!rounded-e-none" value={selectUser||""} onChange={handleSelect}>
-                    <option value="" disabled>Selecciona...</option>
-                    {clientOptions}
-                </select>
-            </HoverSelect>
+            <TextSelect 
+                className="grow" 
+                label="Cliente"
+                value={selectUser}
+                idName="user"
+                inFlex={true}
+                changeState={handleSelect}
+                optionList={options.map(each=>({id:each.id,text:`${each.name}`}))}
+            />
             <button className="btn-go !h-8 mt-3 !text-base !rounded-s-none disabled:!bg-slate-400 flex gap-1 items-center" onClick={getLink} disabled={!selectUser}>Generar link<Icon icon="link"/></button>
         </div>
         {results.link && 

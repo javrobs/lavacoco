@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useLoaderData, useNavigate, useParams} from "react-router"
+import {useLoaderData, useNavigate, useParams, Link} from "react-router"
 import HoverInput from "../../components/HoverInput.jsx";
 import TextSelect from "../../components/TextSelect.jsx";
 import Icon from "../../components/Icon.jsx";
@@ -26,6 +26,10 @@ const CrearOrden = () => {
         } else {
             setFormState(oldValues=>({...oldValues,[name]:value}));
         }
+    }
+
+    function selectUser(id){
+        setFormState(oldValues=>({...oldValues,user:id}));
     }
 
     function handleSubmit(e){
@@ -82,7 +86,7 @@ const CrearOrden = () => {
         </div>
 
     return <main className="container mx-auto py-3">
-        <form className="bubble-div max-w-lg mx-auto flex flex-col gap-1 align-middle" onSubmit={handleSubmit}>
+        <form autoComplete="off" className="bubble-div max-w-lg mx-auto flex flex-col gap-1 align-middle" onSubmit={handleSubmit}>
             <div className="flex flex-wrap items-center justify-between">
                 <h1 className="text-orange-700">Nueva orden</h1>
                 <div className="flex flex-col gap-1">
@@ -101,13 +105,18 @@ const CrearOrden = () => {
                 <ErrorMessage errorContent={orderFailed}/>
             </div>}
             <div className="mx-6 flex flex-col gap-1">
+                <div className="flex">
                 <TextSelect 
                     label="Cliente" 
+                    className="grow"
                     idName="user"
-                    changeState={setFormState}
+                    inFlex={true}
+                    changeState={selectUser}
                     value={formState.user} 
                     optionList={load.users.map(each=>({id:each.id,text:`${each.first_name} ${each.last_name}`}))}
                 />
+                <Link className="mt-3" to="/crear-cliente/"><button className="btn-back flex gap-1 text-sm !h-8 !rounded-l-none items-center" type="button"><Icon  icon="person_add"/></button></Link>
+                </div>
                 <HoverInput label="Entrega">
                     <input onChange={handleChange} type="date" name="date" id="date" value={formState.date||""} required/>
                 </HoverInput>
