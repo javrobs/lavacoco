@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect} from "react"
 import lowerCaseNoAccent from "../utils/lowerCaseNoAccent.js"
 
-const TextSelect = ({label,className,idName,optionList,value,changeState}) => {
+const TextSelect = ({label,className,idName,optionList,value,changeState,inFlex}) => {
     const [searchValue,setSearchValue] = useState(optionList.find(({id})=>id==value)?.text||"");
     const [showList,setShowList] = useState(false);
     const inputRef = useRef(null);
@@ -23,9 +23,17 @@ const TextSelect = ({label,className,idName,optionList,value,changeState}) => {
         setSearchValue(e.target.value);
     }
 
+    function checkEnter(e){
+        if(e.key=="Enter"){
+            e.preventDefault();
+            const {id} = optionList.find(({text})=>lowerCaseNoAccent(text).includes(lowerCaseNoAccent(searchValue)))
+            selectOption(id)
+        }
+    }
+
     function selectOption(id){
         setSearchValue(optionList.find(each=>each.id==id)?.text);
-        changeState(oldValue=>({...oldValue,[idName]:id}))
+        changeState(id);
         setShowList(false);
         inputRef.current.blur();
     }
@@ -55,20 +63,21 @@ const TextSelect = ({label,className,idName,optionList,value,changeState}) => {
     return <div className={`flex flex-col  ${className}`} ref={divRef} >
         <label className={`inputLabel ${searchValue?"valued":""}`}>
             <input ref={inputRef} 
-                className={showList?"!rounded-b-none !rounded-t-xl":""}
+                className={inFlex?(showList?"!rounded-b-none !rounded-tr-none !rounded-tl-xl":"!rounded-r-none"):(showList?"!rounded-b-none !rounded-t-xl":"")}
                 type="text" 
                 onChange={manageInput} 
-                onFocus={()=>setShowList(true)} 
+                onFocus={()=>setShowList(true)}
+                onKeyDown={checkEnter}
                 id={idName} 
-                name={idName} 
-                value={searchValue} 
+                name={idName}
+                value={searchValue}
                 required
             />
             <span>{label}</span>
         </label>
         <div className="relative">
             {showList && 
-            <div className="z-10 max-h-[50dvh] border-sky-600  border-2 border-t-0 shadow-md rounded-b-xl overflow-hidden absolute w-full divide-y-[1px] divide-sky-600">
+            <div className="z-10 max-h-[50dvh] border-sky-600  border-2 border-t-0 shadow-md rounded-b-xl overflow-auto no-scrollbar-x absolute w-full divide-y-[1px] divide-sky-600">
                 {listOfMatches}
             </div>}
         </div>
