@@ -14,7 +14,7 @@ import defaultLoader from "../utils/defaultLoader.js"
 import Tintoreria from "../routes/admin/Tintoreria.jsx"
 import Gastos from "../routes/admin/Gastos.jsx"
 import Reportes from "../routes/admin/Reportes.jsx"
-import Lavadoras from "../routes/admin/Lavadoras.jsx"
+import Listado from "../routes/admin/Listado.jsx"
 import Clientes from "../routes/admin/Clientes.jsx"
 import RegisterPassword from "../routes/guest/RegisterPassword.jsx"
 
@@ -64,8 +64,8 @@ export default function App(){
                 {path:"/lista-de-precios", element:<ListaDePrecios/>, loader:()=>defaultLoader('price')},
                 {path:"/orden/:orderId",element:<Orden/>,loader:({params})=>defaultLoader("order",params.orderId)},
                 {path:"/tintoreria",element:<Tintoreria/>,loader:()=>defaultLoader('drycleaning')},
-                {path:"/lavadoras",element:<Lavadoras/>,loader:()=>defaultLoader('laundry_machines')},
-                {path:"/lavadoras/:day/:month/:year",element:<Lavadoras/>,loader:({params})=>defaultLoader('laundry_machines',params.day,params.month,params.year)},
+                {path:"/listado",element:<Listado/>,loader:()=>defaultLoader('laundry_machines')},
+                {path:"/listado/:day/:month/:year",element:<Listado/>,loader:({params})=>defaultLoader('laundry_machines',params.day,params.month,params.year)},
                 {path:"/clientes",element:<Clientes/>,loader:()=>defaultLoader('clients')},
                 {path:"/editar-cliente/:userID",element:<Signup admin={true} config={true}/>, loader:({params})=>defaultLoader('edit_user',params.userID)},
                 {path:"/invitacion-admin/:JWTinvite",element:<RegisterPassword/>,loader:({params})=>defaultLoader('signup_admin_invite',params.JWTinvite)},

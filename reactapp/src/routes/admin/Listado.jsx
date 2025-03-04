@@ -4,14 +4,14 @@ import TimeAndOrder from "../../components/TimeAndOrder.jsx"
 import HoverInput from "../../components/HoverInput.jsx";
 import Icon from "../../components/Icon.jsx";
 
-const Lavadoras = () => {
+const Listado = () => {
     const {success,dateSelected,orders} = useLoaderData();
     const [date,setDate] = useState(dateSelected);
     const navigator = useNavigate();
 
 
     function redirectToDate(){
-        navigator(`/lavadoras/${date.split("-").reverse().join("/")}`)
+        navigator(`/listado/${date.split("-").reverse().join("/")}`)
     }
 
     function checkForEnter(e){
@@ -36,4 +36,4 @@ const Lavadoras = () => {
     </main>
 }
 
-export default Lavadoras;
+export default Listado;

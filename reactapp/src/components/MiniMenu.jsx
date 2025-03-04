@@ -28,7 +28,7 @@ const MiniMenu = ({onlyMiniMenu}) => {
         {to:'/crear-cliente',text:'Nuevo cliente',icon:'person_add'},
         {to:'/tintoreria',text:'Tintorería',icon:'dry_cleaning',showLarge:true},
         {to:'/gastos',text:"Gastos",icon:"paid",showLarge:true},
-        {to:'/lavadoras',text:'Lavadoras', icon:'local_laundry_service',showLarge:true},
+        {to:'/listado',text:'Listado', icon:'local_laundry_service',showLarge:true},
         {to:'/reportes',text:'Reportes', icon:'savings'},
         {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'},
         {to:'/preguntas-frecuentes',text:'Preguntas frecuentes', icon:'help'},
