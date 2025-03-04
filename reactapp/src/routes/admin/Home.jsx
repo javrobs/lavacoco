@@ -41,7 +41,7 @@ const AdminUser = () => {
             </div>
             <div className="grid gap-0.5 shrink-0 bg-slate-300 shadow-sm grid-cols-2 sm:grid-cols-4">
                 {["clock_loader_10","clock_loader_40","clock_loader_60","clock_loader_90"].map((each,i)=>{
-                    const names = ['Nuevas','Abiertas',"Cerradas","Listas"];
+                    const names = ['Nuevas','En proceso',"Confirmadas","Listas"];
                     return <SubMenuButton 
                         classNameExtra="!py-0"
                         key = {`submenu-${i}`}

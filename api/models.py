@@ -95,7 +95,7 @@ class Order(models.Model):
         return total + other_sum + self.has_half
     
     def status_string(self):
-        status_ref = ["Nueva","Abierta","Cerrada","Lista","Terminada"]
+        status_ref = ["Nueva","En proceso","Confirmada","Lista","Terminada"]
         return status_ref[self.status]
     
     @staticmethod

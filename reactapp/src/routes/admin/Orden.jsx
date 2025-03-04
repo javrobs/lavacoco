@@ -16,7 +16,7 @@ const Orden = () => {
         };
 
 
-    const statusNames = ['Nueva','Abierta',"Cerrada","Lista","Terminada"];
+    const statusNames = ['Nueva','En proceso',"Confirmada","Lista","Terminada"];
 
     console.log(order.status == 3 && superuser && <Payment/>)
 

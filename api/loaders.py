@@ -17,7 +17,7 @@ def home_info(request, page = 1):
     if user.is_superuser:
         result = {"success":True}
         result["orders"] = [model_to_dict(order)|{"date":order.date_as_string(),"user":order.user.get_full_name(),"phone":Country_code.extend_phone(order.user)} for order in Order.objects.filter(status__lte=4).order_by("date")]
-        result["status_strings"] = ["Nueva","Abierta","Cerrada","Lista","Terminada"]
+        result["status_strings"] = ["Nueva","En proceso","Confirmada","Lista","Terminada"]
         return JsonResponse(result)
     else:
         result = {"success":True}
