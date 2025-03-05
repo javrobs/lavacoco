@@ -31,7 +31,7 @@ const Clientes = () => {
 
     return <MainContainer size="md">
         <div className="bubble-div flex flex-col gap-2 !p-0">
-            <div className="grid gap-0.5 overflow-hidden rounded-t-lg shrink-0 bg-slate-300 shadow-sm grid-cols-2">
+            <div className="grid gap-0.5 overflow-hidden rounded-t-lg shrink-0 bg-slate-300 shadow-sm max-sm:grid-cols-1 grid-cols-2">
                 {[["Invitar clientes","group_add"],["Reestablecer contraseña","key"]].map((each,i)=>{
                     return <SubMenuButton 
                         classNameExtra="!py-0"
@@ -114,7 +114,7 @@ const SelectClientShowLink = ({options,notifyOn,text,link}) =>{
                 changeState={handleSelect}
                 optionList={options.map(each=>({id:each.id,text:`${each.name}`}))}
             />
-            <button className="btn-go !h-8 mt-3 !text-base !rounded-s-none disabled:!bg-slate-400 flex gap-1 items-center" onClick={getLink} disabled={!selectUser}>Generar link<Icon icon="link"/></button>
+            <button className="btn-go !h-8 mt-3 !text-base !rounded-s-none disabled:!bg-slate-400 flex gap-1 items-center" onClick={getLink} disabled={!selectUser}><span className="max-sm:hidden">Generar link</span><Icon icon="link"/></button>
         </div>
         {results.link && 
         <div className="flex flex-col gap-2 mt-3">
@@ -122,7 +122,7 @@ const SelectClientShowLink = ({options,notifyOn,text,link}) =>{
             <div className="bg-slate-300 shadow-md rounded-md p-3 break-words italic">
                 {results.link}
             </div>
-            <div className="flex justify-center gap-1 items-center">
+            <div className="flex flex-wrap justify-center gap-1 items-center">
                 <CopyLinkButton textToCopy={results.link}/>
                 <button className="btn-green flex gap-1 items-center" onClick={()=>notifyOn(results.link,selectUser)}>Notificar <i className="bi bi-whatsapp"></i></button>
             </div>

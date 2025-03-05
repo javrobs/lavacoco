@@ -4,7 +4,7 @@ import Icon from "./Icon.jsx";
 
 const Notify = ({show,number,message,backFunction,afterFunction}) => {
     return show && <div className="absolute top-0 left-0 flex justify-center items-center w-full h-dvh z-10 bg-black bg-opacity-80">
-        <div className="py-5 px-8 max-w-screen-sm rounded-md shadow-md gap-3 bg-slate-200 flex flex-col">
+        <div className="py-5 px-8 max-sm:max-w-full max-w-screen-sm rounded-md shadow-md gap-3 bg-slate-200 flex flex-col">
             <h1 className="self-center text-orange-700">Notificar</h1>
             <div className="mx-3 text-lg">Mensaje:</div>
             <div className="text-wrap break-words bg-white rounded-md shadow-md p-3 -mt-2"><i>{message}</i></div>

@@ -6,13 +6,13 @@ const MainContainer = ({children, size,ignore}) => {
     let sizeClass = ""
     switch(size){
         case "lg":
-            sizeClass = "max-w-screen-lg";
+            sizeClass = "max-lg:max-w-full max-w-screen-lg";
             break;
         case "md":
-            sizeClass = "max-w-screen-md";
+            sizeClass = "max-md:max-w-full max-w-screen-md";
             break;
         case "sm":
-            sizeClass = "max-w-screen-sm";
+            sizeClass = "max-sm:max-w-full max-w-screen-sm";
             break;
     }
 

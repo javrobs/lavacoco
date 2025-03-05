@@ -170,7 +170,7 @@ export default function Signup({admin,config}){
         }
         {extendAddressForm&&<AddressForm formState={signupState} handleChange={handleChange}/>}
         
-        <div className="justify-center flex gap-2">
+        <div className="justify-center flex-wrap flex gap-2">
         {config?<>
             <button className="btn btn-back disabled:!bg-slate-400" type="button" onClick={syncChanges} disabled={!trackChanges}>Reestablecer<Icon icon="undo"/></button>
             <button className="btn-go text-nowrap flex items-center gap-1 disabled:!bg-slate-400" disabled={!trackChanges}>Guardar cambios<Icon icon='arrow_forward'/></button>
