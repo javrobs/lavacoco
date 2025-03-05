@@ -247,19 +247,19 @@ def spending_info(request,page=1):
 
 @staff_member_required
 def laundry_machines_info(request,day=None,month=None,year=None):
+    result = {"success":True}
     try:
-        dateQuery = datetime.date(day=day,month=month,year=year) if day and month and year else timezone.localdate()
+        result['dateSelected'] = datetime.date(day=day,month=month,year=year) if day and month and year else timezone.localdate()
     except:
-        dateQuery = timezone.localdate()
-    def AM_PM(time):
-        hours = time.hour
-        minutes = str(100 + time.minute)[1:]
-        return f"{hours if hours <= 12 else hours - 12}:{minutes} {'PM' if hours >= 2 else 'AM'}"
-    orders = [{"time":AM_PM(timezone.localtime(o.opened_datetime)),
+        result['dateSelected'] = timezone.localdate()
+    result['dateBack'] = result['dateSelected'] - timezone.timedelta(days=1)
+    if result['dateSelected'] < timezone.localdate():
+        result['dateForward'] = result['dateSelected'] + timezone.timedelta(days=1)
+    result['orders'] = [{"time":timezone.localtime(o.opened_datetime).strftime("%I:%M %p"),
                "id":o.id,
                "status":o.status_string(),
-               "concept":f"Orden #{o.id} - {o.user.get_full_name()}"}for o in Order.objects.filter(opened_datetime__date=dateQuery).order_by("opened_datetime").all()]
-    return JsonResponse({"success":True,"orders": orders,"dateSelected":dateQuery})
+               "concept":f"Orden #{o.id} - {o.user.get_full_name()}"}for o in Order.objects.filter(opened_datetime__date=result['dateSelected']).order_by("opened_datetime").all()]
+    return JsonResponse(result)
 
 @staff_member_required
 def clients_info(request):
