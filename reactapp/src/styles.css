@@ -192,7 +192,7 @@ label.inputLabel>select,label.inputLabel>input{
 }
 
 label.inputLabel.valued>select,label.inputLabel.valued>input{
-    @apply text-black;
+    @apply text-black bg-white;
 }
 
 label.inputLabel>select>option{
