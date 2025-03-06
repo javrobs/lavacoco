@@ -15,7 +15,7 @@ const OrderList = () => {
     const priceList = Object.values(prices).reduce((prev,value)=>{
         return {...prev,...value.prices}
     },{})
-    
+
 
     //Send State handling
     const [sendState,setSendState] = useState(
@@ -31,7 +31,20 @@ const OrderList = () => {
         function changeOrderList (selectKey,value){
             setSendState(oldValue => {
                 if (selectKey == 1){
-                    oldValue.discountsApplied = discounts_available.filter((each,i) => i < value - 1).map(each=>({...each,value:priceList["1"].price}));
+                    let loadsToDiscount = value;
+                    oldValue.discountsApplied = discounts_available.recs_invite.filter(each => {
+                        if(loadsToDiscount - 1 > 0){
+                            loadsToDiscount--;
+                            return true;
+                        } 
+                        return false;
+                    }).concat(discounts_available.other_discounts.filter(each => {
+                        if(loadsToDiscount > 0){
+                            loadsToDiscount--;
+                            return true;
+                        } 
+                        return false;
+                    })).map(each=>({...each,value:priceList["1"].price}));
                 }
                 if(Number(value) == 0) {
                     const {[selectKey]:_, ...newItems} = oldValue.orderList;
