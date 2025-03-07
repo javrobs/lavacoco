@@ -24,6 +24,7 @@ urlpatterns = [
 
     path('create_order/',orders.create_order),
     path('promote_order/',orders.promote_order),
+    path('delete_order/',orders.delete_order),
     path('save_payment_and_continue/',orders.save_payment_and_continue),
     path('set_order_list/<int:order_id>/',orders.set_order_list),
     path('set_order_list_get_message/<int:order_id>/',orders.set_order_list),

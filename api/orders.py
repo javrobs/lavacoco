@@ -153,3 +153,8 @@ def clothes_ready_message(request,order_id):
     except Exception as e:
         print(e)
         return JsonResponse({"success":False},status=500)
+    
+@staff_member_required
+@require_POST
+def delete_order(request):
+    return JsonResponse({"success":True})
