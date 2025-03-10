@@ -131,10 +131,15 @@ class Dryclean_movements(models.Model):
     
 
 class Spending_movements(models.Model):
+    class payment_type_choices(models.IntegerChoices):
+        EFECTIVO = 0
+        TARJETA = 1
+        CAJA = 2
+
     amount = models.SmallIntegerField()
     category = models.TextField(max_length=40)
     created_at = models.DateTimeField(auto_now_add = True)
-    card_payment = models.BooleanField(default = False)
+    payment_type = models.IntegerField(choices = payment_type_choices, default=0)
     
 
 class List_Of_Order(models.Model):

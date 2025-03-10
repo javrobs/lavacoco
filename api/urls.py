@@ -58,5 +58,7 @@ urlpatterns = [
     path('edit_user_info/<int:user_id>/',loaders.edit_user_info),
     path('signup_admin_invite_info/<str:JWTInvite>/',loaders.signup_admin_invite_info),
     path('recover_pw_info/<str:JWTInvite>/',loaders.recover_pw_info),
+    path('closeout_info/',loaders.closeout_info),
+    path('closeout_info/<int:day>/<int:month>/<int:year>/',loaders.closeout_info),
 ]
 

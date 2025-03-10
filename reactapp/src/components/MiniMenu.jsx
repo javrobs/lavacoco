@@ -29,6 +29,7 @@ const MiniMenu = ({onlyMiniMenu}) => {
         {to:'/tintoreria',text:'Tintorería',icon:'dry_cleaning',showLarge:true},
         {to:'/gastos',text:"Gastos",icon:"paid",showLarge:true},
         {to:'/listado',text:'Listado', icon:'local_laundry_service',showLarge:true},
+        {to:'/corte',text:'Corte', icon:'money_bag'},
         {to:'/reportes',text:'Reportes', icon:'savings'},
         {to:'/lista-de-precios',text:'Lista de precios', icon:'payments'},
         {to:'/preguntas-frecuentes',text:'Preguntas frecuentes', icon:'help'},

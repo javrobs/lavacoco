@@ -30,6 +30,8 @@ urls_admin_only = [
     "clientes/",
     "editar-cliente/<int:user_id>/",
     "reportes/<int:month>/<int:year>/",
+    'corte/',
+    'corte/<int:day>/<int:month>/<int:year>/'
 ]
 
 urls_all_users_only = [

@@ -28,7 +28,7 @@ class MovementsAdmin(admin.ModelAdmin):
     list_display = ["amount","created_at","order"]
 
 class SpendingAdmin(admin.ModelAdmin):
-    list_display = ["amount","category","created_at","card_payment"]    
+    list_display = ["amount","category","created_at","payment_type"]    
 
 class CountriesAdmin(admin.ModelAdmin):
     list_display = ["id","name","phone","unicode_1","unicode_2"]

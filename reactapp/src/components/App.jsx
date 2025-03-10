@@ -16,6 +16,7 @@ import Gastos from "../routes/admin/Gastos.jsx"
 import Reportes from "../routes/admin/Reportes.jsx"
 import Listado from "../routes/admin/Listado.jsx"
 import Clientes from "../routes/admin/Clientes.jsx"
+import Corte from "../routes/admin/Corte.jsx"
 import RegisterPassword from "../routes/guest/RegisterPassword.jsx"
 
 export const userContext = createContext();
@@ -57,6 +58,7 @@ export default function App(){
                     {path:"/configuracion/mis-datos",element:<Signup config={true}/>,loader:()=>defaultLoader('config')},
                     {path:"/configuracion/cambiar-contrasena",element:<RegisterPassword config={true}/>},
                 ]},
+                {path:'/corte',element:<Corte/>, loader:()=>defaultLoader("closeout")},
                 {path:"/gastos", element:<Gastos/>, loader:()=>defaultLoader("spending")},
                 {path:"/reportes/:month/:year", element:<Reportes/>, loader:({params})=>defaultLoader("reports",params.month,params.year)},
                 {path:"/reportes/", element:<Reportes/>, loader:()=>defaultLoader("reports")},

@@ -229,7 +229,6 @@ def spending_info(request,page=1):
     cat = [each["category"] for each in Spending_movements.objects.values("category").distinct().all()]
     movements = Spending_movements.objects.all().order_by("-id")
     paginator = Paginator(movements, 15)
-    print([thing for thing in paginator.get_page(1)])
     if page < 1:
         page = 1
     if page > paginator.num_pages:
@@ -237,7 +236,7 @@ def spending_info(request,page=1):
     movements = [
         {"id":movement.id,
         "concept": movement.category,
-        "cardPayment": movement.card_payment,
+        "paymentType": movement.payment_type,
         "due": movement.amount,
         "date": timezone.localdate(movement.created_at)} for movement in paginator.get_page(page)]
     return JsonResponse({"success": True, 
@@ -250,7 +249,7 @@ def spending_info(request,page=1):
 def laundry_machines_info(request,day=None,month=None,year=None):
     result = {"success":True}
     try:
-        result['dateSelected'] = datetime.date(day=day,month=month,year=year) if day and month and year else timezone.localdate()
+        result['dateSelected'] = datetime.date(day=day,month=month,year=year)
     except:
         result['dateSelected'] = timezone.localdate()
     result['dateBack'] = result['dateSelected'] - timezone.timedelta(days=1)
@@ -270,3 +269,11 @@ def clients_info(request):
         return JsonResponse(result) 
     except Exception as e:
         return JsonResponse({"success":False,"error":str(e)},status=400)
+
+@staff_member_required
+def closeout_info(request):
+    result = {"success":True}
+    result['orders']=[{"id":o.id,"text":o.user.get_full_name(),"earnings":o.earnings()-o.discounts()} for o in Order.objects.filter(status=4, last_modified_at__date=timezone.localdate(), card_payment=False).all()]
+    result['gastos']=[{"id":spending.id,"text":spending.category,"amount":-spending.amount} for spending in Spending_movements.objects.filter(created_at__date=timezone.localdate(), card_payment=False).all()]
+    result['dryclean_gastos']=[{"id":move.id,'amount':-move.amount} for move in  Dryclean_movements.objects.filter(amount__gte=0, created_at__date=timezone.localdate()).all()]
+    return JsonResponse(result)
