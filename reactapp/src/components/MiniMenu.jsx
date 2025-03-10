@@ -38,14 +38,14 @@ const MiniMenu = ({onlyMiniMenu}) => {
 
     const links = (user.logged_in?
         (user.superuser?AdminNav:LoggedInNav):
-        NotLoggedInNav).map((each,i)=>{
-            return <NavLink onClick={()=>setMenuShowing(false)} key={"link"+i} to={each.to}><Icon icon={each.icon}/>{each.text}</NavLink>
+        NotLoggedInNav).map((each)=>{
+            return <NavLink onClick={()=>setMenuShowing(false)} key={each.to} to={each.to}><Icon icon={each.icon}/>{each.text}</NavLink>
         })
 
     const linksLarge = (user.logged_in?
         (user.superuser?AdminNav:LoggedInNav):
-        NotLoggedInNav).filter(({showLarge})=>showLarge).map((each,i)=>{
-            return <NavLink key={"link"+i} to={each.to}>{each.text}</NavLink>
+        NotLoggedInNav).filter(({showLarge})=>showLarge).map((each)=>{
+            return <NavLink key={each.to} to={each.to}>{each.text}</NavLink>
         })
 
     const style = {
