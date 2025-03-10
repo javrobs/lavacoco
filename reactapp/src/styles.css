@@ -188,7 +188,7 @@ label.inputLabel input+span,label.inputLabel select+span{
 }
 
 label.inputLabel>select,label.inputLabel>input{
-    @apply text-white;
+    @apply text-white bg-white;
 }
 
 label.inputLabel.valued>select,label.inputLabel.valued>input{
