@@ -105,6 +105,9 @@ const CrearOrden = () => {
                 <ErrorMessage errorContent={orderFailed}/>
             </div>}
             <div className="mx-6 flex flex-col gap-1">
+                <HoverInput label="# de nota">
+                    <input className="no-arrow" required value={formState.noteID||""} onChange={handleChange} type="number" name="noteID" id="noteID"/>
+                </HoverInput>
                 <div className="flex">
                 <TextSelect 
                     label="Cliente" 

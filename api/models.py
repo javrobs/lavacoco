@@ -43,6 +43,7 @@ class Order(models.Model):
         CERRADA = 2
         LISTA = 3
         TERMINADA = 4
+        ELIMINADA = 5
 
     user = models.ForeignKey(User, on_delete = models.PROTECT)
     date = models.DateField()
@@ -95,16 +96,9 @@ class Order(models.Model):
         return total + other_sum + self.has_half
     
     def status_string(self):
-        status_ref = ["Nueva","En proceso","Confirmada","Lista","Terminada"]
+        status_ref = ["Nueva","En proceso","Confirmada","Lista","Terminada","Eliminada"]
         return status_ref[self.status]
     
-    @staticmethod
-    def earning_month_year(month,year):
-        result = 0
-        print(month,year)
-        for each in Order.objects.filter(last_modified_at__month=month).filter(last_modified_at__year=year).all():
-            result += each.earnings()
-        return result
     
     def tinto_total(self):
         order_tinto_sum = self.list_of_order_set.aggregate(total = Sum(F("price_dryclean_due") * F("quantity")))["total"] or 0

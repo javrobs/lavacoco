@@ -18,7 +18,7 @@ const AdminUser = () => {
     const [loaderData,setLoaderData] = useState(initialLoaderData); 
     const [selectStatus,setSelectStatus] = useState(0);
     const [notify,setNotify] = useState({show:false});
-    const [deleteOrder,setDeleteOrder] = useState({show:false});
+    const [orderToDelete,setOrderToDelete] = useState({show:false});
 
     async function promoteOrder(id){
         const response = await fetch("/api/promote_order/",{
@@ -36,35 +36,22 @@ const AdminUser = () => {
         }
     }
 
-    async function deleteOrderFunction(){
-        console.log(deleteOrder);
-        if(deleteOrder.matchInput==deleteOrder.matchValue){
+    async function deleteOrder(){
+
+        if(orderToDelete.matchInput==orderToDelete.matchValue){
             const response = await fetch("/api/delete_order/",{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
-            body:JSON.stringify(deleteOrder)})
+            body:JSON.stringify(orderToDelete)})
             const data = await response.json();
             if(data.success){
                 const newLoaderData = await defaultLoader("home");
                 setLoaderData(newLoaderData)
-                setDeleteOrder({show:false});
+                setOrderToDelete({show:false});
             }
         } else {
-            setDeleteOrder(oldValue=>({...oldValue,error:"El texto no concuerda, revisa espacios, acentos y minúsculas"}))
+            setOrderToDelete(oldValue=>({...oldValue,error:"El texto no concuerda, revisa espacios, acentos y minúsculas"}))
         }
-        // const response = await fetch("/api/delete_order/",{
-        //     method:"POST",
-        //     headers:{"X-CSRFToken":cookieCutter("csrftoken")},
-        //     body:JSON.stringify({id:id})})
-        // const data = await response.json();
-        // if(data.success){
-        //     console.log("promoted this:",id);
-        //     const newLoaderData = await defaultLoader("home");
-        //     setLoaderData(newLoaderData);
-        //     setSelectStatus(oldValue => oldValue + 1)
-        // } else {
-        //     console.log("error in promoting",id);
-        // }
     }
     
         
@@ -88,18 +75,18 @@ const AdminUser = () => {
                     </SubMenuButton>
                 })}
             </div>
-            <Orders statusValue={selectStatus} setNotify={setNotify} loaderData={loaderData} setDeleteOrder={setDeleteOrder} promoteOrder={promoteOrder}/>
+            <Orders statusValue={selectStatus} setNotify={setNotify} loaderData={loaderData} setOrderToDelete={setOrderToDelete} promoteOrder={promoteOrder}/>
             <Notify {...notify}/>
-            <ModalConfirm show={deleteOrder.show}>
+            <ModalConfirm show={orderToDelete.show}>
                 <h1 className="self-center text-orange-700">Confirmar</h1>
-                <div className="mx-3 self-center">{deleteOrder.text}</div>
-                <ErrorMessage errorContent={deleteOrder.error}/>
-                <HoverInput label={`Escribe "${deleteOrder.matchValue}"`}>
-                    <input type="text" name="matchInput" value={deleteOrder.matchInput||""} onChange={(e)=>setDeleteOrder(oldValue=>({...oldValue,[e.target.name]:e.target.value}))}/>
+                <div className="mx-3 self-center">{orderToDelete.text}</div>
+                <ErrorMessage errorContent={orderToDelete.error}/>
+                <HoverInput label={`Escribe "${orderToDelete.matchValue}"`}>
+                    <input type="text" name="matchInput" value={orderToDelete.matchInput||""} onChange={(e)=>setOrderToDelete(oldValue=>({...oldValue,[e.target.name]:e.target.value}))}/>
                 </HoverInput>	
                 <div className="flex justify-center flex-wrap gap-3">
-                    <button className="flex items-center gap-1 btn-back text-nowrap justify-center grow" type="button" onClick={()=>{setDeleteOrder({show:false})}}>Regresar<Icon icon="undo"/></button>
-                    <button className="btn-go justify-center text-nowrap grow flex items-center gap-1" onClick={()=>deleteOrderFunction(deleteOrder.id)} type="button">Continuar<Icon icon="check_circle"/></button>
+                    <button className="flex items-center gap-1 btn-back text-nowrap justify-center grow" type="button" onClick={()=>{setOrderToDelete({show:false})}}>Regresar<Icon icon="undo"/></button>
+                    <button className="btn-go justify-center text-nowrap grow flex items-center gap-1" onClick={deleteOrder} type="button">Continuar<Icon icon="check_circle"/></button>
                 </div>
             </ModalConfirm>
         </div>
@@ -107,7 +94,7 @@ const AdminUser = () => {
 }
 
 
-const Orders = ({statusValue, loaderData, setNotify, promoteOrder, setDeleteOrder}) => {
+const Orders = ({statusValue, loaderData, setNotify, promoteOrder, setOrderToDelete}) => {
     const nav = useNavigate();
 
     const orders = [];
@@ -131,10 +118,10 @@ const Orders = ({statusValue, loaderData, setNotify, promoteOrder, setDeleteOrde
             {each.priority&&<Icon classNameExtra="text-orange-600 bg-orange-200 rounded-full" icon="brightness_alert"/>}
             {each.pick_up_at_home&&<Icon classNameExtra="text-blue-600 bg-blue-200 rounded-full" icon="directions_car"/>}
         </div>);
-        let actions;
+        let mainOption,options;
         const deleteThisOrder = () => {
             const matchText = lowerCaseNoAccent(each.user);
-            setDeleteOrder({
+            setOrderToDelete({
                 show: true,
                 text: `¿Quieres borrar la order #${each.id}?`,
                 id: each.id,
@@ -143,17 +130,15 @@ const Orders = ({statusValue, loaderData, setNotify, promoteOrder, setDeleteOrde
         }
         switch(statusValue){
             case 0:
-                actions = <>
-                    <IconButton onClick={()=>nav(`/orden/${each.id}`)} icon='description'/>
-                    <IconButton onClick={()=>promoteOrder(each.id)} icon='arrow_right_alt'/>
-                    <IconButton color="orange" onClick={deleteThisOrder} icon='delete'/>
-                </>
+                mainOption = {icon:'arrow_right_alt',onClick:()=>promoteOrder(each.id),text:"Promover"}
+                options = [
+                    {icon:"description",onClick:()=>nav(`/orden/${each.id}`),text:"Ver detalles"},
+                    {icon:"delete",onClick:deleteThisOrder,text:"Borrar"},
+                ]
                 break;
             case 1:
-                actions = <>
-                    <IconButton onClick={()=>nav(`/orden/${each.id}`)} icon='list'/>
-                    <IconButton color="orange" onClick={deleteThisOrder} icon='delete'/>
-                </>
+                mainOption = {icon:"list",onClick:()=>nav(`/orden/${each.id}`),text:"Editar lista"}
+                options = [{icon:"delete",onClick:deleteThisOrder,text:"Borrar"}]
                 break;
             case 2:
                 const notifyThenPromote = async () => {
@@ -168,11 +153,11 @@ const Orders = ({statusValue, loaderData, setNotify, promoteOrder, setDeleteOrde
                         })
                     }
                 }
-                actions = <>
-                    <IconButton onClick={()=>nav(`/orden/${each.id}`)} icon='description'/>
-                    <IconButton onClick={notifyThenPromote} icon='arrow_right_alt'/>
-                    <IconButton color="orange" onClick={deleteThisOrder} icon='delete'/>
-                </>
+                mainOption = {icon: "arrow_right_alt", onClick: notifyThenPromote, text: "Notificar y promover"}
+                options = [
+                    {icon:"description", onClick:()=>nav(`/orden/${each.id}`), text:"Ver detalles"},
+                    {icon:"delete", onClick: deleteThisOrder, text:"Borrar"}
+                ]
                 break;
             case 3:
                 const notify = async () => {
@@ -186,25 +171,57 @@ const Orders = ({statusValue, loaderData, setNotify, promoteOrder, setDeleteOrde
                         })
                     }
                 }
-                actions = <>
-                        <IconButton onClick={()=>nav(`/orden/${each.id}`)} icon='point_of_sale'/>
-                        <IconButton onClick={notify} icon='chat'/>
-                        <IconButton color="orange" onClick={deleteThisOrder} icon='delete'/>
-                    </>
+                mainOption = {icon: "point_of_sale", onClick: ()=>nav(`/orden/${each.id}`), text: "Pago"}
+                options = [
+                    {icon:"chat", onClick:notify, text:"Enviar recordatorio"},
+                    {icon:"delete", onClick: deleteThisOrder, text:"Borrar"}
+                ]
                 break;
         }
-        orders.push(<div className={`p-1 justify-center items-center flex gap-1 flex-wrap col-span-3 ${bg}`} key={`action-${each.id}`}>
-            {actions}
-            
-            </div>);
+        orders.push(<div className={`p-1 justify-center items-center flex gap-3 flex-wrap col-span-3 ${bg}`} key={each.id}>
+            <OtherOptionButton
+                user={each.user}
+                id={each.id}
+                mainOption={mainOption}
+                options={options}
+            />
+        </div>);
     })
     return <div className="grid grid-cols-10 overflow-y-auto scrollbar-thin">
-        {/* <div className="p-1 col-span-2 lg:col-span-1 text-center">ID</div>
-        <div className="p-1 col-span-5 lg:col-span-6">Nombre</div>
-        <div className="p-1 text-center col-span-3">Acciones</div> */}
         {orders}
-        
     </div>
 };
 
 export default AdminUser;
+
+
+const OtherOptionButton = ({user,id,options,mainOption}) => {
+    const [show,setShow] = useState(false)
+
+    const menuOptions = [{icon:"undo",onClick:()=>setShow(false),text:"Regresar"},mainOption].concat(options).map(each=>{
+        const showFalseThen = () => {
+            setShow(false);
+            each.onClick();
+        }
+        return <button 
+            className="flex w-full gap-2 px-2 py-1 hover:bg-sky-200 hover:text-sky-800 items-center" 
+            key={each.icon} 
+            onClick={showFalseThen}>
+                <Icon icon={each.icon}/>
+                {each.text}
+        </button>
+    })
+
+    return <>
+        <IconButton onClick={()=>setShow(true)} icon='more_horiz'/>
+        <IconButton onClick={mainOption.onClick} icon={mainOption.icon}/>
+        {show&&<ModalConfirm clickOutside={()=>setShow(false)} noPadding={true} show={show}>
+            <div className="rounded-md divide-y-[1px] divide-slate-300 overflow-hidden">
+                <h2 className="px-4 py-2">
+                    Orden {id}: {user}
+                </h2>
+                {menuOptions}
+            </div>
+        </ModalConfirm>}
+    </>
+} 

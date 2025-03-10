@@ -16,7 +16,6 @@ const Orden = () => {
         };
 
 
-    const statusNames = ['Nueva','En proceso',"Confirmada","Lista","Terminada"];
 
     console.log(order.status == 3 && superuser && <Payment/>)
 
@@ -28,7 +27,7 @@ const Orden = () => {
             <div className="bubble-div flex gap-2 flex-col p-4">
                 <h1 className="text-orange-700">#{order.id} - {order.user}</h1>
                 <div><b>Entrega:</b> {order.date}</div>
-                <div><b>Estado de orden:</b> {statusNames[order.status]}</div>
+                <div><b>Estado de orden:</b> {order.status_name}</div>
                 {(Object.keys(passOrder.orderList).length > 0 || 
                 passOrder.mediaCarga ||
                 passOrder.others.length > 0) &&

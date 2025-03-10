@@ -34,10 +34,13 @@ def create_order(request):
                         setattr(address,key,json_data[key])
                 address.save()
         if json_data.get("deliver") and not Address.objects.filter(user=user).exists():
-            return JsonResponse({"success":False, "error": "Falta la dirección del cliente"},status = 500)
+            raise Exception("Falta la dirección del cliente")
         if datetime.datetime.strptime(json_data["date"],"%Y-%m-%d").date() < timezone.localdate():
-            return JsonResponse({"success":False,"error":"Error en la fecha"},status = 500)
+            raise Exception("Error en la fecha")
+        if Order.objects.filter(id=json_data["noteID"]).exists():
+            raise Exception("El número de nota ya existe")
         new_order = Order(user = user,
+                    id = json_data["noteID"],
                     date = json_data["date"],
                     pick_up_at_home = bool(json_data.get("deliver")),
                     priority = json_data.get("priority") or False)
@@ -157,4 +160,14 @@ def clothes_ready_message(request,order_id):
 @staff_member_required
 @require_POST
 def delete_order(request):
-    return JsonResponse({"success":True})
+    try:
+        json_data = json.loads(request.body)
+        print(json_data)
+        if(json_data["matchValue"]==json_data["matchInput"]):
+            order_to_delete = Order.objects.get(id=json_data["id"])
+            order_to_delete.status = 5
+            order_to_delete.save()
+        return JsonResponse({"success":True})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"success":False},status=500)
