@@ -217,7 +217,7 @@ def drycleaning_info(request, page = 1):
          "id_order": movement.order.id if movement.order else None,
         "concept": f"Orden #{movement.order.id} - {movement.order.user.get_full_name()}" if movement.order else 'Pago',
         "amount": movement.amount,
-        "date": timezone.localdate(movement.created_at)} for movement in paginator.get_page(page)]
+        "date": timezone.localdate(movement.created_at).strftime("%d/%m/%Y")} for movement in paginator.get_page(page)]
     return JsonResponse({"success": True, 
         "movements": movements, 
         "page": page,
@@ -239,7 +239,7 @@ def spending_info(request,page=1):
         "concept": movement.category,
         "paymentType": movement.payment_type,
         "amount": movement.amount,
-        "date": timezone.localdate(movement.created_at)} for movement in paginator.get_page(page)]
+        "date": timezone.localdate(movement.created_at).strftime("%d/%m/%Y")} for movement in paginator.get_page(page)]
     return JsonResponse({"success": True, 
         "movements": movements, 
         "page": page,
@@ -271,10 +271,10 @@ def closeout_info(request,day=None,month=None,year=None):
     result.update(date_dict(day,month,year))
     last_cutout = Cutout.latest_cutout(result['dateSelected'])
     print(last_cutout)
-    result['movements']=[{"id":f"order-{o.id}","type":"order","id_order":o.id,"concept":f"Orden #{o.id} - {o.user.get_full_name()}","amount":o.earnings()-o.discounts()} for o in Order.objects.filter(status=4, last_modified_at__date__lte=result['dateSelected'], last_modified_at__date__gt=last_cutout.date, card_payment=False).all()] + \
-    [{"id":f"spending-{spending.id}","type":"spending","concept":spending.category,"amount":-spending.amount} for spending in Spending_movements.objects.filter(created_at__date__lte=result['dateSelected'], created_at__date__gt=last_cutout.date, payment_type=2).all()] + \
-    [{"id":f"dryclean-{move.id}","type":"drycleaning",'amount':-move.amount,"concept":"Pago de tintorería"} for move in  Dryclean_movements.objects.filter(amount__gte=0, created_at__date__lte=result['dateSelected'], created_at__date__gt=last_cutout.date).all()]
-    print(result)
+    result['movements']=[{"id":f"order-{o.id}","date":timezone.localdate(o.last_modified_at).strftime("%d/%m/%Y"),"fullDate":o.last_modified_at,"type":"order","id_order":o.id,"concept":f"Orden #{o.id} - {o.user.get_full_name()}","amount":o.earnings()-o.discounts()} for o in Order.objects.filter(status=4, last_modified_at__date__lte=result['dateSelected'], last_modified_at__date__gt=last_cutout.date, card_payment=False).all()] + \
+    [{"id":f"spending-{spending.id}","type":"spending","date":timezone.localdate(spending.created_at).strftime("%d/%m/%Y"),"fullDate":spending.created_at,"concept":spending.category,"amount":-spending.amount} for spending in Spending_movements.objects.filter(created_at__date__lte=result['dateSelected'], created_at__date__gt=last_cutout.date, payment_type=2).all()] + \
+    [{"id":f"dryclean-{move.id}","type":"drycleaning",'amount':-move.amount,"date":timezone.localdate(move.created_at).strftime("%d/%m/%Y"),"fullDate":move.created_at,"concept":"Pago de tintorería"} for move in  Dryclean_movements.objects.filter(amount__gte=0, created_at__date__lte=result['dateSelected'], created_at__date__gt=last_cutout.date).all()]
+    result['movements'].sort(key=lambda x: x['fullDate'])
     if result["dateSelected"] == timezone.localdate():
         result["active"]=True
     day_cutout = Cutout.objects.filter(date=result["dateSelected"]).first()

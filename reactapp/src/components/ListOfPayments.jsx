@@ -4,8 +4,9 @@ import { Link } from "react-router";
 import Icon from "./Icon.jsx";
 import cookieCutter from "../utils/cookieCutter.js";
 import Paginator from "./Paginator.jsx";
+import defaultPost from "../utils/defaultPost.js";
 
-const ListOfPayments = ({movementState, setMovementState, loader, refreshState, nodate, fetchURL, modifyConcepts}) => {
+const ListOfPayments = ({movementState, setMovementState, loader, refreshState, fetchURL, modifyConcepts}) => {
     const {movements} = movementState;
     const [edit,setEdit] = useState({});
     const editInput = useRef(null);
@@ -17,16 +18,11 @@ const ListOfPayments = ({movementState, setMovementState, loader, refreshState, 
     
     const saveEdits = async (e) => {
         e.preventDefault();
-        const response = await fetch(fetchURL,{
-            method:"POST",
-            headers:{"X-CSRFToken":cookieCutter("csrftoken")},
-            body:JSON.stringify(edit)
-        });
-        const {data,error} = await response.json();
+        const {success,error} = await defaultPost(fetchURL,edit);
         if(success){
             refreshState().then(()=>setEdit({}));
         } else {
-            setEdit(oldValue=>({...oldValue,error:data.error}))
+            setEdit(oldValue=>({...oldValue,error:error}))
         }
     }
 
@@ -49,14 +45,14 @@ const ListOfPayments = ({movementState, setMovementState, loader, refreshState, 
     }
 
     const listOfPayments = movements.map((each)=>{
-        const rearrangeDate = each.date && each.date.split("-").reverse().join("/");
+        const rearrangeDate = each.date.split("-").reverse().join("/");
 
         return each.id == edit.id?
             <form className="flex bg-opacity-50 items-center" key={each.id}  onSubmit={saveEdits}>
                 {modifyConcepts && <button type="button" onClick={togglePayment} className={`px-1 shrink-0 w-14 !h-6 text-center ${edit.paymentType?(edit.paymentType==2?"text-blue-700 bg-blue-200 hover:bg-blue-300":"text-orange-700 bg-orange-200 hover:bg-orange-300"):"text-green-700 bg-green-200 hover:bg-green-300"}`}>
                     <Icon icon={edit.paymentType?(edit.paymentType==2?"point_of_sale":"credit_card"):"payments"}/>
                 </button>}
-                {!nodate && <div className="px-1 shrink-0 w-24 text-center">{rearrangeDate}</div>}
+                <div className="px-1 shrink-0 w-24 text-center">{rearrangeDate}</div>
                 <div className="px-1 shrink-0 w-24 text-center">
                     <input className={`!h-6 !w-16 no-arrow ${edit.error=="amount"?"shake":""}`} type="number" name="amount" value={edit.amount||""} ref={editInput} onChange={changeEdit}/>
                 </div>
@@ -76,7 +72,7 @@ const ListOfPayments = ({movementState, setMovementState, loader, refreshState, 
                 {modifyConcepts && <div className="px-1 shrink-0 w-14 !h-6 text-center">
                     <Icon icon={each.paymentType?(each.paymentType==2?"point_of_sale":"credit_card"):"payments"}/>
                 </div>}
-                {!nodate && <div className="px-1 shrink-0 w-24 text-center">{rearrangeDate}</div>}
+                <div className="px-1 shrink-0 w-24 text-center">{rearrangeDate}</div>
             <div className="px-1 shrink-0 w-24 text-center">
                 {each.amount > 0 ? "$ " + each.amount : "$ (" + (-each.amount) + ")"}
             </div>
@@ -98,7 +94,7 @@ const ListOfPayments = ({movementState, setMovementState, loader, refreshState, 
                 className="divide-y-[1px] divide-slate-500">
     <div className="flex">
         {modifyConcepts && <div className="px-1 shrink-0 w-14 text-center">Pago</div>}
-        {!nodate && <div className="px-1 shrink-0 w-24 text-center">Fecha</div>}
+        <div className="px-1 shrink-0 w-24 text-center">Fecha</div>
         <div className="px-1 shrink-0 w-24 text-center">Cantidad</div>
         <div className="grow px-1">Concepto</div>
     </div>
