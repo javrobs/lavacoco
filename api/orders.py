@@ -130,7 +130,7 @@ def save_payment_and_continue(request):
     try:
         json_data = json.loads(request.body)
         order = Order.objects.get(id=json_data["id"])
-        order.payment = True if json_data["payment"]=="tarjeta" else False
+        order.card_payment = True if json_data["payment"]=="tarjeta" else False
         order.status = 4
         total_tinto = order.tinto_movement()
         order.save()
