@@ -17,7 +17,6 @@ from .jwt import root_url,invite_user_admin
 def create_order(request):
     try:
         json_data = json.loads(request.body)
-        print(json_data)
         result = {"success":True}
         user = User.objects.get(id = json_data["user"])
         if json_data.get("calle") and json_data.get("colonia") and json_data.get("numero_ext"):
@@ -48,7 +47,6 @@ def create_order(request):
         # result = {"users":list(User.objects.filter(is_staff=False).order_by("first_name").values("first_name","username","last_name","id"))} 
         return JsonResponse(result)
     except Exception as e:
-        print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500)
 
 @require_POST
@@ -65,7 +63,6 @@ def promote_order(request):
         order.save()
         return JsonResponse({"success":True})
     except Exception as e:
-        print(e)
         return JsonResponse({"success":False, "error":"Failed"},status=500)
     
     
@@ -121,7 +118,6 @@ def set_order_list(request,order_id):
                 result["message"] += f'Te invito al sitio web de lavandería coco. Regístrate aquí: {invite_user_admin(request,order.user)}' if order.user.password == "" else f"Puedes revisar más detalles en: {root_url(request)}/orden/{order.id}/"
             return JsonResponse(result)
     except Exception as e:
-        print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500)
     
 @require_POST
@@ -139,7 +135,6 @@ def save_payment_and_continue(request):
             order.user.star_discount_set.create()
         return JsonResponse({"success":True, "total_tinto":total_tinto})
     except Exception as e:
-        print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500)    
 
 
@@ -154,7 +149,6 @@ def clothes_ready_message(request,order_id):
         response["message"] += f'Te invito al sitio web de lavandería coco. Regístrate aquí: {invite_user_admin(request,user)}' if user.password == "" else f"Puedes ver los detalles aquí: {root_url(request)}/orden/{order.id}/"
         return JsonResponse(response)
     except Exception as e:
-        print(e)
         return JsonResponse({"success":False},status=500)
     
 @staff_member_required
@@ -162,12 +156,10 @@ def clothes_ready_message(request,order_id):
 def delete_order(request):
     try:
         json_data = json.loads(request.body)
-        print(json_data)
         if(json_data["matchValue"]==json_data["matchInput"]):
             order_to_delete = Order.objects.get(id=json_data["id"])
             order_to_delete.status = 5
             order_to_delete.save()
         return JsonResponse({"success":True})
     except Exception as e:
-        print(e)
         return JsonResponse({"success":False},status=500)

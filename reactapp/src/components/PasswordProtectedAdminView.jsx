@@ -22,7 +22,6 @@ const PasswordProtectedAdminView = ({setUser}) => {
         console.log(data)
         if(data.success){
             setUser(data);
-            console.log(data,"user data changed");
         } else {
             setError(true)
             setPassword("");

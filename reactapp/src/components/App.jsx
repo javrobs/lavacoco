@@ -39,7 +39,6 @@ export default function App(){
         const data = await response.json();
         setUser(data);
         setInitialized(true);
-        console.log(data,"user data changed");
     }
 
     const router = createBrowserRouter([ 

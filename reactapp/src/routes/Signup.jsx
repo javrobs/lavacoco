@@ -50,7 +50,6 @@ export default function Signup({admin,config}){
             setSignupState(oldState=>({...oldState,username:value}));
         }
         if (tenNumbers.test(value)){
-            console.log("REMEMBER TO DO THIS");
         }
     }
     
@@ -63,7 +62,6 @@ export default function Signup({admin,config}){
     async function syncChanges(){
         const result =  admin ? await defaultLoader("edit_user",select_user.info.id):await defaultLoader("config");
         const selectUser = result.select_user;
-        console.log(selectUser);
         setSignupState(selectUser.info);
         setTrackChanges(false);
         setExtendAddressForm(selectUser.has_address);
@@ -89,9 +87,7 @@ export default function Signup({admin,config}){
             body:JSON.stringify(sendState)
         }).then(response=>response.json())
         .then(data=>{
-            console.log(data);
             if (data.success){
-                console.log("succesful!");
                 if(config){
                     syncChanges();
                 } else {

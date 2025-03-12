@@ -27,5 +27,4 @@ def change_prices(request):
         
         return JsonResponse(result)
     except Exception as e:
-        print(e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)

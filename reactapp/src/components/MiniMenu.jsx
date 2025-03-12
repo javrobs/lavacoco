@@ -1,6 +1,6 @@
 import React,{useState,useContext} from "react"
 import Icon from "./Icon.jsx"
-import { useNavigate, NavLink, redirect} from "react-router";
+import { useNavigate, NavLink} from "react-router";
 import { userContext } from "./App.jsx";
 
 const MiniMenu = ({onlyMiniMenu}) => {
@@ -59,23 +59,18 @@ const MiniMenu = ({onlyMiniMenu}) => {
     }
 
     function logUserOut(){
-        console.log("logging user out");
         fetch('/api/logout_user')
         .then(response=>response.json())
         .then(data=>{
-            console.log(data);
             if(data.success){
-                console.log("Logout exitoso");
                 user.refreshFunction().then(()=>setRedirect(true));
                 setMenuShowing(false);
-            } else {
-                console.log("Logout falló");
             }
         })
     }
 
     if(redirect){
-        navigate("/")
+        navigate("/");
     }
 
     return <>

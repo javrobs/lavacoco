@@ -1,14 +1,11 @@
 import React, {useState} from "react";
-import {useNavigate,useRouteError} from "react-router";
+import {useRouteError} from "react-router";
 import Header from "./Header.jsx";
 import Icon from "./Icon.jsx";
 
-const ErrorComponent = ({children}) => {
-    const navigate = useNavigate();
+const ErrorComponent = () => {
     const [showError,setShowError] = useState(false);
     const error = useRouteError();
-
-    console.log(error);
 
     function goBack(){
         history.back();

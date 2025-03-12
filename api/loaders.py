@@ -93,7 +93,6 @@ def signup_admin_invite_info(request,JWTInvite):
                     "id":user.id}
             return JsonResponse(result)
         except Exception as e:
-            print(e)
             return JsonResponse({"success":False,"error":str(e)},error=500)
     return JsonResponse({"success":False},error=500)
 
@@ -127,7 +126,6 @@ def recover_pw_info(request,JWTInvite):
                     "id":user.id}
             return JsonResponse(result)
         except Exception as e:
-            print(e)
             return JsonResponse({"success":False,"error":str(e)},error=500)
     return JsonResponse({"success":False},error=500)
 
@@ -201,7 +199,6 @@ def order_info(request,order_id):
         else:
             return JsonResponse({"success":False,"error":"Not authorized"},status=500)
     except Exception as e:
-        print(e)
         return JsonResponse({"success":False,"error":str(e)},status=404)
     
 @staff_member_required
@@ -270,7 +267,6 @@ def closeout_info(request,day=None,month=None,year=None):
     result = {"success":True} 
     result.update(date_dict(day,month,year))
     last_cutout = Cutout.latest_cutout(result['dateSelected'])
-    print(last_cutout)
     result['movements']=[{"id":f"order-{o.id}","date":timezone.localdate(o.last_modified_at).strftime("%d/%m/%Y"),"fullDate":o.last_modified_at,"type":"order","id_order":o.id,"concept":f"Orden #{o.id} - {o.user.get_full_name()}","amount":o.earnings()-o.discounts()} for o in Order.objects.filter(status=4, last_modified_at__date__lte=result['dateSelected'], last_modified_at__date__gt=last_cutout.date, card_payment=False).all()] + \
     [{"id":f"spending-{spending.id}","type":"spending","date":timezone.localdate(spending.created_at).strftime("%d/%m/%Y"),"fullDate":spending.created_at,"concept":spending.category,"amount":-spending.amount} for spending in Spending_movements.objects.filter(created_at__date__lte=result['dateSelected'], created_at__date__gt=last_cutout.date, payment_type=2).all()] + \
     [{"id":f"dryclean-{move.id}","type":"drycleaning",'amount':-move.amount,"date":timezone.localdate(move.created_at).strftime("%d/%m/%Y"),"fullDate":move.created_at,"concept":"Pago de tintorería"} for move in  Dryclean_movements.objects.filter(amount__gte=0, created_at__date__lte=result['dateSelected'], created_at__date__gt=last_cutout.date).all()]

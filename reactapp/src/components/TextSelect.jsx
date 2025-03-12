@@ -42,7 +42,6 @@ const TextSelect = ({label,className,idName,optionList,value,changeState,inFlex}
         const matchWithValue = optionList.find(({text}) => {
             return lowerCaseNoAccent(text) == lowerCaseNoAccent(searchValue)
         });
-        console.log('match', matchWithValue, value);
         inputRef.current.setCustomValidity(matchWithValue && matchWithValue.id == value?"":"Elige un elemento de la lista")
     },[searchValue])
 

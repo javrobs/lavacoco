@@ -89,7 +89,6 @@ def month_year_info(request, month=timezone.localdate().month, year=timezone.loc
             order__last_modified_at__month=month,
             order__last_modified_at__year=year
         ).aggregate(Sum("value"),Count("value"))
-        print(discounts_stars)
         if discounts_stars["value__sum"]:
             total_discounts += discounts_stars["value__sum"]
             append_three(f" Cliente frecuente ({discounts_stars['value__count']}) ", discounts_stars["value__sum"]," Descuentos ")
@@ -121,7 +120,6 @@ def month_year_info(request, month=timezone.localdate().month, year=timezone.loc
         
         return JsonResponse(result)
     except Exception as e:
-        print(e)
         return JsonResponse({"success":False, "error":str(e)}, status=500)
     
 

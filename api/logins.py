@@ -15,11 +15,9 @@ from .models import *
 def login_user(request):
     try:
         json_data = json.loads(request.body)
-        print(json_data)
         if not User.objects.filter(username = json_data['username']).exists():
             raise Exception("El teléfono no se encontró")
         user = authenticate(request, username = json_data['username'], password = json_data['pw'])
-        print(user)
         if not user:
             raise Exception("La contraseña es incorrecta")
         login(request,user)
@@ -65,7 +63,6 @@ def create_user(request, admin_created = False, edit_self = False):
             country_code = json_data.get("countryCode")
             if country_code:
                 try:
-                    print("are you trying here",country_code)
                     country = Country_code.objects.get(id=country_code)
                     country.users.add(user)
                 except Exception as e:
@@ -108,7 +105,6 @@ def create_user(request, admin_created = False, edit_self = False):
                 "reference": bool(reference)})
         
     except Exception as e:
-        print(e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
@@ -214,7 +210,6 @@ def edit_my_user(request):
 def change_my_password(request):
     try:
         json_data = json.loads(request.body)
-        print(json_data)
         user = request.user
         if not user.check_password(json_data['password']):
             raise Exception("La contraseña es incorrecta")    

@@ -24,7 +24,6 @@ def dryclean_payment(request,edit=False):
         movement.save()
         return JsonResponse({"success":True, "payment_id":movement.id})
     except Exception as e:
-        print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500) 
     
     
@@ -33,7 +32,6 @@ def dryclean_payment(request,edit=False):
 def spending_payment(request,edit=False):
     try:
         json_data = json.loads(request.body)
-        print(json_data)
         if not json_data["amount"] or int(json_data["amount"]) <= 0:
             raise Exception("amount" if edit else "El pago debe ser mayor a 0")
         movement = edit or Spending_movements() 
@@ -45,7 +43,6 @@ def spending_payment(request,edit=False):
         movement.save()
         return JsonResponse({"success":True, "payment_id":movement.id})
     except Exception as e:
-        print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500) 
     
     
@@ -57,7 +54,6 @@ def edit_spending(request):
         movement = Spending_movements.objects.get(id=json_data["id"])
         return spending_payment(request,movement)
     except Exception as e:
-        print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500) 
 
 @require_POST
@@ -68,7 +64,6 @@ def edit_drycleaning(request):
         movement = Dryclean_movements.objects.get(id=json_data["id"])
         return dryclean_payment(request, movement)
     except Exception as e:
-        print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500) 
         
 @require_POST
@@ -76,7 +71,6 @@ def edit_drycleaning(request):
 def set_cutout(request):
     try:
         json_data = json.loads(request.body)
-        print(json_data)
         if(datetime.datetime.strptime(json_data["date"],"%Y-%m-%d").date()!=timezone.localdate()):
             raise Exception("Date is wrong")
         if(int(json_data["amount"])<0):
