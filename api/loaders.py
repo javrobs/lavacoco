@@ -249,13 +249,7 @@ def spending_info(request,page=1):
 @staff_member_required
 def laundry_machines_info(request,day=None,month=None,year=None):
     result = {"success":True}
-    try:
-        result['dateSelected'] = datetime.date(day=day,month=month,year=year)
-    except:
-        result['dateSelected'] = timezone.localdate()
-    result['dateBack'] = result['dateSelected'] - timezone.timedelta(days=1)
-    if result['dateSelected'] < timezone.localdate():
-        result['dateForward'] = result['dateSelected'] + timezone.timedelta(days=1)
+    result.update(date_dict(day,month,year))
     result['orders'] = [{"time":timezone.localtime(o.opened_datetime).strftime("%I:%M %p"),
                "id":o.id,
                "status":o.status_string(),
