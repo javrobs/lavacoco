@@ -1,46 +1,35 @@
 import React, {useState} from "react";
-import {useLoaderData, useNavigate} from "react-router"
+import {useLoaderData, useNavigate} from "react-router";
 import Icon from "../../components/Icon.jsx";
-import cookieCutter from "../../utils/cookieCutter.js";
+import defaultPost from "../../utils/defaultPost.js"
 
 const Payment = () => {
     const loader = useLoaderData();
     const [payment,setPayment] = useState("");
     const navigate = useNavigate();
 
-
-    console.log(loader);
-
-    const submit = (e) => {
+    const submit = async (e) => {
         e.preventDefault();
-        fetch("/api/save_payment_and_continue/",{
-            method:"POST",
-            headers:{"X-CSRFToken":cookieCutter("csrftoken")},
-            body:JSON.stringify({id:loader.order.id,payment:payment})
-        }).then(response=>response.json())
-        .then(data=>{
-            if(data.success){
-                console.log(data);
-                navigate("/");
-            }
-        })
+        const data = await defaultPost("/api/save_payment_and_continue/",{id:loader.order.id,payment:payment})
+        if(data.success){
+            navigate("/");
+        }
     }
 
     function selectPayment({target}){
-        const {value} = target;
-        setPayment(value);
+        setPayment(target.value);
     }
 
     return <form className="bubble-div p-4" onSubmit={submit}>
         <div className="flex gap-2 flex-wrap">
             <h2>Método de pago</h2>
-            <label className={`${payment=="efectivo"?"bg-sky-200 text-sky-700":"hover:bg-sky-100"}  rounded-md px-2 flex ms-auto items-center gap-1`}>
-                <input className="accent-sky-700" type="radio" name="payment" value="efectivo" onChange={selectPayment} checked={payment=="efectivo"} required={true}/>
-                <Icon icon="payments"/>
-                Efectivo
+            <label className={`${payment=="efectivo"?"bg-blue-200 text-blue-700":"hover:bg-blue-100"}  rounded-md px-2 flex ms-auto items-center gap-1`}>
+                <input className="accent-blue-700" type="radio" name="payment" value="efectivo" onChange={selectPayment} checked={payment=="efectivo"} required={true}/>
+                <Icon icon="point_of_sale"/>
+                Caja
             </label>
-            <label className={`${payment=="tarjeta"?"bg-sky-200 text-sky-700":"hover:bg-sky-100"}  rounded-md px-2 flex items-center gap-1`}>
-                <input className="accent-sky-700" type="radio" name="payment" value="tarjeta" onChange={selectPayment} checked={payment=="tarjeta"} required={true}/>
+            <label className={`${payment=="tarjeta"?"bg-orange-200 text-orange-700":"hover:bg-orange-100"}  rounded-md px-2 flex items-center gap-1`}>
+                <input className="accent-orange-700" type="radio" name="payment" value="tarjeta" onChange={selectPayment} checked={payment=="tarjeta"} required={true}/>
                 <Icon icon="credit_card"/>
                 Transferencia
             </label>
