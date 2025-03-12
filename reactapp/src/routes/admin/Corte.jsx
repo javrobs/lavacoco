@@ -64,7 +64,6 @@ const Corte = () => {
                 setMovementState={()=>{}}
                 refreshState={refreshState}
                 loader="drycleaning"
-                nodate={true}
             />
         </div>
         {dayCutout!==undefined?

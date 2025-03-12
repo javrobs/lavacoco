@@ -45,14 +45,12 @@ const ListOfPayments = ({movementState, setMovementState, loader, refreshState, 
     }
 
     const listOfPayments = movements.map((each)=>{
-        const rearrangeDate = each.date.split("-").reverse().join("/");
-
         return each.id == edit.id?
             <form className="flex bg-opacity-50 items-center" key={each.id}  onSubmit={saveEdits}>
                 {modifyConcepts && <button type="button" onClick={togglePayment} className={`px-1 shrink-0 w-14 !h-6 text-center ${edit.paymentType?(edit.paymentType==2?"text-blue-700 bg-blue-200 hover:bg-blue-300":"text-orange-700 bg-orange-200 hover:bg-orange-300"):"text-green-700 bg-green-200 hover:bg-green-300"}`}>
                     <Icon icon={edit.paymentType?(edit.paymentType==2?"point_of_sale":"credit_card"):"payments"}/>
                 </button>}
-                <div className="px-1 shrink-0 w-24 text-center">{rearrangeDate}</div>
+                <div className="px-1 shrink-0 w-24 text-center">{each.date}</div>
                 <div className="px-1 shrink-0 w-24 text-center">
                     <input className={`!h-6 !w-16 no-arrow ${edit.error=="amount"?"shake":""}`} type="number" name="amount" value={edit.amount||""} ref={editInput} onChange={changeEdit}/>
                 </div>
@@ -72,7 +70,7 @@ const ListOfPayments = ({movementState, setMovementState, loader, refreshState, 
                 {modifyConcepts && <div className="px-1 shrink-0 w-14 !h-6 text-center">
                     <Icon icon={each.paymentType?(each.paymentType==2?"point_of_sale":"credit_card"):"payments"}/>
                 </div>}
-                <div className="px-1 shrink-0 w-24 text-center">{rearrangeDate}</div>
+                <div className="px-1 shrink-0 w-24 text-center">{each.date}</div>
             <div className="px-1 shrink-0 w-24 text-center">
                 {each.amount > 0 ? "$ " + each.amount : "$ (" + (-each.amount) + ")"}
             </div>
