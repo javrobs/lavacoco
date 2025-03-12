@@ -247,3 +247,14 @@ input.no-arrow[type=number] {
 .icon-full{
     font-variation-settings: 'FILL' 1;
 }
+
+.shake{
+    @apply bg-yellow-100;
+    animation: shake-animation .3s ease-in-out;
+}
+
+@keyframes shake-animation {
+    25% {transform: translateX(2px)}
+    75% {transform: translateX(-2px)}
+    100% {transform: translateX(0);}
+}

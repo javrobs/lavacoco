@@ -5,7 +5,7 @@ import Icon from "./Icon.jsx";
 import cookieCutter from "../utils/cookieCutter.js";
 import Paginator from "./Paginator.jsx";
 
-const ListOfPayments = ({movementState, setMovementState, loader, refreshState, fetchURL}) => {
+const ListOfPayments = ({movementState, setMovementState, loader, refreshState, nodate, fetchURL, modifyConcepts}) => {
     const {movements} = movementState;
     const [edit,setEdit] = useState({});
     const editInput = useRef(null);
@@ -13,56 +13,72 @@ const ListOfPayments = ({movementState, setMovementState, loader, refreshState, 
     useEffect(()=>{
         if(edit.id){
             editInput.current.focus();
-    }},[edit])
+    }},[edit.id])
     
-    const saveEdits = async () => {
+    const saveEdits = async (e) => {
+        e.preventDefault();
         const response = await fetch(fetchURL,{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
             body:JSON.stringify(edit)
         });
-        const {success} = await response.json();
+        const {data,error} = await response.json();
         if(success){
-            refreshState();
+            refreshState().then(()=>setEdit({}));
+        } else {
+            setEdit(oldValue=>({...oldValue,error:data.error}))
         }
-        setEdit({});
     }
 
     const selectEdit = (id) => {
-        const {due,cardPayment} = movements.find((each) => each.id == id);
-        setEdit({id:id,due:due,cardPayment:cardPayment})
+        const {amount,paymentType,concept} = movements.find((each) => each.id == id);
+        setEdit({id:id,amount:amount,paymentType:paymentType,concept:concept})
     }
     
-    const editDue = (e) => {
-        const {value} = e.target;
-        setEdit(oldValue=>({...oldValue,due:Number(value)}));
+    const changeEdit = (e) => {
+        const {name, value} = e.target;
+        setEdit(oldValue=>({...oldValue,[name]:value}));
     }
 
     const togglePayment = () => {
-        setEdit(oldValue=>({...oldValue,cardPayment:!oldValue.cardPayment}));
+        setEdit(oldValue=>{
+            const newValue = Object.keys(oldValue).includes("paymentType")?
+                {0:1, 1:2, 2:0}[oldValue.paymentType]: 1
+            return {...oldValue,paymentType:newValue}}
+        );
     }
 
-    const hasCardPayments = movements.length>0 && Object.keys(movements[0]).includes("cardPayment");
-    
     const listOfPayments = movements.map((each)=>{
-        const rearrangeDate = each.date.split("-").reverse().join("/");
+        const rearrangeDate = each.date && each.date.split("-").reverse().join("/");
 
-        return <div className="flex bg-opacity-50 items-center" key={each.id}>
-            {hasCardPayments &&
-                (each.id == edit.id?
-                <button onClick={togglePayment} className={`px-1 shrink-0 w-14 !h-6 text-center ${edit.cardPayment?"text-emerald-700 bg-emerald-200 hover:bg-emerald-300":"text-sky-700 bg-sky-200 hover:bg-sky-300"}`}>
-                    <Icon icon={edit.cardPayment?"credit_card":"payments"}/>
-                </button>:
-                <div className="px-1 shrink-0 w-14 !h-6 text-center">
-                    <Icon icon={each.cardPayment?"credit_card":"payments"}/>
-                </div>)
-            }
-            <div className="px-1 shrink-0 w-24 text-center">{rearrangeDate}</div>
-            <div className="px-1 shrink-0 w-24 text-center">
-                {each.id == edit.id?
-                <input className="!h-6 !w-16 no-arrow" type="number" value={edit.due||""} ref={editInput} onChange={editDue}/>:
-                (each.due > 0 ? "$ " + each.due : "$ (" + (-each.due) + ")")
+        return each.id == edit.id?
+            <form className="flex bg-opacity-50 items-center" key={each.id}  onSubmit={saveEdits}>
+                {modifyConcepts && <button type="button" onClick={togglePayment} className={`px-1 shrink-0 w-14 !h-6 text-center ${edit.paymentType?(edit.paymentType==2?"text-blue-700 bg-blue-200 hover:bg-blue-300":"text-orange-700 bg-orange-200 hover:bg-orange-300"):"text-green-700 bg-green-200 hover:bg-green-300"}`}>
+                    <Icon icon={edit.paymentType?(edit.paymentType==2?"point_of_sale":"credit_card"):"payments"}/>
+                </button>}
+                {!nodate && <div className="px-1 shrink-0 w-24 text-center">{rearrangeDate}</div>}
+                <div className="px-1 shrink-0 w-24 text-center">
+                    <input className={`!h-6 !w-16 no-arrow ${edit.error=="amount"?"shake":""}`} type="number" name="amount" value={edit.amount||""} ref={editInput} onChange={changeEdit}/>
+                </div>
+                <div className="px-1 grow overflow-hidden text-nowrap text-ellipsis">
+                {each.id_order?
+                <Link className="hover:!text-orange-500 text-orange-700" to={`/orden/${each.id_order}`}>{each.concept}</Link>:
+                modifyConcepts?
+                    <input className={`!h-6 ${edit.error=="concept"?"shake":""}`} type="text" name="concept" value={edit.concept||""} onChange={changeEdit}/>:
+                    <>{each.concept}</>
                 }
+                </div>
+                <MiniIconButton classNameExtra="me-1 shrink-0 text-black !bg-red-200 hover:!bg-red-300" icon="undo" onClick={()=>{setEdit({})}}/>
+                <MiniIconButton type="submit" classNameExtra="me-1 shrink-0 text-black !bg-emerald-200 hover:!bg-emerald-300" icon="arrow_forward"/>
+            </form>
+        :
+            <div className="flex bg-opacity-50 items-center" key={each.id}>
+                {modifyConcepts && <div className="px-1 shrink-0 w-14 !h-6 text-center">
+                    <Icon icon={each.paymentType?(each.paymentType==2?"point_of_sale":"credit_card"):"payments"}/>
+                </div>}
+                {!nodate && <div className="px-1 shrink-0 w-24 text-center">{rearrangeDate}</div>}
+            <div className="px-1 shrink-0 w-24 text-center">
+                {each.amount > 0 ? "$ " + each.amount : "$ (" + (-each.amount) + ")"}
             </div>
             <div className="px-1 grow overflow-hidden text-nowrap text-ellipsis">
                 {each.id_order?
@@ -70,13 +86,9 @@ const ListOfPayments = ({movementState, setMovementState, loader, refreshState, 
                 <>{each.concept}</>
                 }
             </div>
-            {each.id == edit.id?
-            <><MiniIconButton classNameExtra="me-1 shrink-0 text-black !bg-red-200 hover:!bg-red-300" icon="undo" onClick={()=>{setEdit({})}}/>
-            <MiniIconButton classNameExtra="me-1 shrink-0 text-black !bg-emerald-200 hover:!bg-emerald-300" icon="arrow_forward" onClick={saveEdits}/></>:
-            !each.id_order&&<MiniIconButton classNameExtra="me-1 shrink-0 text-black" icon="edit" onClick={()=>{selectEdit(each.id)}}/>}
+            {(!each.id_order && !each.type) && <MiniIconButton classNameExtra="me-1 shrink-0 text-black" icon="edit" onClick={()=>{selectEdit(each.id)}}/>}
         </div>
     })
-    console.log(loader);
 
     return <Paginator 
                 page= {movementState.page}
@@ -85,8 +97,8 @@ const ListOfPayments = ({movementState, setMovementState, loader, refreshState, 
                 loader={loader}
                 className="divide-y-[1px] divide-slate-500">
     <div className="flex">
-        {hasCardPayments && <div className="px-1 shrink-0 w-14 text-center">Pago</div>}
-        <div className="px-1 shrink-0 w-24 text-center">Fecha</div>
+        {modifyConcepts && <div className="px-1 shrink-0 w-14 text-center">Pago</div>}
+        {!nodate && <div className="px-1 shrink-0 w-24 text-center">Fecha</div>}
         <div className="px-1 shrink-0 w-24 text-center">Cantidad</div>
         <div className="grow px-1">Concepto</div>
     </div>

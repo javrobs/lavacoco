@@ -11,7 +11,7 @@ import MainContainer from "../../components/MainContainer.jsx";
 const Tintoreria = () => {
     const {success,...load} = useLoaderData();
     const [movementState,setMovementState] = useState(load)
-    const [payment, setPayment] = useState("");
+    const [amount, setAmount] = useState("");
     const [error,setError] = useState('');
     const inputRef = useRef(null);
 
@@ -22,7 +22,7 @@ const Tintoreria = () => {
         const {value} = e.target;
         const pattern = new RegExp(/^[0-9]*$/);
         if(pattern.test(value)){
-            setPayment(value);
+            setAmount(value);
         }
     }
 
@@ -31,13 +31,13 @@ const Tintoreria = () => {
         const response = await fetch('/api/dryclean_payment/',{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
-            body:JSON.stringify({payment:payment})
+            body:JSON.stringify({amount:amount})
         })
         const data = await response.json();
         if(data.success){
             refreshState();
             inputRef.current.blur();
-            setPayment("");
+            setAmount("");
             setError("");
         } else {
             setError(data.error);
@@ -53,24 +53,24 @@ const Tintoreria = () => {
     return <MainContainer size='md'>
         <div className="bubble-div max-sm:!p-2 flex flex-col">
             <h1 className="text-orange-700">Tintorería</h1>
-            {Boolean(total) && <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
+            {Boolean(total)? <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
                 <ErrorMessage errorContent={error}/>
                 <div className="flex divide-x-[1px] divide-slate-400 items-end">
-                <HoverInput label="Abonar pago" className="grow">
-                    <input ref={inputRef} className={`shadow-sm !rounded-e-none max-sm:!rounded-none no-arrow`} min={0} max={-total} required={true} type="number" value={payment} onChange={handleInput}/>
-                </HoverInput> 
-                <button className="btn btn-go max-sm:!rounded-none !rounded-s-none !text-base text-nowrap !h-8">
-                    Enviar
-                    <Icon icon='arrow_forward'/>
-                </button>
+                    <HoverInput label="Cantidad" className="grow">
+                        <input ref={inputRef} className={`shadow-sm !rounded-e-none max-sm:!rounded-none no-arrow`} min={0} max={-total} required={true} type="number" value={amount} onChange={handleInput}/>
+                    </HoverInput> 
+                    <button className="btn-go max-sm:!rounded-none !rounded-s-none !text-base text-nowrap justify-center !h-8 flex gap-1 items-center !w-32">
+                        Enviar
+                        <Icon icon='arrow_forward'/>
+                    </button>
                 </div>
-            </form>}
+            </form>:
+            <p className="mt-2">No hay pagos pendientes de tintorería, estás al día.</p>}
         </div>
         <div className="bubble-div-with-title">
             <div className="bubble-div-title">
                 <span className="me-auto">
-                    Pendiente: 
-                    <span className="text-orange-300 font-bold">
+                    Pendiente: <span className="text-orange-300 font-bold">
                         $ {-total}
                     </span>
                 </span>

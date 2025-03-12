@@ -216,7 +216,7 @@ def drycleaning_info(request, page = 1):
         {"id": movement.id,
          "id_order": movement.order.id if movement.order else None,
         "concept": f"Orden #{movement.order.id} - {movement.order.user.get_full_name()}" if movement.order else 'Pago',
-        "due": movement.amount,
+        "amount": movement.amount,
         "date": timezone.localdate(movement.created_at)} for movement in paginator.get_page(page)]
     return JsonResponse({"success": True, 
         "movements": movements, 
@@ -238,7 +238,7 @@ def spending_info(request,page=1):
         {"id":movement.id,
         "concept": movement.category,
         "paymentType": movement.payment_type,
-        "due": movement.amount,
+        "amount": movement.amount,
         "date": timezone.localdate(movement.created_at)} for movement in paginator.get_page(page)]
     return JsonResponse({"success": True, 
         "movements": movements, 
