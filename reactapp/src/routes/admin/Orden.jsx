@@ -16,9 +16,6 @@ const Orden = () => {
         };
 
 
-
-    console.log(order.status == 3 && superuser && <Payment/>)
-
     switch(true){
         case order.status == 1 && superuser:
             return <OrderList/>

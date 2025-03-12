@@ -211,9 +211,8 @@ const OrderList = () => {
         .then(data => {
         if(data.success) {
             navigate("/");
-        } else {
-            console.log("error in promoting",id);
-        }});
+        }
+        });
     }
 
     function fetcher(url){

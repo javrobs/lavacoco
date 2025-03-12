@@ -8,8 +8,6 @@ const Reportes = () => {
     const {success,...data} = useLoaderData();
     const navigator = useNavigate();
     
-    console.log(data);
-
     const listOfReports = data.dates.map(([value,text])=>{
         return <option key={text} value={value}>{text}</option>
     })

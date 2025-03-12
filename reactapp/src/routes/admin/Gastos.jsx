@@ -19,8 +19,6 @@ const Gastos = () => {
     const [error,setError] = useState("");
     const catInputRef = useRef(null);
 
-    console.log(movementState);
-
     function handleInput(e){
         const {value,name} = e.target;
         modifyState(value,name)

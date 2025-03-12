@@ -21,7 +21,6 @@ export default function Login(){
             setLoginState(oldState=>({...oldState,username:value}));
         }
         if (tenNumbers.test(value)){
-            console.log("REMEMBER TO DO THIS");
         }
     }
 
@@ -32,7 +31,6 @@ export default function Login(){
 
     function handleSubmit(e){
         e.preventDefault();
-        console.log(e);
         fetch("/api/login_user/",{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
@@ -40,21 +38,13 @@ export default function Login(){
         })
         .then(response=>response.json())
         .then(data=>{
-            console.log(data);
             if(data.success){
-                console.log("Login exitoso");
                 refreshFunction().then(()=>{
-                    console.log("after function is refreshed navigate");
                     setRedirect(true);
-                }).catch(err => {
-                    console.error("Error refreshing user context:", err);
                 });
             } else {
-                console.log("Login failed:", data.error);
                 setLoginFailed(data.error);
             }
-        }).catch(err => {
-            console.error("Error during fetch:", err);
         });
     }
 

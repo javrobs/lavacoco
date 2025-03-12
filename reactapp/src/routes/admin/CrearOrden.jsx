@@ -16,9 +16,6 @@ const CrearOrden = () => {
     const [addressEditing,setAddressEditing] = useState(false);
     const navigate = useNavigate();
 
-    console.log(load);
-    console.log(formState);
-
     function handleChange(e){
         const {value,name,type,checked} = e.target;
         if(type=="checkbox"){
@@ -41,7 +38,6 @@ const CrearOrden = () => {
         }).then(response=>response.json())
         .then(data=>{
             if(data.success){
-                console.log(data);
                 navigate("/");
             } else {
                 setOrderFailedState(data.error);

@@ -27,12 +27,9 @@ const AdminUser = () => {
             body:JSON.stringify({id:id})})
         const data = await response.json();
         if(data.success){
-            console.log("promoted this:",id);
             const newLoaderData = await defaultLoader("home");
             setLoaderData(newLoaderData);
             setSelectStatus(oldValue => oldValue + 1)
-        } else {
-            console.log("error in promoting",id);
         }
     }
 
