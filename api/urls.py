@@ -11,6 +11,7 @@ urlpatterns = [
     path('signup/',logins.create_user),
     path('logout_user/',logins.logout_user),
     path('load_user/',logins.load_user),
+    path('load_user_extra_password/',logins.load_user_extra_password),
     path('create_client/',logins.create_client),
     path('get_link_invite_admin/',logins.get_link_invite_admin),
     path('get_link_recover_password_admin/',logins.get_link_recover_password_admin),

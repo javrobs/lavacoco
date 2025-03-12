@@ -125,6 +125,19 @@ def load_user(request):
         return JsonResponse({"success":True,"logged_in":True,"superuser":user.is_superuser,"first_name":user.first_name,"last_name":user.last_name})
     return JsonResponse({"success":True,"logged_in":False})
 
+@require_POST
+@staff_member_required
+def load_user_extra_password(request):
+    try:
+        user = request.user
+        json_data = json.loads(request.body)
+        password=json_data.get("password")
+        if password != "260404":
+            raise Exception("La contraseña es incorrecta")
+        return JsonResponse({"success":True,"logged_in":True,"superuser":user.is_superuser,"first_name":user.first_name,"last_name":user.last_name,"extraPassword":True})
+    except Exception as e:
+        return JsonResponse({"success":False, "error":str(e)},status=500)
+
 
 @require_POST
 @staff_member_required
