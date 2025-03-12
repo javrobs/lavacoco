@@ -28,7 +28,7 @@ class MovementsAdmin(admin.ModelAdmin):
     list_display = ["amount","created_at","order"]
 
 class SpendingAdmin(admin.ModelAdmin):
-    list_display = ["amount","category","created_at","card_payment"]    
+    list_display = ["amount","category","created_at","payment_type"]    
 
 class CountriesAdmin(admin.ModelAdmin):
     list_display = ["id","name","phone","unicode_1","unicode_2"]
@@ -38,6 +38,9 @@ class RecommendationsAdmin(admin.ModelAdmin):
 
 class StarAdmin(admin.ModelAdmin):
     list_display = ["user",'order','value']
+
+class CutoutAdmin(admin.ModelAdmin):
+    list_display = ["date", "amount_left"]
 
 admin.site.register(Address,AddressAdmin)
 admin.site.register(Price,PriceAdmin)
@@ -51,4 +54,5 @@ admin.site.register(Spending_movements,SpendingAdmin)
 admin.site.register(Country_code,CountriesAdmin)
 admin.site.register(User_recommendation,RecommendationsAdmin)
 admin.site.register(Star_discount,StarAdmin)
+admin.site.register(Cutout,CutoutAdmin)
 # Register your models here.

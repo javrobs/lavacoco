@@ -11,6 +11,7 @@ urlpatterns = [
     path('signup/',logins.create_user),
     path('logout_user/',logins.logout_user),
     path('load_user/',logins.load_user),
+    path('load_user_extra_password/',logins.load_user_extra_password),
     path('create_client/',logins.create_client),
     path('get_link_invite_admin/',logins.get_link_invite_admin),
     path('get_link_recover_password_admin/',logins.get_link_recover_password_admin),
@@ -34,6 +35,7 @@ urlpatterns = [
     path('spending_payment/',payments.spending_payment),
     path('edit_spending/',payments.edit_spending),
     path('edit_drycleaning/',payments.edit_drycleaning),
+    path('set_cutout/',payments.set_cutout),
 
     path('reports_info/',reports.month_year_info),
     path('reports_info/<int:month>/<int:year>/',reports.month_year_info),
@@ -58,5 +60,7 @@ urlpatterns = [
     path('edit_user_info/<int:user_id>/',loaders.edit_user_info),
     path('signup_admin_invite_info/<str:JWTInvite>/',loaders.signup_admin_invite_info),
     path('recover_pw_info/<str:JWTInvite>/',loaders.recover_pw_info),
+    path('closeout_info/',loaders.closeout_info),
+    path('closeout_info/<int:day>/<int:month>/<int:year>/',loaders.closeout_info),
 ]
 

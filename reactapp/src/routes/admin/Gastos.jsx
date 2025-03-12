@@ -8,6 +8,7 @@ import ErrorMessage from "../../components/ErrorMessage.jsx";
 import cookieCutter from "../../utils/cookieCutter.js";
 import defaultLoader from "../../utils/defaultLoader.js";
 import MiniIconButton from "../../components/MiniIconButton.jsx";
+import MainContainer from "../../components/MainContainer.jsx";
 
 
 const Gastos = () => {
@@ -63,8 +64,14 @@ const Gastos = () => {
     }
 
     function toggleCreditCard(){
-        setSendState(oldValue=>({...oldValue,creditCard:!oldValue?.creditCard}))
-    }
+        setSendState(oldValue=>{
+            const newValue = Object.keys(oldValue).includes("paymentType")?
+                {0:1, 1:2, 2:0}[oldValue.paymentType]: 1
+            return {...oldValue,paymentType:newValue}
+        })
+        }
+    
+    console.log(sendState)
 
     useEffect(()=>{
         if(newSelect){
@@ -72,33 +79,53 @@ const Gastos = () => {
         }
     },[newSelect])
 
-    return <main className="container flex flex-col max-w-screen-md mx-auto sm:gap-3 py-3">
-            <div className="bubble-div max-sm:!p-2">
-                <h1 className="text-orange-700">Gastos</h1>
+    function returnToCatSelect(){
+        setNewSelect(false);
+        setSendState(oldValue=>{
+            const {concept,...valuesToKeep} = oldValue;
+            return valuesToKeep; 
+        });
+    }
+
+
+    return <MainContainer size="md">
+            <form className="bubble-div max-sm:!px-0 flex flex-col gap-1" autoComplete="off" onSubmit={handleForm}>
+                <h1 className="text-orange-700 max-sm:px-3">Gastos</h1>
                 <ErrorMessage errorContent={error}/>
-                <form className="flex divide-x-[1px] divide-slate-400 max-sm:flex-wrap items-center" autoComplete="off" onSubmit={handleForm}>
-                    <button type="button" className={`btn-white btn mt-3 !p-0 !text-base max-sm:!rounded-none !rounded-e-none !w-10 !h-8 ${sendState?.creditCard?"!text-emerald-700 !bg-emerald-200 hover:!bg-emerald-300":"!text-sky-700 !bg-sky-200 hover:!bg-sky-300"}`} onClick={toggleCreditCard}><Icon icon={sendState?.creditCard?"credit_card":"payments"}/></button>
+                <div className="flex divide-x-[1px] divide-slate-400 max-sm:flex-wrap gap-y-1 items-center">
+                    <button type="button" className={`btn-white btn mt-3 !text-base !p-0 max-sm:!rounded-none !rounded-e-none !w-24 !h-8 ${sendState?.paymentType?(sendState.paymentType==2?"!text-blue-700 !bg-blue-200 hover:!bg-blue-300":"!text-orange-700 !bg-orange-200 hover:!bg-orange-300"):"!text-green-700 !bg-green-200 hover:!bg-green-300"}`} onClick={toggleCreditCard}>
+                        <Icon icon={sendState?.paymentType?(sendState.paymentType==2?"point_of_sale":"credit_card"):"payments"}/>
+                        {sendState?.paymentType?(sendState.paymentType==2?"Caja":"Tarjeta"):"Efectivo"}
+                    </button>
                     <HoverInput label='Cantidad ($)' className="w-32 grow shrink-0">
                         <input className="no-arrow !rounded-none" ref={catInputRef} type="number" min={0} name="amount" value={sendState?.amount||""} onInput={handleInput} required={true}/>
                     </HoverInput>
                     {newSelect?
                         <div className="relative mt-3 flex items-center grow-[20] max-sm:basis-full">
                             <HoverInput className="grow !mt-0" label='Añadir gasto'>
-                            <input className="!rounded-none" ref={catInputRef} name="category" type="text" value={sendState?.category||""} onInput={handleInput} required={true}/>
+                            <input className="max-sm:!rounded-none !rounded-s-none" ref={catInputRef} name="concept" type="text" value={sendState?.concept||""} onInput={handleInput} required={true}/>
                             </HoverInput>
-                            <MiniIconButton classNameExtra="absolute" onClick={()=>{setNewSelect(false)}} icon="undo"/>
+                            <MiniIconButton classNameExtra="absolute" onClick={returnToCatSelect} icon="undo"/>
                         </div>:
                         <HoverSelect className="grow-[20] max-sm:basis-full" label='Añadir gasto'>
-                            <select className="!rounded-none" value={sendState?.category||""} name="category" onChange={categoryHandleSelect} required={true}>
+                            <select className=" max-sm:!rounded-none !rounded-s-none" value={sendState?.concept||""} name="concept" onChange={categoryHandleSelect} required={true}>
                                 <option value="" disabled={true}>Selecciona...</option>
                                 {movementState.categories.map((each,i)=><option key={`option-${i}`} value={each}>{each}</option>)}
                                 <option className="bg-blue-200" value="new_cat_change">Nueva categoría</option>
                             </select>
                         </HoverSelect>
                     }
-                    <button className="btn-go mt-3 btn !text-base max-sm:!rounded-none !rounded-s-none text-nowrap grow !w-32 !h-8">Enviar<Icon icon="arrow_forward"/></button>
-                </form>
-            </div>
+                </div>
+                {Boolean(sendState.concept)&&Boolean(sendState.amount)&&<><label className="gap-1 max-sm:px-3 flex items-center self-center">
+                    <input className="accent-sky-600" type='checkbox' required/>
+                    <span>
+                        Pagué ${sendState.amount} de "{sendState.concept}" mediante <b>{sendState?.paymentType?(sendState.paymentType==2?"caja":"tarjeta"):"efectivo"}</b>.
+                    </span>
+                </label>
+                <button className="btn-go btn text-nowrap self-center">Enviar<Icon icon="arrow_forward"/></button>
+                </>
+                }
+            </form>
             <div className="bubble-div-with-title">
                 <div className="bubble-div-title">Gastos recientes<Icon icon='paid'/></div>
                 <ListOfPayments 
@@ -107,9 +134,10 @@ const Gastos = () => {
                     setMovementState={setMovementState} 
                     refreshState={refreshState}
                     loader="spending"
+                    modifyConcepts={true}
                 />
             </div>
-        </main>
+        </MainContainer>
 }
 
 export default Gastos;

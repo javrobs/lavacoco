@@ -131,10 +131,15 @@ class Dryclean_movements(models.Model):
     
 
 class Spending_movements(models.Model):
+    class payment_type_choices(models.IntegerChoices):
+        EFECTIVO = 0
+        TARJETA = 1
+        CAJA = 2
+
     amount = models.SmallIntegerField()
     category = models.TextField(max_length=40)
     created_at = models.DateTimeField(auto_now_add = True)
-    card_payment = models.BooleanField(default = False)
+    payment_type = models.IntegerField(choices = payment_type_choices, default=0)
     
 
 class List_Of_Order(models.Model):
@@ -215,3 +220,15 @@ class Star_discount(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     order = models.ForeignKey(Order, blank= True, null = True, on_delete=models.CASCADE)
     value = models.SmallIntegerField(blank= True, null = True)  
+
+class Cutout(models.Model):
+    date = models.DateField(auto_now_add = True, unique=True)
+    amount_left = models.IntegerField()
+
+    def __str__(self):
+        return f"Se hizo corte de {self.amount_left} el {self.date}"
+
+    @staticmethod
+    def latest_cutout(select_date):
+        return Cutout.objects.filter(date__lt=select_date).order_by("-date").first() or Cutout(amount_left=0,date=date(day=1,month=1,year=2025))
+        

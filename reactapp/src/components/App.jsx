@@ -16,7 +16,9 @@ import Gastos from "../routes/admin/Gastos.jsx"
 import Reportes from "../routes/admin/Reportes.jsx"
 import Listado from "../routes/admin/Listado.jsx"
 import Clientes from "../routes/admin/Clientes.jsx"
+import Corte from "../routes/admin/Corte.jsx"
 import RegisterPassword from "../routes/guest/RegisterPassword.jsx"
+import PasswordProtectedAdminView from "../components/PasswordProtectedAdminView.jsx"
 
 export const userContext = createContext();
 
@@ -57,17 +59,21 @@ export default function App(){
                     {path:"/configuracion/mis-datos",element:<Signup config={true}/>,loader:()=>defaultLoader('config')},
                     {path:"/configuracion/cambiar-contrasena",element:<RegisterPassword config={true}/>},
                 ]},
-                {path:"/gastos", element:<Gastos/>, loader:()=>defaultLoader("spending")},
-                {path:"/reportes/:month/:year", element:<Reportes/>, loader:({params})=>defaultLoader("reports",params.month,params.year)},
-                {path:"/reportes/", element:<Reportes/>, loader:()=>defaultLoader("reports")},
+                {path:"/",element:<PasswordProtectedAdminView setUser={setUser}/>,children:[
+                    {path:'/corte',element:<Corte/>, loader:()=>defaultLoader("closeout")},
+                    {path:'/corte/:day/:month/:year',element:<Corte/>, loader:({params})=>defaultLoader("closeout",params.day,params.month,params.year)},
+                    {path:"/reportes/:month/:year", element:<Reportes/>, loader:({params})=>defaultLoader("reports",params.month,params.year)},
+                    {path:"/reportes/", element:<Reportes/>, loader:()=>defaultLoader("reports")},
+                    {path:"/editar-cliente/:userID",element:<Signup admin={true} config={true}/>, loader:({params})=>defaultLoader('edit_user',params.userID)},
+                    {path:"/clientes",element:<Clientes/>,loader:()=>defaultLoader('clients')},
+                    {path:"/gastos", element:<Gastos/>, loader:()=>defaultLoader("spending")},
+                ]},
                 {path:'/preguntas-frecuentes',element:<PreguntasFrecuentes/>, loader:()=>defaultLoader('faq')},
                 {path:"/lista-de-precios", element:<ListaDePrecios/>, loader:()=>defaultLoader('price')},
                 {path:"/orden/:orderId",element:<Orden/>,loader:({params})=>defaultLoader("order",params.orderId)},
                 {path:"/tintoreria",element:<Tintoreria/>,loader:()=>defaultLoader('drycleaning')},
                 {path:"/listado",element:<Listado/>,loader:()=>defaultLoader('laundry_machines')},
                 {path:"/listado/:day/:month/:year",element:<Listado/>,loader:({params})=>defaultLoader('laundry_machines',params.day,params.month,params.year)},
-                {path:"/clientes",element:<Clientes/>,loader:()=>defaultLoader('clients')},
-                {path:"/editar-cliente/:userID",element:<Signup admin={true} config={true}/>, loader:({params})=>defaultLoader('edit_user',params.userID)},
                 {path:"/invitacion-admin/:JWTinvite",element:<RegisterPassword/>,loader:({params})=>defaultLoader('signup_admin_invite',params.JWTinvite)},
                 {path:"/recuperar-contrasena/:JWTinvite",element:<RegisterPassword recover={true}/>,loader:({params})=>defaultLoader('recover_pw',params.JWTinvite)},
             ],
