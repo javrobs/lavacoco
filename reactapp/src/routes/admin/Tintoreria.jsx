@@ -6,6 +6,7 @@ import defaultLoader from "../../utils/defaultLoader.js";
 import cookieCutter from "../../utils/cookieCutter.js";
 import ErrorMessage from "../../components/ErrorMessage.jsx";
 import ListOfPayments from "../../components/ListOfPayments.jsx";
+import MainContainer from "../../components/MainContainer.jsx";
 
 const Tintoreria = () => {
     const {success,...load} = useLoaderData();
@@ -49,8 +50,8 @@ const Tintoreria = () => {
     }
 
 
-    return <main className="container mx-auto max-w-screen-md flex flex-col py-3 sm:gap-2">
-        <div className="bubble-div max-sm:!p-2">
+    return <MainContainer size='md'>
+        <div className="bubble-div max-sm:!p-2 flex flex-col">
             <h1 className="text-orange-700">Tintorería</h1>
             {Boolean(total) && <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
                 <ErrorMessage errorContent={error}/>
@@ -84,7 +85,7 @@ const Tintoreria = () => {
                 loader="drycleaning"
             />
         </div>
-    </main>
+    </MainContainer>
 }
 
 export default Tintoreria;

@@ -8,6 +8,7 @@ import ErrorMessage from "../../components/ErrorMessage.jsx";
 import cookieCutter from "../../utils/cookieCutter.js";
 import defaultLoader from "../../utils/defaultLoader.js";
 import MiniIconButton from "../../components/MiniIconButton.jsx";
+import MainContainer from "../../components/MainContainer.jsx";
 
 
 const Gastos = () => {
@@ -72,9 +73,9 @@ const Gastos = () => {
         }
     },[newSelect])
 
-    return <main className="container flex flex-col max-w-screen-md mx-auto sm:gap-3 py-3">
-            <div className="bubble-div max-sm:!p-2">
-                <h1 className="text-orange-700">Gastos</h1>
+    return <MainContainer size="md">
+            <form className="bubble-div max-sm:!px-0 flex flex-col gap-1" autoComplete="off" onSubmit={handleForm}>
+                <h1 className="text-orange-700 max-sm:px-3">Gastos</h1>
                 <ErrorMessage errorContent={error}/>
                 <form className="flex divide-x-[1px] divide-slate-400 max-sm:flex-wrap items-center" autoComplete="off" onSubmit={handleForm}>
                     <button type="button" className={`btn-white btn mt-3 !p-0 !text-base max-sm:!rounded-none !rounded-e-none !w-10 !h-8 ${sendState?.creditCard?"!text-emerald-700 !bg-emerald-200 hover:!bg-emerald-300":"!text-sky-700 !bg-sky-200 hover:!bg-sky-300"}`} onClick={toggleCreditCard}><Icon icon={sendState?.creditCard?"credit_card":"payments"}/></button>
@@ -109,7 +110,7 @@ const Gastos = () => {
                     loader="spending"
                 />
             </div>
-        </main>
+        </MainContainer>
 }
 
 export default Gastos;
