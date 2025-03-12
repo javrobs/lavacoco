@@ -39,6 +39,9 @@ class RecommendationsAdmin(admin.ModelAdmin):
 class StarAdmin(admin.ModelAdmin):
     list_display = ["user",'order','value']
 
+class CutoutAdmin(admin.ModelAdmin):
+    list_display = ["date", "amount_left"]
+
 admin.site.register(Address,AddressAdmin)
 admin.site.register(Price,PriceAdmin)
 admin.site.register(Category,CategoryAdmin)
@@ -51,4 +54,5 @@ admin.site.register(Spending_movements,SpendingAdmin)
 admin.site.register(Country_code,CountriesAdmin)
 admin.site.register(User_recommendation,RecommendationsAdmin)
 admin.site.register(Star_discount,StarAdmin)
+admin.site.register(Cutout,CutoutAdmin)
 # Register your models here.

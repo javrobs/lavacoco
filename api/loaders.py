@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
 from .jwt import invite_user_admin_decode, recover_password_decode, invite_user_friend, invite_user_friend_decode
+from functools import reduce
 
 
 def home_info(request, page = 1):
@@ -271,9 +272,38 @@ def clients_info(request):
         return JsonResponse({"success":False,"error":str(e)},status=400)
 
 @staff_member_required
-def closeout_info(request):
-    result = {"success":True}
-    result['orders']=[{"id":o.id,"text":o.user.get_full_name(),"earnings":o.earnings()-o.discounts()} for o in Order.objects.filter(status=4, last_modified_at__date=timezone.localdate(), card_payment=False).all()]
-    result['gastos']=[{"id":spending.id,"text":spending.category,"amount":-spending.amount} for spending in Spending_movements.objects.filter(created_at__date=timezone.localdate(), card_payment=False).all()]
-    result['dryclean_gastos']=[{"id":move.id,'amount':-move.amount} for move in  Dryclean_movements.objects.filter(amount__gte=0, created_at__date=timezone.localdate()).all()]
+def closeout_info(request,day=None,month=None,year=None):
+    result = {"success":True} 
+    result.update(date_dict(day,month,year))
+    last_cutout = Cutout.latest_cutout(result['dateSelected'])
+    print(last_cutout)
+    result['movements']=[{"id":f"order-{o.id}","type":"order","id_order":o.id,"concept":f"Orden #{o.id} - {o.user.get_full_name()}","amount":o.earnings()-o.discounts()} for o in Order.objects.filter(status=4, last_modified_at__date__lte=result['dateSelected'], last_modified_at__date__gt=last_cutout.date, card_payment=False).all()] + \
+    [{"id":f"spending-{spending.id}","type":"spending","concept":spending.category,"amount":-spending.amount} for spending in Spending_movements.objects.filter(created_at__date__lte=result['dateSelected'], created_at__date__gt=last_cutout.date, payment_type=2).all()] + \
+    [{"id":f"dryclean-{move.id}","type":"drycleaning",'amount':-move.amount,"concept":"Pago de tintorería"} for move in  Dryclean_movements.objects.filter(amount__gte=0, created_at__date__lte=result['dateSelected'], created_at__date__gt=last_cutout.date).all()]
+    print(result)
+    if result["dateSelected"] == timezone.localdate():
+        result["active"]=True
+    day_cutout = Cutout.objects.filter(date=result["dateSelected"]).first()
+    if day_cutout:
+        result["dayCutout"] = day_cutout.amount_left
+    result["page"]=1,
+    result["num_pages"]=1
+    result["total"]= reduce(lambda agg,each:agg + each["amount"],result['movements'],last_cutout.amount_left)
     return JsonResponse(result)
+
+def date_dict(day,month,year):
+    result={}
+    if day and month and year:
+        try:
+            result['dateSelected'] = datetime.date(day=day,month=month,year=year)
+            if result['dateSelected'] > timezone.localdate():
+                raise Exception("date is in the future")
+        except:
+            result['dateSelected'] = timezone.localdate()
+            result['redirect'] = True
+    else:
+        result['dateSelected'] = timezone.localdate()
+    result['dateBack'] = result['dateSelected'] - timezone.timedelta(days=1)
+    if result['dateSelected'] < timezone.localdate():
+        result['dateForward'] = result['dateSelected'] + timezone.timedelta(days=1)
+    return result

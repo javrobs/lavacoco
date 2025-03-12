@@ -34,6 +34,7 @@ urlpatterns = [
     path('spending_payment/',payments.spending_payment),
     path('edit_spending/',payments.edit_spending),
     path('edit_drycleaning/',payments.edit_drycleaning),
+    path('set_cutout/',payments.set_cutout),
 
     path('reports_info/',reports.month_year_info),
     path('reports_info/<int:month>/<int:year>/',reports.month_year_info),

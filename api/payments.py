@@ -79,3 +79,18 @@ def edit_drycleaning(request):
     except Exception as e:
         print(e)
         return JsonResponse({"success":False, "error":str(e)},status=500) 
+        
+@require_POST
+@staff_member_required
+def set_cutout(request):
+    try:
+        json_data = json.loads(request.body)
+        print(json_data)
+        if(datetime.datetime.strptime(json_data["date"],"%Y-%m-%d").date()!=timezone.localdate()):
+            raise Exception("Date is wrong")
+        if(int(json_data["amount"])<0):
+            raise Exception("Amount is wrong")
+        Cutout(amount_left=json_data["amount"]).save()
+        return JsonResponse({"success":True})
+    except Exception as e:
+        return JsonResponse({"success":False, "error":str(e)},status=500) 

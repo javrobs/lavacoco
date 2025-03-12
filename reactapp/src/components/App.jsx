@@ -59,7 +59,7 @@ export default function App(){
                     {path:"/configuracion/cambiar-contrasena",element:<RegisterPassword config={true}/>},
                 ]},
                 {path:'/corte',element:<Corte/>, loader:()=>defaultLoader("closeout")},
-                {path:"/gastos", element:<Gastos/>, loader:()=>defaultLoader("spending")},
+                    {path:'/corte/:day/:month/:year',element:<Corte/>, loader:({params})=>defaultLoader("closeout",params.day,params.month,params.year)},
                 {path:"/reportes/:month/:year", element:<Reportes/>, loader:({params})=>defaultLoader("reports",params.month,params.year)},
                 {path:"/reportes/", element:<Reportes/>, loader:()=>defaultLoader("reports")},
                 {path:'/preguntas-frecuentes',element:<PreguntasFrecuentes/>, loader:()=>defaultLoader('faq')},
