@@ -6,7 +6,7 @@ module.exports = {
         filename: "main.js",
     },
     module: { rules: [
-        { test: /.tsx|ts|js|jsx$/,
+        { test: /\.(tsx|ts|js|jsx)$/,
         exclude: /node_modules/,
         use: {loader: "babel-loader"}},
         { test: /\.css$/,
