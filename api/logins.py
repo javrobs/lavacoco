@@ -53,7 +53,7 @@ def create_user(request, admin_created = False, edit_self = False):
             for key in ["first_name","last_name"]:
                 if not json_data.get(key):
                     raise Exception(f"Datos incompletos")
-                setattr(user,key,json_data.get(key))                
+                setattr(user,key,json_data.get(key).strip())           
                 
             user.save()
 
