@@ -13,6 +13,7 @@ const Tintoreria = () => {
     const [movementState,setMovementState] = useState(load)
     const [amount, setAmount] = useState("");
     const [error,setError] = useState('');
+    const sendFormButton = useRef(null);
     const inputRef = useRef(null);
 
     const {total} = movementState;
@@ -28,6 +29,7 @@ const Tintoreria = () => {
 
     async function handleSubmit(e){
         e.preventDefault();
+        sendFormButton.current.disabled = true;
         const response = await fetch('/api/dryclean_payment/',{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
@@ -39,8 +41,10 @@ const Tintoreria = () => {
             inputRef.current.blur();
             setAmount("");
             setError("");
+            sendFormButton.current.disabled = false;
         } else {
             setError(data.error);
+            sendFormButton.current.disabled = false;
         }
     }
 
@@ -59,7 +63,7 @@ const Tintoreria = () => {
                     <HoverInput label="Cantidad" className="grow">
                         <input ref={inputRef} className={`shadow-sm !rounded-e-none max-sm:!rounded-none no-arrow`} min={0} max={-total} required={true} type="number" value={amount} onChange={handleInput}/>
                     </HoverInput> 
-                    <button className="btn-go max-sm:!rounded-none !rounded-s-none !text-base text-nowrap justify-center !h-8 flex gap-1 items-center !w-32">
+                    <button ref={sendFormButton} className="btn-go max-sm:!rounded-none !rounded-s-none !text-base text-nowrap justify-center !h-8 flex gap-1 items-center !w-32">
                         Enviar
                         <Icon icon='arrow_forward'/>
                     </button>

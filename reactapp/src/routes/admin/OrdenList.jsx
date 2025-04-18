@@ -11,7 +11,9 @@ const OrderList = () => {
 
     
     const {order,order_list,prices,others_start,others_tinto,half_price,discounts_available, discounts_applied} = useLoaderData();
-    
+    const sendButtonOne = useRef(null);
+    const sendButtonTwo = useRef(null);
+
     const priceList = Object.values(prices).reduce((prev,value)=>{
         return {...prev,...value.prices}
     },{})
@@ -189,20 +191,29 @@ const OrderList = () => {
     
 
     //Send info
-
-    function sendFinish(){
-        if(formRef.current.reportValidity()){
-            fetcher(`/api/set_order_list_get_message/${order.id}/`);
-        }
-    }
+    
     
     function sendReturn(){
+        sendButtonOne.current.disabled = true;
         if(formRef.current.reportValidity()){
             fetcher(`/api/set_order_list/${order.id}/`);
         }
     }
 
-    function promoteAndReturn(id){
+    function sendFinish(){
+        sendButtonTwo.current.disabled = true;
+        if(formRef.current.reportValidity()){
+            fetcher(`/api/set_order_list_get_message/${order.id}/`);
+        }
+    }
+
+    function promoteAndReturn(e){
+        let matchButton = e.target;
+        while(matchButton.tagName!="BUTTON"){
+            matchButton = matchButton.parentElement;
+        }
+        console.log(matchButton);
+        matchButton.disabled = true;
         fetch("/api/promote_order/",{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
@@ -211,6 +222,8 @@ const OrderList = () => {
         .then(data => {
         if(data.success) {
             navigate("/");
+        } else {
+            matchButton.disabled = false;
         }
         });
     }
@@ -225,8 +238,12 @@ const OrderList = () => {
             if(data.success){
                 if(data.message){
                     setAreYouSure(data.message);
+                    sendButtonOne.current.disabled = false;
+                    sendButtonTwo.current.disabled = false;
                 } else {
                     navigate("/")
+                    sendButtonOne.current.disabled = false;
+                    sendButtonTwo.current.disabled = false;
                 }
             }
         })
@@ -250,8 +267,8 @@ const OrderList = () => {
                         functions={functions()}
                         half_price={half_price}/>
                     <div className="flex flex-wrap justify-center gap-2">
-                        <button onClick={sendReturn} type="button" name="save-and-return" className="flex items-center gap-1 btn-back">Guardar<Icon icon="save"/></button>
-                        <button type="button" className="flex items-center gap-1 btn-go" onClick={sendFinish}>Guardar y terminar<Icon icon="shopping_cart_checkout"/></button>
+                        <button ref={sendButtonOne} onClick={sendReturn} type="button" name="save-and-return" className="flex items-center gap-1 btn-back">Guardar<Icon icon="save"/></button>
+                        <button ref={sendButtonTwo} type="button" className="flex items-center gap-1 btn-go" onClick={sendFinish}>Guardar y terminar<Icon icon="shopping_cart_checkout"/></button>
                     </div>
                     <Notify 
                         show={Boolean(areYouSure)}

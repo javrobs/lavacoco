@@ -1,4 +1,4 @@
-import React,{useState, useContext} from "react";
+import React,{useState, useContext, useRef} from "react";
 import MainContainer from "../../components/MainContainer.jsx";
 import { useLoaderData, Link, useNavigate } from "react-router"; 
 import { PasswordInputs } from "../Signup.jsx";
@@ -16,6 +16,7 @@ const RegisterPassword = ({recover,config}) => {
     const [changesSaved,setChangesSaved] = useState(false);
     const [errorMessage,setErrorMessage] = useState('');
     const {refreshFunction} = useContext(userContext);
+    const sendFormButtonRef = useRef(null);
     const nav = useNavigate();
 
     if(expired){
@@ -33,6 +34,7 @@ const RegisterPassword = ({recover,config}) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        sendFormButtonRef.current.disabled = true;
         const sendState = config? signupState:{userId:user_info.id,...signupState}
         const response = await fetch(recover?"/api/set_recover_password/":config?"/api/change_my_password/":"/api/add_password_admin_invite/",{
             method:"POST",
@@ -45,11 +47,13 @@ const RegisterPassword = ({recover,config}) => {
                 setChangesSaved(true);
                 setSignupState({});
                 refreshFunction();
+                sendFormButtonRef.current.disabled = false;
             } else {
                 nav("/iniciar-sesion");
             }
         } else {
             setErrorMessage(data.error);
+            sendFormButtonRef.current.disabled = false;
         }
     }
 
@@ -73,7 +77,7 @@ const RegisterPassword = ({recover,config}) => {
             </div>
             {changesSaved?
                 <button className="btn-green gap-1 items-center flex text-nowrap self-center mt-4">Cambios guardados<Icon icon='check'/></button>:
-                <button className="btn-go gap-1 items-center flex text-nowrap self-center mt-4">{recover?"Continuar":config?"Guardar cambios":"Registrarme"}<Icon icon="arrow_forward"/></button>
+                <button ref={sendFormButtonRef} className="btn-go gap-1 items-center flex text-nowrap self-center mt-4">{recover?"Continuar":config?"Guardar cambios":"Registrarme"}<Icon icon="arrow_forward"/></button>
             }
             {!config &&
                 <Link to="/">No soy {user_info.first_name}</Link>

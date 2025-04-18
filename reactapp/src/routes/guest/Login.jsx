@@ -1,4 +1,4 @@
-import React, {useState,useContext} from "react"
+import React, {useState,useContext, useRef} from "react"
 import {Link,useNavigate} from "react-router"
 import cookieCutter from "../../utils/cookieCutter.js"
 import ErrorMessage from "../../components/ErrorMessage.jsx"
@@ -11,6 +11,7 @@ export default function Login(){
     const [loginFailed,setLoginFailed] = useState("");
     const {refreshFunction} = useContext(userContext);
     const [redirect,setRedirect] = useState(false);
+    const buttonRef = useRef(null);
     const navigate = useNavigate();
     
     function phoneInputChange(e){
@@ -31,6 +32,7 @@ export default function Login(){
 
     function handleSubmit(e){
         e.preventDefault();
+        buttonRef.current.disabled = true;
         fetch("/api/login_user/",{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
@@ -44,6 +46,7 @@ export default function Login(){
                 });
             } else {
                 setLoginFailed(data.error);
+                buttonRef.current.disabled = false;
             }
         });
     }
@@ -62,7 +65,7 @@ export default function Login(){
             <HoverInput label="Contraseña">
                 <input id='pw' value={loginState.pw||""} onInput={handleChange} minLength={8} name="pw" type="password" autoComplete="current-password" required/>
             </HoverInput>
-            <button className="btn-go btn self-center mt-3" >Ingresar<Icon icon='login'/></button>
+            <button ref={buttonRef} className="btn-go btn self-center mt-3" >Ingresar<Icon icon='login'/></button>
             <Link className="self-center" to='/crear-cuenta'>Todavía no tengo usuario</Link>
         </form>
         </main>

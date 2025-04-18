@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { useLoaderData , useNavigate} from "react-router"
 import GridDivider from "../components/GridDivider.jsx";
 import Icon from '../components/Icon.jsx'
@@ -11,8 +11,10 @@ const ListaDePrecios = () => {
 
     const [priceChanges,setPriceChanges] = useState({})
     const navigator = useNavigate();
+    const nav = useNavigate();
     const loader = useLoaderData();
     const adminMode = Object.keys(loader.prices[0].prices[0]).includes("price_dryclean");
+    const sendButtonRef = useRef(null);
 
     function editPrice(e) {
         const {value,name} = e.target;
@@ -33,17 +35,20 @@ const ListaDePrecios = () => {
         })
     }
 
-    function submitChanges(){
-        fetch("/api/change_prices/",{
+    async function submitChanges(){
+        sendButtonRef.current.disabled = true;
+        const response = await fetch("/api/change_prices/",{
             method:"POST",
             headers:{"X-CSRFToken":cookieCutter("csrftoken")},
             body:JSON.stringify(priceChanges)
-        }).then(response=>response.json())
-        .then(data=>{
-            if(data.success){
-                navigator(0);
-            }
         })
+        const data = await response.json();
+        if(data.success){
+            setPriceChanges({});
+            nav("/lista-de-precios/");
+        } else {
+            sendButtonRef.current.disabled = false;
+        }
     }
 
 
@@ -113,7 +118,7 @@ const ListaDePrecios = () => {
     return <main className="container max-w-4xl mx-auto gap-3 py-3 flex flex-wrap">
             {listOfPrices}
             {adminMode && 
-            <button className="btn btn-go disabled:bg-slate-400 grow min-w-full" onClick={submitChanges} disabled={Object.keys(priceChanges).length==0}>
+            <button ref={sendButtonRef} className="btn btn-go disabled:bg-slate-400 grow min-w-full" onClick={submitChanges} disabled={Object.keys(priceChanges).length==0}>
                 {Object.keys(priceChanges).length==0?
                     <>No hay cambios<Icon icon="check"/></>:
                     <>Guardar cambios<Icon icon="upgrade"/></>}

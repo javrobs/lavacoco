@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useRef} from "react";
 import {useLoaderData, useNavigate} from "react-router";
 import Icon from "../../components/Icon.jsx";
 import defaultPost from "../../utils/defaultPost.js"
@@ -7,12 +7,16 @@ const Payment = () => {
     const loader = useLoaderData();
     const [payment,setPayment] = useState("");
     const navigate = useNavigate();
+    const buttonRef = useRef(null);
 
     const submit = async (e) => {
         e.preventDefault();
+        buttonRef.current.disabled=true;
         const data = await defaultPost("/api/save_payment_and_continue/",{id:loader.order.id,payment:payment})
         if(data.success){
             navigate("/");
+        } else {
+            buttonRef.current.disabled=false;
         }
     }
 
@@ -34,7 +38,7 @@ const Payment = () => {
                 Transferencia
             </label>
         </div>
-        <button className="btn mx-auto btn-go mt-2">Finalizar<Icon icon="check"/></button>
+        <button ref={buttonRef} className="btn mx-auto btn-go mt-2">Finalizar<Icon icon="check"/></button>
     </form>
 }
 
