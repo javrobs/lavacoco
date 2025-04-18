@@ -1,4 +1,5 @@
 import React from "react";
+import Icon from "./Icon.jsx";
 
 const IconButton = ({onClick,icon,classNameExtra,color,type}) => {
     let colorClass = ""
@@ -14,9 +15,7 @@ const IconButton = ({onClick,icon,classNameExtra,color,type}) => {
     }
 
     return <button type={type} onClick={onClick} className={` rounded-full h-8 w-8 flex gap-1 justify-center items-center ${colorClass} ${classNameExtra}`}>
-        <span className="material-symbols-outlined">
-        {icon}
-        </span>
+        <Icon icon={icon}/>
     </button>
 }
 
